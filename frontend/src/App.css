@@ -1,0 +1,65 @@
+/* App specific layout styles */
+.App {
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Specific button variants if needed, but prefer global index.css */
+.btn-secondary {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--text-secondary);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: center;
+}
+
+.btn-secondary:hover {
+  filter: brightness(0.9);
+}
+
+.btn-danger {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--danger);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: center;
+}
+
+.btn-danger:hover {
+  filter: brightness(0.9);
+}
+
+.btn-success {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--success);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: center;
+}
+
+.btn-success:hover {
+  filter: brightness(0.9);
+}
