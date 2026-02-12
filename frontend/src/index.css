@@ -13,7 +13,9 @@
   --border-color: #d1d5db;
   --input-bg: #f9fafb;
   --danger: #ef4444;
-  --success: #10b981;
+  --success: #065f46;
+  --navbar-bg: rgba(255, 255, 255, 0.95);
+  --navbar-border: rgba(0, 0, 0, 0.1);
 }
 
 [data-theme='dark'] {
@@ -26,7 +28,9 @@
   --border-color: #374151;
   --input-bg: #374151;
   --danger: #f87171;
-  --success: #34d399;
+  --success: #047857;
+  --navbar-bg: rgba(17, 24, 39, 0.95);
+  --navbar-border: rgba(255, 255, 255, 0.1);
 }
 
 body {

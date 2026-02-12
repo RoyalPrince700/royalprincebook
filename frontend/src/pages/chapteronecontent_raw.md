@@ -1,4 +1,7 @@
-using the ai writing guidline file, chapter one content I became the 36th Student Union President while on campus, which is one of the highest leadership positions I've held. Prior to that, in my 300 level, I became the Student Union General Secretary. While in 200 level, I became the Librarian of my faculty, Faculty of Agriculture, with over 5,000 students. Oh, that reminds me, the University of Ellore has over 40,000 students at large.
+using the ai writing guidline file, chapter one content
+
+
+ I became the 36th Student Union President while on campus, which is one of the highest leadership positions I've held. Prior to that, in my 300 level, I became the Student Union General Secretary. While in 200 level, I became the Librarian of my faculty, Faculty of Agriculture, with over 5,000 students. Oh, that reminds me, the University of Ellore has over 40,000 students at large.
 
 So, I was president of over 40,000 students, General Secretary of over 40,000 students, Faculty Librarian for over 5,000 students
 
@@ -57,9 +60,6 @@ It's about the mindset that governs a leader. My success today is attributed to 
 
 Leadership is first you must lead yourself before you can lead other people. For you to lead yourself, you must have the genuine mindset that'll push you to lead yourself."
 
-How's that? Want me to refine it or continue? 😊
-
-Got it 😊. Here's a typed-out version of your message:
 
 "Mindset is so important if anyone wants to lead himself. A point has to come where you make up your mind that you will be in charge of your life.
 
@@ -71,9 +71,6 @@ Prior to that, I'd never faced an audience, never put thoughts together to rende
 
 But I said to myself I want to go for a competition of over five thousand people... and I said to myself, "I want to go and I will do it". This point marked a critical point in my life."
 
-How's that? Want me to refine it or ask more questions about this? 😊
-
-Got it 😊. Here's a typed-out version of your message:
 
 "This competition is so big that participants are coming from every part of the country - from Lagos, from Ibadan, from Akure... and here I am in my small town telling myself I can do this.
 
@@ -83,9 +80,6 @@ That mindset... I trace it, it was that thought that shifted something in me. It
 
 Because now that I have made up my mind that I want to do this thing, it means that if my mindset is aligned and I'm focused and I kept on repeating to myself... then every part of my body starts adjusting and starts working towards that goal."
 
-How's that? Want me to refine it or ask more questions about this? 😊fg
-
-Got it 😊. Here's af typed-out version of your message:
 
 "And this has made me realize that if anybody, any individual has the right mindset first to do something - especially to lead his own life the way he is supposed to live... and start thinking positively.
 
@@ -94,3 +88,59 @@ The life you want to live, you're picturing it and you're adjusting your mindset
 You start seeing possibilities in greatness. It starts with your mindset. If your mindset is right, every other thing will be falling in place.
 
 The first and most important thing is your mindset. You have to have the right mindset leading your life. Even if you can't lead yourself, you can't lead others. You have to accept that truth."
+
+
+"I discovered that it was when I started leading myself, it was when I started putting my life together... I was being consistent with the things I want to learn, I was paying more attention to the things I do. I cut out noise, I focused on myself, I started building my skills...
+
+It was after all of this I started seeing that, "Oh, I can lead others because I've been able to put myself together".
+
+Anyone who can't put his life together, who is not consistent, who is not disciplined... that person cannot be a good leader. The skills, the traits required to be a leader mean that you yourself can lead yourself, you can put your life in order.
+
+No man who can't put his life in order can put the life of others in order."
+
+
+"So any man who aspires to be a leader, any man who wants to lead others must first start leading himself.
+
+For you to lead yourself, you must have the right mindset... you must have the right mind that "I can lead myself".
+
+Your mindset must start shifting... within you, you must be conscious. That's what your mindset does to you. When your mindset is right, you start living a conscious life... of you being disciplined, being consistent, leading yourself.
+
+Leadership starts from your mindset... having the correct mindset that you can lead yourself."
+
+
+"The exposure I had before I gained admission... the exposure I had when I stayed with my sister for three years... the environment changed my mindset, exposed me, made me believe that there is a future ahead of me and that future I have to work at.
+
+My mindset, my mind was always and constantly thinking about putting my life in order, leading myself, taking control... so the mindset changed.
+
+I had before my university has really helped me a lot... has given me the knowledge, the discipline, the consistency I need for the kind of life I wanted."
+
+"Whoever is using this book, you must know that the shift you are looking for starts with your mind. Your mind must see it.
+
+When I was young, like I keep saying, I had it in my mind and my future will be bright, it's going to be great, I will do exploits... even though I don't know what I'm going to do in that future.
+
+But right now, my mindset, everything, my mind keeps affirming... I know my future will be great.
+
+So it is important, you must start with your mindset. Your mindset must be aligned, must be positive. You have to start thinking... if you don't think it, you can't achieve it.
+
+Every greatness starts from the heart, not from the action... it starts from the mind. Your mindset must see that greatness."
+
+
+
+"One thing you must know about this chapter is that your mindset before you read every other aspect of this book is that... firstly, get it right.
+
+If you don't believe that you can be great, if you don't believe you'll be successful... I'm telling you now, before you read other parts of this book... take a minute, start thinking in your mind... the future you want to have, start creating the future you want to have.
+
+You might not exactly know how it's going to be, but there is something that must be right in your mindset... is that you are going to be successful.
+
+Think about the things... success means to you. Mine, when I was young... success to me means that I will have my own car, I will build my own house, I'm going to have my own business...
+
+So these are things that looked like success to me when I was younger and I was pursuing... I knew it, I will buy a car, I will build a house, I will have my own business... these were the things I was thinking, my mindset was always on these things."
+
+
+
+"Take a minute, take a minute... think in your mind, picture it. Close your eyes now and picture it.
+
+Think about what you want to do, think about what you want to become, think about the future you want for yourself... you have to think about it, you have to constantly think about it.
+
+That is how you are changing your mindset, that is how your mindset will shift. If you don't, if you are not convinced in your mind... there is nothing that can happen. You must see it."
+

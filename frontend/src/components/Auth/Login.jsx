@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import ThemeToggle from '../ThemeToggle';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -39,10 +38,19 @@ const Login = () => {
 
   return (
     <div className="auth-container">
-      <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
-        <ThemeToggle />
-      </div>
       <div className="auth-card">
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h1
+            style={{
+              color: 'var(--primary-color)',
+              fontSize: '1.5rem',
+              fontWeight: '800',
+              margin: 0
+            }}
+          >
+            RoyalPrinceBook
+          </h1>
+        </div>
         <div className="auth-header">
           <h2 className="auth-title">Welcome Back</h2>
           <p className="auth-subtitle">Sign in to continue writing your book</p>

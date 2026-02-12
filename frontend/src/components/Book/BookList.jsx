@@ -3,6 +3,34 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ThemeToggle from '../ThemeToggle';
 import axios from 'axios';
+import leadingFromWithinImage from '../../assets/leadingfromwithin.jpg';
+import collegeBlueprintImage from '../../assets/collegeblueprint.png';
+import academicMasteryImage from '../../assets/academicmastery.png';
+import uniHackImage from '../../assets/unihack.png';
+import understandingLoveLanguagesImage from '../../assets/understandinglovelanguages.png';
+import buildingLastingTrustImage from '../../assets/buildinglastingtrust.png';
+
+const getBookCover = (title) => {
+  if (!title) return 'https://placehold.co/300x450/e9ecef/333333?text=No+Cover';
+  
+  const lowerTitle = title.toLowerCase();
+  
+  if (lowerTitle.includes('leading from within')) {
+    return leadingFromWithinImage;
+  } else if (lowerTitle.includes('college') || lowerTitle.includes('blueprint')) {
+    return collegeBlueprintImage;
+  } else if (lowerTitle.includes('academic') || lowerTitle.includes('mastery')) {
+    return academicMasteryImage;
+  } else if (lowerTitle.includes('hack') || lowerTitle.includes('uni')) {
+    return uniHackImage;
+  } else if (lowerTitle.includes('love languages') || lowerTitle.includes('understanding love')) {
+    return understandingLoveLanguagesImage;
+  } else if (lowerTitle.includes('trust') || lowerTitle.includes('building lasting')) {
+    return buildingLastingTrustImage;
+  }
+  
+  return 'https://placehold.co/300x450/e9ecef/333333?text=' + encodeURIComponent(title);
+};
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -249,7 +277,7 @@ const BookList = () => {
                     width: '100%',
                     height: '350px',
                     backgroundColor: 'var(--input-bg)',
-                    backgroundImage: `url(${book.coverImage || `https://placehold.co/300x450/e9ecef/333333?text=${encodeURIComponent(book.title)}`})`,
+                    backgroundImage: `url(${getBookCover(book.title)})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     borderBottom: '1px solid var(--border-color)'

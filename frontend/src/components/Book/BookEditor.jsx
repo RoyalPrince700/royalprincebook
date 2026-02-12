@@ -3,7 +3,6 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../contexts/AuthContext';
-import ThemeToggle from '../ThemeToggle';
 import axios from 'axios';
 
 const BookEditor = () => {
@@ -226,35 +225,32 @@ const BookEditor = () => {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-color)', color: 'var(--text-primary)' }}>
-      {/* Header */}
-      <header style={{
+      {/* Toolbar */}
+      <div style={{
         backgroundColor: 'var(--card-bg)',
-        padding: '1rem 2rem',
+        padding: '0.5rem 2rem',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        borderBottom: '1px solid var(--border-color)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link to="/dashboard" style={{ textDecoration: 'none', color: 'var(--primary-color)' }}>
-            ← Back to Dashboard
-          </Link>
           <div>
-            <h1 style={{ margin: '0', fontSize: '1.5rem', color: 'var(--text-primary)' }}>{book.title}</h1>
+            <h1 style={{ margin: '0', fontSize: '1.2rem', color: 'var(--text-primary)' }}>{book.title}</h1>
             <small style={{ color: 'var(--text-secondary)' }}>
-              Page {currentPage} | Status: {book.status} | Total Words: {book.totalWordCount || 0}
+              Page {currentPage} | Status: {book.status}
             </small>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <ThemeToggle />
           {saving && <span style={{ color: 'var(--text-secondary)' }}>Saving...</span>}
           {success && <span style={{ color: 'var(--success)' }}>{success}</span>}
           {error && <span style={{ color: 'var(--danger)' }}>{error}</span>}
 
           <Link to={`/books/${bookId}/read`} style={{ textDecoration: 'none' }}>
-            <button className="btn-success">
+            <button className="btn-success" style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>
               Read Mode
             </button>
           </Link>
@@ -263,6 +259,7 @@ const BookEditor = () => {
             className="btn-primary"
             onClick={savePage}
             disabled={saving}
+            style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}
           >
             Save Page
           </button>
@@ -270,11 +267,12 @@ const BookEditor = () => {
           <button
             className="btn-secondary"
             onClick={() => setSidebarOpen(!sidebarOpen)}
+            style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}
           >
             {sidebarOpen ? 'Hide' : 'Show'} Sidebar
           </button>
         </div>
-      </header>
+      </div>
 
       <div style={{ display: 'flex', minHeight: 'calc(100vh - 80px)' }}>
         {/* Sidebar */}

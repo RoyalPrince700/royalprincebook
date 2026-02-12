@@ -16,8 +16,8 @@ const demoBooks = [
     ]
   },
   {
-    title: "The Art of Research",
-    description: "A comprehensive guide to conducting meaningful and impactful research.",
+    title: "The College Blueprint",
+    description: "Unlock Your Full Potential from Matriculation to Graduation",
     genre: "Academics",
     status: "published",
     coverImage: "https://placehold.co/300x450/e9ecef/333333?text=Art+of+Research",
@@ -26,7 +26,7 @@ const demoBooks = [
     ]
   },
   {
-    title: "Study Smart, Not Hard",
+    title: "University Hacks: the unified guide to crushing your degree",
     description: "Efficiency techniques for the modern student.",
     genre: "Academics",
     status: "published",

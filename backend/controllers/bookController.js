@@ -3,8 +3,21 @@ const Book = require('../models/Book');
 // Get all books for the authenticated user
 const getBooks = async (req, res) => {
   try {
+    const { search } = req.query;
+
+    let query = {};
+    if (search) {
+      query = {
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { genre: { $regex: search, $options: 'i' } }
+        ]
+      };
+    }
+
     // Users see all books
-    const books = await Book.find({})
+    const books = await Book.find(query)
       .populate('author', 'username email')
       .sort({ updatedAt: -1 });
 

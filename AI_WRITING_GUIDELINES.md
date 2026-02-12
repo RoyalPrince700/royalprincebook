@@ -34,7 +34,7 @@ The author will provide raw, unstructured content ("thoughts as they come"). You
 *   **Call to Action (CTA):** Since the book is story-driven, ensure the reader knows *what to do* with the inspiration. Identify or create distinct "Action Points" or "Reflective Questions" at the end of key sections to bridge the gap between the author's story and the reader's life.
 
 ## 📚 Chapter Outline (Reference)
-1.  **The Pre-University Mindset Shift**: How deciding to "do all it takes to be successful" shaped the journey.
+1.  **The Mindset Shift**: How deciding to "do all it takes to be successful" shaped the journey.
 2.  **Self-Leadership: The Foundation**: Why leading yourself is key to leading others.
 3.  **Discipline: My Non-Negotiable**: How discipline drove achievements (student politics, businesses).
 4.  **Purpose Fuels Direction**: Finding your "why" and letting it guide actions.

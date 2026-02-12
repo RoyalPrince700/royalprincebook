@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import ThemeToggle from '../components/ThemeToggle';
 import ChapterReader from '../components/Book/ChapterReader';
 import './ReadBook.css';
 
@@ -119,17 +118,12 @@ const ReadBook = () => {
       {/* Reader Header */}
       <header className="reader-header">
         <div className="header-left">
-          <Link to="/dashboard" className="back-link" style={{ textDecoration: 'none', color: '#666' }}>
-            <span className="back-arrow">←</span> <span className="back-text">Dashboard</span>
-          </Link>
-          <span className="divider" style={{ color: '#ddd' }}>|</span>
           <h1 className="book-title">
             <span style={{ fontWeight: 'bold' }}>{book.title}</span>
           </h1>
         </div>
 
         <div className="header-right">
-           <ThemeToggle />
            {/* Download Dropdown */}
            <div style={{ position: 'relative' }}>
              <button 

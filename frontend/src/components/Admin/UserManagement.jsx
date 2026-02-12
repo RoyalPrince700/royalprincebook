@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
-import ThemeToggle from '../ThemeToggle';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -64,7 +63,7 @@ const UserManagement = () => {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-color)', color: 'var(--text-primary)' }}>
       {/* Header */}
-      <header style={{
+      <div style={{
         backgroundColor: 'var(--card-bg)',
         padding: '1rem 2rem',
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -73,13 +72,9 @@ const UserManagement = () => {
         alignItems: 'center'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link to="/dashboard" style={{ textDecoration: 'none', color: 'var(--primary-color)' }}>
-            ← Back to Dashboard
-          </Link>
           <h1 style={{ margin: 0, color: 'var(--text-primary)' }}>User Management</h1>
         </div>
-        <ThemeToggle />
-      </header>
+      </div>
 
       <div className="container" style={{ marginTop: '2rem' }}>
         {error && (

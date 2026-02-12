@@ -1,8 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import ThemeToggle from '../ThemeToggle';
 import axios from 'axios';
+import leadingFromWithinImage from '../../assets/leadingfromwithin.jpg';
+import collegeBlueprintImage from '../../assets/collegeblueprint.png';
+import academicMasteryImage from '../../assets/academicmastery.png';
+import uniHackImage from '../../assets/unihack.png';
+import understandingLoveLanguagesImage from '../../assets/understandinglovelanguages.png';
+import buildingLastingTrustImage from '../../assets/buildinglastingtrust.png';
+
+const getBookCover = (title) => {
+  if (!title) return 'https://placehold.co/300x450/e9ecef/333333?text=No+Cover';
+  
+  const lowerTitle = title.toLowerCase();
+  
+  if (lowerTitle.includes('leading from within')) {
+    return leadingFromWithinImage;
+  } else if (lowerTitle.includes('college') || lowerTitle.includes('blueprint')) {
+    return collegeBlueprintImage;
+  } else if (lowerTitle.includes('academic') || lowerTitle.includes('mastery')) {
+    return academicMasteryImage;
+  } else if (lowerTitle.includes('hack') || lowerTitle.includes('uni')) {
+    return uniHackImage;
+  } else if (lowerTitle.includes('love languages') || lowerTitle.includes('understanding love')) {
+    return understandingLoveLanguagesImage;
+  } else if (lowerTitle.includes('trust') || lowerTitle.includes('building lasting')) {
+    return buildingLastingTrustImage;
+  }
+  
+  return 'https://placehold.co/300x450/e9ecef/333333?text=' + encodeURIComponent(title);
+};
 
 const Dashboard = () => {
   const [books, setBooks] = useState([]);
@@ -82,53 +109,6 @@ const Dashboard = () => {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-color)', color: 'var(--text-primary)' }}>
-      {/* Header */}
-      <header style={{
-        backgroundColor: 'var(--card-bg)',
-        padding: '1rem 2rem',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <Link
-          to="/dashboard"
-          style={{
-            textDecoration: 'none',
-            color: 'inherit'
-          }}
-        >
-          <h1 style={{
-            margin: 0,
-            color: 'var(--text-primary)',
-            cursor: 'pointer',
-            transition: 'color 0.2s'
-          }}
-          onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-          onMouseLeave={(e) => e.target.style.color = 'var(--text-primary)'}
-          >
-            Royal Prince Book
-          </h1>
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span>Welcome, {user?.username}!</span>
-          <ThemeToggle />
-          {user?.role === 'admin' && (
-            <Link to="/admin/users" style={{ 
-              textDecoration: 'none', 
-              color: 'var(--text-secondary)',
-              fontWeight: '500',
-              fontSize: '0.95rem'
-            }}>
-              User Management
-            </Link>
-          )}
-          <button onClick={handleLogout} className="btn-secondary">
-            Logout
-          </button>
-        </div>
-      </header>
-
       {/* Main Content */}
       <div className="container">
           <div style={{
@@ -279,7 +259,7 @@ const Dashboard = () => {
                     width: '100%',
                     height: '350px',
                     backgroundColor: 'var(--input-bg)',
-                    backgroundImage: `url(${book.coverImage || `https://placehold.co/300x450/e9ecef/333333?text=${encodeURIComponent(book.title)}`})`,
+                    backgroundImage: `url(${getBookCover(book.title)})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     borderBottom: '1px solid var(--border-color)'

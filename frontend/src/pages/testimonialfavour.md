@@ -1,0 +1,37 @@
+testimonial by Adeyemi Favour who was my roomate 
+
+[05/02, 22:15] Bro Favour Nccf: Living with Royal, one thing that stood out immediately was his constant commitment to positive affirmation, regardless of the situation. Even when circumstances didn’t look favorable, he believed deeply in taking action anyway. He never waited for conditions to be perfect. In fact, there were many times he didn’t yet have the resources for a goal, but he had already begun taking deliberate steps toward it. That mindset alone made it clear his thinking was different.
+
+Royal is a true goal-getter, and what fascinated me most was how he approached his goals. He spoke about what he wanted to achieve long before it happened. He would repeatedly tell us in the room what he was going to do, almost as if he was announcing a future he had already seen. Then, gradually, what he spoke about began to materialize. He didn’t wait until he “had enough” before starting—he started first, trusting that the resources would follow.
+
+One of the most defining aspects of Royal’s life is that he acts like the person he wants to become. I remember this vividly from our school days. Whatever he aspired to be, he embodied it fully in how he spoke, behaved, and carried himself around us. If Royal aspired to become a president, for example, he would begin painting the picture for us—how he would walk, the kind of clothes he would wear, the people he would meet, and the rooms he would enter. During our casual conversations, he would describe these scenes in detail, even explaining what people would say and how events would unfold.
+
+At first, we laughed and joked about it, but over time something shifted. We started living in the future he consistently spoke about. What once sounded like imagination slowly became reality. That habit of visualizing, speaking, and acting before manifestation didn’t just shape him—it transformed the entire vibe of our living space. There was a growing sense of purpose, confidence, and forward momentum in our room.
+
+That environment had a direct impact on us. Living around Royal’s leadership pushed both Johnson and me into leadership roles ourselves. In my 400-level days, I became the class representative, while Johnson became the General Secretary of his department. His excellence in leadership rubbed off on us naturally—not through instruction, but through example. Being around him made leadership feel normal, attainable, and expected.
+
+Royal is also extremely diligent. You could tell where he was going simply by observing how he translated thoughts into action. He spoke first, acted next, and followed through relentlessly.
+
+Most importantly, Royal never viewed setbacks as failures. To him, they were simply opportunities to try again—to adjust, learn, and move forward with even more conviction. That outlook reshaped how the rest of us perceived challenges and solidified the atmosphere in our room as one that was hopeful, disciplined, and constantly moving forward.
+[05/02, 22:28] Bro Favour Nccf: I can recall many moments that made it clear Royal didn’t live based on who he was at the time, but on who he was becoming. His actions were consistently guided by the future he saw for himself, not the limitations of his present reality. Whether in how he spoke, how he acted, or how he carried himself, Royal never showed up as anything less than the person he envisioned becoming.
+
+What struck me most was that his mindset always came before his circumstances. The way he dressed, communicated, and related with people reflected a version of himself that was still unfolding. He behaved as though he was already living in that future, and he allowed that vision to shape his daily decisions in the present.
+
+One moment that stands out vividly was a day he began acting out his wedding, long before he was in a relationship or even had anyone in view. He danced, described who would be present, and painted the whole atmosphere with complete conviction. To an outsider, it might have looked like pure imagination, but to those of us living with him, it was clear: Royal was rehearsing a future he fully believed in.
+
+That same mindset showed up clearly when he decided to learn software development. Royal didn’t allow NEPA, lack of light, or limited resources to slow him down or determine his learning pace. If there was no electricity, he would use the little money he had—sometimes money meant for food—to buy fuel for the generator, trusting God that food would come later. And somehow, it always did.
+
+On days when fueling the generator wasn’t an option, he didn’t complain or make excuses. He would simply pack up and go to a Succoth's place where there was light and data, just to make sure he met his daily learning quota. Missing a study day was never an option for him.
+
+Another funny but impressive thing about Royal was his commitment once he decided to learn something. When he set a time range to learn a skill, he stuck to it—and within that period, he didn’t just learn it, he perfected it. Excellence followed his discipline naturally. Whatever he committed himself to, he excelled in.
+
+Royal lives as though the future is already real. He prepares, decides, and carries himself like someone who has already arrived. Because of that, his belief in what will be consistently dictates what he does now. That unwavering future focus didn’t just shape his personal journey; it influenced the environment around him, reminding all of us that when vision is clear, even an uncertain present can be navigated with confidence.
+[05/02, 22:31] Bro Favour Nccf: Honestly, in my time on this earth, Royal is one of the most positive people I’ve ever met—and I don’t say that lightly. His positivity wasn’t loud or forced; it was practical. Anytime he sat down to plan, he didn’t see problems, he saw puzzles. Instead of saying, “This thing is hard,” he’d say, “Okay, how do we go around this one?” Nothing was allowed to stop him for too long.
+
+Even on bad days, Royal had a system. And that system usually started with food. If something went wrong, he’d say, “Let’s eat first,” like hunger was the real enemy, not the problem itself. Once he had eaten, his mood would lift, his energy would return, and suddenly the solutions would start flowing. If this way won’t work, what about that one? And if that fails, who else can we talk to? Before you knew it, the “problem” had turned into a full strategy session.
+
+A perfect example was during the period he was running for SU President. A few days before the election, serious challenges started showing up—things that would normally make most people panic or break down. Royal didn’t panic at all. Instead, he was rejoicing, playing music in the room, and making sure he wasn’t hungry. Once food was sorted, he went straight into action mode—mapping out strategies, listing people to meet, people to talk to, and moves to make. No drama, no fear—just calm confidence and planning.
+
+And somehow, everything went smoothly. Step by step, things aligned, and Royal emerged victorious.
+
+That moment really captured who he was. When pressure came, he didn’t crumble. He stayed calm, stayed fed, stayed focused—and kept moving forward. He didn’t allow anything to weigh him down, even when everything around him suggested it should. Being around that kind of consistency teaches you a lot. It shows you that sometimes, winning isn’t about panic or stress—it’s about keeping your head clear, your stomach full, and your eyes on the goal.

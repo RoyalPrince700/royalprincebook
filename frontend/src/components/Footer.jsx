@@ -48,7 +48,8 @@ const Footer = () => {
               lineHeight: '1.6',
               color: 'var(--text-secondary)'
             }}>
-              A sophisticated platform for AI-assisted book creation, where ideas transform into beautifully formatted manuscripts ready for publication.
+              Books created to guide, inspire, and challenge your mindset.
+For readers committed to growth, clarity, and meaningful progress.
             </p>
           </div>
 
@@ -70,90 +71,13 @@ const Footer = () => {
               flexDirection: 'column',
               gap: '0.5rem'
             }}>
-              <li>AI-Powered Content Generation</li>
               <li>Chapter-Based Organization</li>
               <li>Real-Time Preview</li>
               <li>Multiple Export Formats</li>
-              <li>Code-Based Editing</li>
             </ul>
           </div>
 
-          {/* Resources Section */}
-          <div>
-            <h4 style={{
-              margin: '0 0 1rem 0',
-              color: 'var(--text-primary)',
-              fontSize: '1rem',
-              fontWeight: '500'
-            }}>
-              Resources
-            </h4>
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem'
-            }}>
-              <li>
-                <a
-                  href="#"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                >
-                  Documentation
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                >
-                  Writing Guide
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                >
-                  API Reference
-                </a>
-              </li>
-              <li>
-                <a
-                  href="#"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                >
-                  Support
-                </a>
-              </li>
-            </ul>
-          </div>
+         
 
           {/* Contact Section */}
           <div>
@@ -187,20 +111,7 @@ const Footer = () => {
                   contact@royalprincebook.com
                 </a>
               </li>
-              <li>
-                <a
-                  href="#"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                >
-                  GitHub
-                </a>
-              </li>
+             
               <li>
                 <a
                   href="#"
