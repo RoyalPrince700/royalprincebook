@@ -13,20 +13,28 @@ const register = async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
-    });
+    // Create capitalized username first
+    const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
 
-    if (existingUser) {
+    // Check if user already exists
+    const existingUserByEmail = await User.findOne({ email });
+    if (existingUserByEmail) {
       return res.status(400).json({
-        message: 'User with this email or username already exists'
+        message: 'Email already exists',
+        field: 'email'
+      });
+    }
+
+    // Check against the capitalized username since that's what we save
+    const existingUserByUsername = await User.findOne({ username: capitalizedUsername });
+    if (existingUserByUsername) {
+      return res.status(400).json({
+        message: 'Username is already in use',
+        field: 'username'
       });
     }
 
     // Create new user
-    const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
-    
     const user = new User({
       username: capitalizedUsername,
       email,
@@ -51,6 +59,20 @@ const register = async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
+    if (error.code === 11000) {
+      if (error.keyPattern.username) {
+        return res.status(400).json({ 
+          message: 'Username is already in use', 
+          field: 'username' 
+        });
+      }
+      if (error.keyPattern.email) {
+        return res.status(400).json({ 
+          message: 'Email already exists', 
+          field: 'email' 
+        });
+      }
+    }
     res.status(500).json({ message: 'Server error during registration' });
   }
 };

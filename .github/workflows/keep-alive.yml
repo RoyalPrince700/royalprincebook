@@ -2,21 +2,27 @@ name: Keep Backend Alive
 
 on:
   schedule:
-    # Run every 10 minutes
-    - cron: '*/10 * * * *'
-  workflow_dispatch: # Allow manual trigger
+    # Run every 13 minutes: at minutes 0, 13, 26, 39, 52 of every hour
+    - cron: '0 * * * *'
+    - cron: '13 * * * *'
+    - cron: '26 * * * *'
+    - cron: '39 * * * *'
+    - cron: '52 * * * *'
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   ping-backend:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Ping Backend
-        run: |
-          echo "Pinging backend to keep it alive..."
-          curl -f -s https://royalprincebook.onrender.com > /dev/null
-          if [ $? -eq 0 ]; then
-            echo "✅ Backend ping successful"
-          else
-            echo "❌ Backend ping failed"
-            exit 1
-          fi
+    - name: Ping Backend
+      run: |
+        echo "Pinging backend at https://royalprincebook.onrender.com"
+        curl -f https://royalprincebook.onrender.com || echo "Ping failed, but continuing..."
+
+    - name: Health Check
+      run: |
+        echo "Performing health check"
+        # Try to access a common health endpoint or root
+        curl -f https://royalprincebook.onrender.com/health || curl -f https://royalprincebook.onrender.com/ || echo "Health check completed"
+

@@ -80,7 +80,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Registration failed'
+        message: error.response?.data?.message || 'Registration failed',
+        field: error.response?.data?.field
       };
     }
   };

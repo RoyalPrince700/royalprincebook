@@ -10,6 +10,7 @@ const Register = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const { register } = useAuth();
@@ -20,11 +21,19 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear field-specific error when user types
+    if (fieldErrors[e.target.name]) {
+      setFieldErrors({
+        ...fieldErrors,
+        [e.target.name]: null
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -47,7 +56,11 @@ const Register = () => {
     if (result.success) {
       navigate('/dashboard');
     } else {
-      setError(result.message);
+      if (result.field) {
+        setFieldErrors({ [result.field]: result.message });
+      } else {
+        setError(result.message);
+      }
     }
 
     setLoading(false);
@@ -94,11 +107,17 @@ const Register = () => {
               id="username"
               name="username"
               className="form-input"
+              style={fieldErrors.username ? { borderColor: 'var(--danger)' } : {}}
               value={formData.username}
               onChange={handleChange}
               placeholder="johndoe"
               required
             />
+            {fieldErrors.username && (
+              <span style={{ color: 'var(--danger)', fontSize: '0.875rem', marginTop: '0.25rem', display: 'block' }}>
+                {fieldErrors.username}
+              </span>
+            )}
           </div>
 
           <div className="form-group">
@@ -110,11 +129,17 @@ const Register = () => {
               id="email"
               name="email"
               className="form-input"
+              style={fieldErrors.email ? { borderColor: 'var(--danger)' } : {}}
               value={formData.email}
               onChange={handleChange}
               placeholder="name@company.com"
               required
             />
+            {fieldErrors.email && (
+              <span style={{ color: 'var(--danger)', fontSize: '0.875rem', marginTop: '0.25rem', display: 'block' }}>
+                {fieldErrors.email}
+              </span>
+            )}
           </div>
 
           <div className="form-group">
