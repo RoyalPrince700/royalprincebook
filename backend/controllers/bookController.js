@@ -1,4 +1,5 @@
 const Book = require('../models/Book');
+const User = require('../models/User');
 
 // Get all books for the authenticated user
 const getBooks = async (req, res) => {
@@ -24,6 +25,26 @@ const getBooks = async (req, res) => {
     res.json({ books });
   } catch (error) {
     console.error('Get books error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get purchased books for authenticated user
+const getPurchasedBooks = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate({
+      path: 'purchasedBooks',
+      populate: { path: 'author', select: 'username email' },
+      options: { sort: { updatedAt: -1 } }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ books: user.purchasedBooks || [] });
+  } catch (error) {
+    console.error('Get purchased books error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -227,6 +248,7 @@ const deletePage = async (req, res) => {
 
 module.exports = {
   getBooks,
+  getPurchasedBooks,
   getBook,
   createBook,
   updateBook,

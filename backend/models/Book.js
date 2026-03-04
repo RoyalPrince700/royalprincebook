@@ -62,6 +62,10 @@ const bookSchema = new mongoose.Schema({
   coverImage: {
     type: String // URL or path to cover image
   },
+  price: {
+    type: Number,
+    default: 0
+  },
   totalWordCount: {
     type: Number,
     default: 0

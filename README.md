@@ -1,18 +1,16 @@
 # Royal Prince Book
 
-Royal Prince Book is a dual-purpose platform: a powerful AI-integrated writing tool for authors and a Netflix-style digital library for readers. It allows authors to write, format, and publish books seamlessly while offering readers a premium browsing experience to discover, purchase, or subscribe to access a vast collection of books.
+Royal Prince Book is a dual-purpose platform: a powerful writing tool for authors and a premium digital library for readers. It allows authors to write, format, and publish books seamlessly while offering readers a unique browsing experience to discover, purchase, or subscribe to access a vast collection of books.
 
 ## 🚀 Core Workflow
 
 ### For Authors (Writing & Publishing)
-The application leverages an "AI-first" writing process:
-1.  **Idea Generation**: Authors send raw thoughts to the AI (within the Cursor IDE).
-2.  **AI Formatting**: The AI converts these into professionally formatted book chapters.
-3.  **Code-Based Editing**: Content is updated directly in the codebase.
-4.  **Publishing**: Finished books are published to the platform for public access.
+1.  **Create & Write**: Authors can draft and organize their books directly on the platform using the built-in editor.
+2.  **Format**: Content can be structured and formatted professionally.
+3.  **Publishing**: Finished books are published to the platform for public access.
 
 ### For Readers (Browsing & Reading)
-1.  **Netflix-Style Interface**: Users browse a visually engaging catalog of books.
+1.  **Immersive Book Discovery**: Users browse a unique, visually engaging catalog of books.
 2.  **Flexible Access**:
     *   **Single Purchase**: Buy individual books for permanent access.
     *   **Subscription**: Subscribe (Monthly/Yearly) to access the entire library.
@@ -21,13 +19,13 @@ The application leverages an "AI-first" writing process:
 
 ## ✨ Features
 
-*   **Public Digital Library**: A rich, visual interface for users to browse books, similar to streaming services.
+*   **Public Digital Library**: A rich, custom interface for users to browse books, designed for an immersive experience.
 *   **Monetization & Payments**:
     *   **Flutterwave Integration**: Secure payment processing for global transactions.
     *   **Single Book Sales**: Buy and own specific titles.
     *   **Subscription Models**: Recurring billing (Monthly/Yearly) for unlimited access.
 *   **Authoring Tools**:
-    *   **AI Integration Ready**: Designed for AI-assisted writing and formatting.
+    *   **Intuitive Editor**: A user-friendly interface for writing and editing book content.
     *   **Chapter-Based Organization**: Structured content management.
     *   **Full Book Export**: Download manuscripts as DOCX files.
 *   **User Management**:
@@ -40,7 +38,7 @@ The application leverages an "AI-first" writing process:
 *   **React 18** (Vite)
 *   **React Router DOM** for navigation
 *   **Axios** for API interaction
-*   **Tailwind CSS** for the Netflix-style UI
+*   **Tailwind CSS** for the custom user interface
 *   **Flutterwave-React-v3** for payment gateway integration
 
 ### Backend
@@ -111,7 +109,7 @@ royalprincebook/
 4.  **Read**: Access your purchased books in your library.
 
 ### As an Author
-1.  **Write**: Use the AI-assisted workflow to generate content.
+1.  **Write**: Use the dashboard to write and organize content.
 2.  **Manage**: Use the dashboard to organize chapters and books.
 3.  **Publish**: Make books available on the storefront.
 

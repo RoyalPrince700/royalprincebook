@@ -53,7 +53,8 @@ const register = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        purchasedBooks: user.purchasedBooks || []
       },
       token
     });
@@ -103,7 +104,8 @@ const login = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        purchasedBooks: user.purchasedBooks || []
       },
       token
     });
@@ -127,7 +129,8 @@ const getProfile = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
+        purchasedBooks: user.purchasedBooks || []
       }
     });
   } catch (error) {
@@ -172,7 +175,8 @@ const updateProfile = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role
+        role: user.role,
+        purchasedBooks: user.purchasedBooks || []
       }
     });
   } catch (error) {

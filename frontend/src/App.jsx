@@ -34,9 +34,9 @@ const Layout = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <Router>
+    <Router>
+      <AuthProvider>
+        <ThemeProvider>
           <ScrollToTop />
           <Layout>
             <Routes>
@@ -78,10 +78,10 @@ function App() {
               />
             </Routes>
           </Layout>
-        </Router>
-      </ThemeProvider>
-    </AuthProvider>
-);
+        </ThemeProvider>
+      </AuthProvider>
+    </Router>
+  );
 }
 
 export default App;

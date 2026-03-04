@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../contexts/AuthContext';
+import { bookData as leadingFromWithinBook } from '../../chapters';
 import axios from 'axios';
 
 const BookEditor = () => {
@@ -63,6 +64,11 @@ const BookEditor = () => {
   }, [pageData, currentPage]);
 
   const fetchBook = async () => {
+    if (bookId === leadingFromWithinBook._id) {
+        setError('This book is managed locally and cannot be edited via the web interface.');
+        setLoading(false);
+        return;
+    }
     try {
       const response = await axios.get(`/books/${bookId}`);
       setBook(response.data.book);

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   getBooks,
+  getPurchasedBooks,
   getBook,
   createBook,
   updateBook,
@@ -16,6 +17,7 @@ router.get('/', getBooks);
 
 // Protected routes - require authentication
 router.use(authenticateToken);
+router.get('/purchased', getPurchasedBooks);
 router.get('/:id', getBook);
 router.post('/', authorizeAdmin, createBook);
 router.put('/:id', authorizeAdmin, updateBook);

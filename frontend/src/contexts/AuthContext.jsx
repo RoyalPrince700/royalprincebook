@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const AuthContext = createContext();
@@ -12,6 +13,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -42,6 +44,14 @@ export const AuthProvider = ({ children }) => {
 
     initAuth();
   }, [token]);
+
+  const refreshProfile = async () => {
+    if (!token) return null;
+
+    const response = await axios.get('/auth/profile');
+    setUser(response.data.user);
+    return response.data.user;
+  };
 
   const login = async (email, password) => {
     try {
@@ -91,7 +101,27 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
+    navigate('/login');
   };
+
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          // Check if we are already on the login page to avoid loops
+          if (!window.location.pathname.includes('/login')) {
+            logout();
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, [navigate]);
 
   const updateProfile = async (profileData) => {
     try {
@@ -106,6 +136,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const addPurchasedBook = (bookId) => {
+    if (!bookId) return;
+
+    setUser((prevUser) => {
+      if (!prevUser) return prevUser;
+      const purchasedBooks = Array.isArray(prevUser.purchasedBooks) ? prevUser.purchasedBooks : [];
+      if (purchasedBooks.includes(bookId)) {
+        return prevUser;
+      }
+
+      return {
+        ...prevUser,
+        purchasedBooks: [...purchasedBooks, bookId]
+      };
+    });
+  };
+
   const value = {
     user,
     token,
@@ -114,6 +161,8 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
+    refreshProfile,
+    addPurchasedBook,
     isAuthenticated: !!user
   };
 

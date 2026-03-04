@@ -24,11 +24,17 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bookwrite
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/books', require('./routes/books'));
+app.use('/api/payment', require('./routes/payment'));
 app.use('/api/export', require('./routes/export'));
 
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Book Writer API is running' });
+});
+
+// Get Flutterwave Public Key
+app.get('/api/config/flutterwave-public-key', (req, res) => {
+  res.json({ publicKey: process.env.FLUTTERWAVE_PUBLIC_KEY });
 });
 
 const PORT = process.env.PORT || 5000;

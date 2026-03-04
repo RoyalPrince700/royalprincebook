@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import ChapterReader from '../components/Book/ChapterReader';
+import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
 import './ReadBook.css';
 
 const ReadBook = () => {
   const { bookId } = useParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, refreshProfile, addPurchasedBook } = useAuth();
   
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,6 +16,7 @@ const ReadBook = () => {
   const [currentPageNum, setCurrentPageNum] = useState(1);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
+  const [flwPublicKey, setFlwPublicKey] = useState('');
 
   // Auto-close sidebar on mobile
   useEffect(() => {
@@ -36,7 +37,17 @@ const ReadBook = () => {
 
   useEffect(() => {
     fetchBook();
+    fetchPublicKey();
   }, [bookId]);
+
+  const fetchPublicKey = async () => {
+    try {
+      const response = await axios.get('/config/flutterwave-public-key');
+      setFlwPublicKey(response.data.publicKey);
+    } catch (err) {
+      console.error('Failed to fetch public key', err);
+    }
+  };
 
   const fetchBook = async () => {
     try {
@@ -89,6 +100,59 @@ const ReadBook = () => {
     }
   };
 
+  // Payment Configuration
+  const config = {
+    public_key: flwPublicKey,
+    tx_ref: Date.now(),
+    amount: book?.price || 0,
+    currency: 'NGN',
+    payment_options: 'card,mobilemoney,ussd',
+    customer: {
+      email: user?.email,
+      name: user?.username,
+    },
+    customizations: {
+      title: `Purchase ${book?.title}`,
+      description: 'Payment for book access',
+      logo: 'https://st2.depositphotos.com/4403291/7418/v/450/depositphotos_74189661-stock-illustration-online-shop-log.jpg',
+    },
+  };
+
+  const handleFlutterwavePayment = useFlutterwave(config);
+
+  const handlePayment = () => {
+    if (!flwPublicKey) {
+      alert("Payment system initializing, please try again in a moment.");
+      return;
+    }
+    
+    handleFlutterwavePayment({
+      callback: async (response) => {
+        closePaymentModal();
+        if (response.status === "successful") {
+           try {
+             // Verify payment on backend
+             await axios.post('/payment/verify', {
+               transaction_id: response.transaction_id,
+               bookId: book._id
+             });
+             addPurchasedBook(book._id);
+             await refreshProfile();
+             alert("Payment successful! You can now read the book.");
+           } catch (err) {
+             console.error("Verification failed", err);
+             alert("Payment verification failed. Please contact support.");
+           }
+        } else {
+          alert("Payment failed.");
+        }
+      },
+      onClose: () => {
+        // Do nothing
+      },
+    });
+  };
+
   if (loading) {
     return (
       <div className="read-book-container" style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -105,6 +169,40 @@ const ReadBook = () => {
         <div className="card text-center">
           <h3>{error || 'Book not found'}</h3>
           <Link to="/dashboard">Back to Dashboard</Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Check access
+  const isAuthor = user && book.author && (user.id === book.author._id || user.id === book.author);
+  const isAdmin = user && user.role === 'admin';
+  const hasPurchased = user && user.purchasedBooks && user.purchasedBooks.includes(book._id);
+  const isFree = !book.price || book.price === 0;
+
+  const hasAccess = isAuthor || isAdmin || hasPurchased || isFree;
+
+  if (!hasAccess) {
+    return (
+      <div className="read-book-container" style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <div className="card text-center" style={{ maxWidth: '500px', padding: '2rem' }}>
+          <h2 style={{ marginBottom: '1rem' }}>{book.title}</h2>
+          <p style={{ marginBottom: '2rem', fontSize: '1.1rem', color: '#666' }}>
+            To read this book, you need to purchase it.
+          </p>
+          <div style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
+            Price: ₦{book.price.toLocaleString()}
+          </div>
+          <button 
+            className="btn-primary" 
+            onClick={handlePayment}
+            style={{ fontSize: '1.2rem', padding: '0.8rem 2rem', width: '100%' }}
+          >
+            Buy Now
+          </button>
+          <div style={{ marginTop: '1rem' }}>
+             <Link to="/dashboard" style={{ color: '#666' }}>Back to Dashboard</Link>
+          </div>
         </div>
       </div>
     );
