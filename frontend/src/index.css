@@ -130,11 +130,11 @@ a:hover {
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: var(--auth-bg, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  background: var(--auth-bg, #f8fafc);
 }
 
 [data-theme='dark'] .auth-container {
-  --auth-bg: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  --auth-bg: #0f172a;
 }
 
 .auth-card {

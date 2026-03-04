@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import ThemeToggle from './ThemeToggle';
+// import ThemeToggle from './ThemeToggle';
 import '../App.css'; 
 
 const Navbar = () => {
@@ -85,14 +85,14 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-            <div className="ml-2">
+            {/* <div className="ml-2">
               <ThemeToggle />
-            </div>
+            </div> */}
           </nav>
 
           {/* Mobile Menu Button (simplified) */}
           <div className="md:hidden flex items-center gap-4">
-             <ThemeToggle />
+             {/* <ThemeToggle /> */}
             {user ? (
                <Link to="/dashboard" className="text-sm font-medium text-gray-900">
                  Dashboard

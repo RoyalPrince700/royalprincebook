@@ -148,8 +148,8 @@ For readers committed to growth, clarity, and meaningful progress.
             gap: '1rem',
             fontSize: '0.85rem'
           }}>
-            <a
-              href="#"
+            <Link
+              to="/privacy-policy"
               style={{
                 color: 'var(--text-secondary)',
                 textDecoration: 'none',
@@ -159,9 +159,9 @@ For readers committed to growth, clarity, and meaningful progress.
               onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
             >
               Privacy Policy
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/terms-of-service"
               style={{
                 color: 'var(--text-secondary)',
                 textDecoration: 'none',
@@ -171,7 +171,7 @@ For readers committed to growth, clarity, and meaningful progress.
               onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
             >
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>

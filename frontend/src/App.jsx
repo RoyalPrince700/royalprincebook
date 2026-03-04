@@ -6,6 +6,8 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Dashboard from './components/Dashboard/Dashboard';
 import Home from './pages/Home';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 import BookEditor from './components/Book/BookEditor';
 import BookList from './components/Book/BookList';
 import ReadBook from './pages/ReadBook';
@@ -41,6 +43,8 @@ function App() {
           <Layout>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
               <Route path="/all-books" element={<BookList />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
