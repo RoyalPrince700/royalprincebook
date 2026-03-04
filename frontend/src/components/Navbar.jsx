@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 // import ThemeToggle from './ThemeToggle';
@@ -9,6 +9,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
   // Handle scroll effect for Apple-style navbar
   useEffect(() => {
@@ -29,6 +31,44 @@ const Navbar = () => {
     logout();
     navigate('/login');
   };
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  // Handle click outside to close menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        closeMenu();
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMenuOpen]);
 
   const isHome = location.pathname === '/';
 
@@ -64,8 +104,8 @@ const Navbar = () => {
                 <Link to="/dashboard" className="text-xs text-gray-700 hover:text-black transition-colors">
                   Dashboard
                 </Link>
-                <button 
-                  onClick={handleLogout} 
+                <button
+                  onClick={handleLogout}
                   className="text-xs text-gray-700 hover:text-black transition-colors"
                 >
                   Log out
@@ -93,22 +133,106 @@ const Navbar = () => {
             </div> */}
           </nav>
 
-          {/* Mobile Menu Button (simplified) */}
-          <div className="md:hidden flex items-center gap-4">
-             {/* <ThemeToggle /> */}
-            <Link to="/about-author" className="text-sm font-medium text-gray-900">
-              Author
-            </Link>
-            {user ? (
-               <Link to="/dashboard" className="text-sm font-medium text-gray-900">
-                 Dashboard
-               </Link>
-            ) : (
-               <Link to="/login" className="text-sm font-medium text-gray-900">
-                 Log in
-               </Link>
-            )}
+          {/* Hamburger Menu Button - Only visible on smaller screens */}
+          <button
+            onClick={toggleMenu}
+            className="md:hidden flex flex-col justify-center items-center w-8 h-8 space-y-1 hover:bg-gray-100 rounded-md transition-colors p-1"
+            aria-label="Toggle menu"
+          >
+            <span className={`block w-5 h-0.5 bg-gray-700 transition-transform duration-300 ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
+            <span className={`block w-5 h-0.5 bg-gray-700 transition-opacity duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+            <span className={`block w-5 h-0.5 bg-gray-700 transition-transform duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+          </button>
+        </div>
+      </div>
+
+      {/* Hamburger Menu Overlay */}
+      <div
+        className={`fixed inset-0 z-40 transition-all duration-500 ease-in-out ${
+          isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+        }`}
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      >
+        <div
+          ref={menuRef}
+          className={`absolute top-0 left-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-500 ease-in-out ${
+            isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          {/* Menu Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+            <button
+              onClick={closeMenu}
+              className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+              aria-label="Close menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
+
+          {/* Menu Content */}
+          <nav className="flex flex-col py-4">
+            <Link
+              to="/all-books"
+              className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+              onClick={closeMenu}
+            >
+              Books
+            </Link>
+            <Link
+              to="/about-author"
+              className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+              onClick={closeMenu}
+            >
+              About Author
+            </Link>
+
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                  onClick={closeMenu}
+                >
+                  Dashboard
+                </Link>
+                <div className="border-t border-gray-200 my-2"></div>
+                <div className="px-6 py-2">
+                  <span className="text-sm text-gray-500 block mb-2">Welcome, {user.username}</span>
+                </div>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    closeMenu();
+                  }}
+                  className="px-6 py-3 text-left text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="border-t border-gray-200 my-2"></div>
+                <Link
+                  to="/login"
+                  className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                  onClick={closeMenu}
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/register"
+                  className="mx-6 my-3 px-4 py-2 text-center text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
+                  onClick={closeMenu}
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
+          </nav>
         </div>
       </div>
     </header>
