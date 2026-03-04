@@ -71,19 +71,20 @@ const Navbar = () => {
   }, [isMenuOpen]);
 
   const isHome = location.pathname === '/';
+  const headerBackgroundClass = isMenuOpen
+    ? 'bg-white border-b border-gray-200'
+    : scrolled || !isHome
+      ? 'bg-white/80 backdrop-blur-md border-b border-gray-200/50 supports-[backdrop-filter]:bg-white/60'
+      : 'bg-transparent';
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${
-        scrolled || !isHome 
-          ? 'bg-white/80 backdrop-blur-md border-b border-gray-200/50 supports-[backdrop-filter]:bg-white/60' 
-          : 'bg-transparent'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${headerBackgroundClass}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-12">
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center">
+          <div className="shrink-0 flex items-center">
             <Link to="/" className="text-gray-900 font-semibold tracking-tight hover:opacity-80 transition-opacity">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -148,16 +149,21 @@ const Navbar = () => {
 
       {/* Hamburger Menu Overlay */}
       <div
-        className={`fixed inset-0 z-40 transition-all duration-500 ease-in-out ${
-          isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-        }`}
-        style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+        className={`fixed inset-0 z-40 ${isMenuOpen ? 'visible' : 'invisible'}`}
       >
         <div
+          className={`absolute inset-0 bg-white transition-opacity duration-300 ease-in-out ${
+            isMenuOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={closeMenu}
+          aria-hidden="true"
+        />
+        <div
           ref={menuRef}
-          className={`absolute top-0 left-0 h-full w-80 bg-white shadow-2xl transform transition-transform duration-500 ease-in-out ${
+          className={`absolute top-0 left-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl transform transition-transform duration-500 ease-in-out ${
             isMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
+          style={{ backgroundColor: 'white', opacity: 1 }}
         >
           {/* Menu Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
