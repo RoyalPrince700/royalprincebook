@@ -56,6 +56,9 @@ const Navbar = () => {
             <Link to="/all-books" className="text-xs text-gray-700 hover:text-black transition-colors">
               Books
             </Link>
+            <Link to="/about-author" className="text-xs text-gray-700 hover:text-black transition-colors">
+              About Author
+            </Link>
             {user ? (
               <>
                 <Link to="/dashboard" className="text-xs text-gray-700 hover:text-black transition-colors">
@@ -93,6 +96,9 @@ const Navbar = () => {
           {/* Mobile Menu Button (simplified) */}
           <div className="md:hidden flex items-center gap-4">
              {/* <ThemeToggle /> */}
+            <Link to="/about-author" className="text-sm font-medium text-gray-900">
+              Author
+            </Link>
             {user ? (
                <Link to="/dashboard" className="text-sm font-medium text-gray-900">
                  Dashboard

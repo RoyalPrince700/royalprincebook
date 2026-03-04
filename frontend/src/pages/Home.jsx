@@ -33,6 +33,7 @@ const chapterHighlights = [
 const Home = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAboutBook, setShowAboutBook] = useState(false);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -112,6 +113,41 @@ const Home = () => {
                 alt="Leading From Within Book Cover"
                 className="w-full rounded-2xl object-cover"
               />
+            </div>
+            <div className="mx-auto mt-5 max-w-md">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAboutBook((prev) => !prev)}
+                  className="inline-flex w-full items-center justify-center rounded-full border border-blue-200 bg-white px-6 py-3 text-sm font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-50"
+                >
+                  {showAboutBook ? 'Hide About the Book' : 'About the Book'}
+                </button>
+                <Link
+                  to="/about-author"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white! transition hover:bg-slate-700 hover:text-white!"
+                >
+                  About Author
+                </Link>
+              </div>
+
+              {showAboutBook && (
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm">
+                  <h3 className="text-lg font-semibold text-slate-900">About Leading From Within</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                    <em>Leading From Within</em> is a deeply personal and practical leadership journey. In Chapters 1
+                    to 6, the author moves from humble beginnings and a mindset shift, to self-leadership, discipline,
+                    and purpose-driven action. The book shows how growth starts internally before it becomes visible
+                    externally.
+                  </p>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                    Readers will discover how consistency builds confidence, how purpose gives direction under pressure,
+                    and how service transforms influence into lasting impact. This is more than inspiration: each chapter
+                    includes practical lessons that help students, young professionals, and aspiring leaders take bold,
+                    measurable steps in real life.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
