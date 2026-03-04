@@ -5,7 +5,6 @@ import { chapter4 } from './chapter4';
 import { chapter5 } from './chapter5';
 import { chapter6 } from './chapter6';
 import { chapter7 } from './chapter7';
-import { chapter8 } from './chapter8';
 
 export const bookData = {
   _id: "local-leading-from-within",
@@ -22,8 +21,7 @@ export const bookData = {
     chapter4,
     chapter5,
     chapter6,
-    chapter7,
-    chapter8
+    chapter7
   ]
 };
 
@@ -34,6 +32,5 @@ export {
   chapter4,
   chapter5,
   chapter6,
-  chapter7,
-  chapter8
+  chapter7
 };

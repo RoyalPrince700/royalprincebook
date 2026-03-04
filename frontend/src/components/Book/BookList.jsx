@@ -115,6 +115,7 @@ const BookList = () => {
 
   useEffect(() => {
     if (!selectedBook || !buyingBookId) return;
+    const currentBook = selectedBook;
 
     triggerFlutterwavePayment({
       callback: async (response) => {
@@ -130,10 +131,10 @@ const BookList = () => {
         try {
           await axios.post('/payment/verify', {
             transaction_id: response.transaction_id,
-            bookId: book._id
+            bookId: currentBook._id
           });
 
-          addPurchasedBook(book._id);
+          addPurchasedBook(currentBook._id);
           await refreshProfile();
           alert('Payment successful. You can now read this book.');
         } catch (verifyError) {
