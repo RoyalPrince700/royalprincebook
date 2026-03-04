@@ -122,7 +122,7 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-3 py-1 text-xs text-white !text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
+                  className="px-3 py-1 text-xs text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
                 >
                   Sign up
                 </Link>
@@ -226,6 +226,7 @@ const Navbar = () => {
                 <Link
                   to="/register"
                   className="mx-6 my-3 px-4 py-2 text-center text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
+                  style={{ color: 'white' }}
                   onClick={closeMenu}
                 >
                   Sign up
