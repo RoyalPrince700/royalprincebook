@@ -97,10 +97,10 @@ const Home = () => {
                 Buy Now
               </Link>
               <Link
-                to="/register"
+                to="/login"
                 className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-7 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100"
               >
-                Create Account
+                Continue with Google
               </Link>
             </div>
           </div>
@@ -233,7 +233,7 @@ const Home = () => {
               to="/login"
               className="inline-flex items-center justify-center rounded-full border border-slate-300 px-8 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
             >
-              I Already Have an Account
+                Sign In with Google
             </Link>
           </div>
         </div>

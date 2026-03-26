@@ -1,40 +1,17 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
+const authErrors = {
+  auth_failed: 'Google sign-in failed. Please try again.',
+  no_token: 'Google sign-in did not complete. Please try again.'
+};
+
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const { login } = useAuth();
-  const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    const result = await login(formData.email, formData.password);
-
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.message);
-    }
-
-    setLoading(false);
-  };
+  const { loginWithGoogle } = useAuth();
+  const location = useLocation();
+  const errorCode = new URLSearchParams(location.search).get('error');
+  const error = authErrors[errorCode] || '';
 
   return (
     <div className="auth-container">
@@ -53,7 +30,7 @@ const Login = () => {
         </div>
         <div className="auth-header">
           <h2 className="auth-title">Welcome Back</h2>
-          <p className="auth-subtitle">Sign in to continue writing your book</p>
+          <p className="auth-subtitle">Sign in with Google to continue reading and writing.</p>
         </div>
 
         {error && (
@@ -67,52 +44,24 @@ const Login = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="form-input"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="name@company.com"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className="form-input"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
+        <div className="space-y-4">
           <button
-            type="submit"
+            type="button"
+            onClick={loginWithGoogle}
             className="btn-primary w-full"
-            disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            Continue with Google
           </button>
-        </form>
+
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+            We only support Google authentication.
+          </p>
+        </div>
 
         <div className="auth-footer">
-          Don't have an account?{' '}
+          New here?{' '}
           <Link to="/register">
-            Create account
+            Sign up with Google
           </Link>
         </div>
       </div>

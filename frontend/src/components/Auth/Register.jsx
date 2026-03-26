@@ -1,70 +1,9 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
-  const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-
-  const { register } = useAuth();
-  const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    // Clear field-specific error when user types
-    if (fieldErrors[e.target.name]) {
-      setFieldErrors({
-        ...fieldErrors,
-        [e.target.name]: null
-      });
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setFieldErrors({});
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
-
-    setLoading(true);
-
-    const result = await register(
-      formData.username,
-      formData.email,
-      formData.password
-    );
-
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      if (result.field) {
-        setFieldErrors({ [result.field]: result.message });
-      } else {
-        setError(result.message);
-      }
-    }
-
-    setLoading(false);
-  };
+  const { loginWithGoogle } = useAuth();
 
   return (
     <div className="auth-container">
@@ -82,112 +21,28 @@ const Register = () => {
           </h1>
         </div>
         <div className="auth-header">
-          <h2 className="auth-title">Create Account</h2>
-          <p className="auth-subtitle">Start your writing journey today</p>
+          <h2 className="auth-title">Create Your Account</h2>
+          <p className="auth-subtitle">Use Google to create your account and start immediately.</p>
         </div>
 
-        {error && (
-          <div className="error-message">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
-              <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username" className="form-label">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              className="form-input"
-              style={fieldErrors.username ? { borderColor: 'var(--danger)' } : {}}
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="johndoe"
-              required
-            />
-            {fieldErrors.username && (
-              <span style={{ color: 'var(--danger)', fontSize: '0.875rem', marginTop: '0.25rem', display: 'block' }}>
-                {fieldErrors.username}
-              </span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="form-input"
-              style={fieldErrors.email ? { borderColor: 'var(--danger)' } : {}}
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="name@company.com"
-              required
-            />
-            {fieldErrors.email && (
-              <span style={{ color: 'var(--danger)', fontSize: '0.875rem', marginTop: '0.25rem', display: 'block' }}>
-                {fieldErrors.email}
-              </span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className="form-input"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-              minLength="6"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="confirmPassword" className="form-label">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              className="form-input"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
+        <div className="space-y-4">
           <button
-            type="submit"
+            type="button"
+            onClick={loginWithGoogle}
             className="btn-primary w-full"
-            disabled={loading}
           >
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            Continue with Google
           </button>
-        </form>
+
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+            Your Google account will be used for both sign up and sign in.
+          </p>
+        </div>
 
         <div className="auth-footer">
           Already have an account?{' '}
           <Link to="/login">
-            Sign in here
+            Sign in with Google
           </Link>
         </div>
       </div>

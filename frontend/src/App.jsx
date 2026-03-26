@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
+import AuthCallback from './components/Auth/AuthCallback';
 import Dashboard from './components/Dashboard/Dashboard';
 import Home from './pages/Home';
 import AboutAuthor from './pages/AboutAuthor';
@@ -50,6 +51,7 @@ function App() {
               <Route path="/all-books" element={<BookList />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               <Route
                 path="/dashboard"
                 element={

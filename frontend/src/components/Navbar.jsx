@@ -81,7 +81,7 @@ const Navbar = () => {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${headerBackgroundClass}`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 py-1 md:py-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-12">
           {/* Logo */}
           <div className="shrink-0 flex items-center">
@@ -93,7 +93,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8 ">
             <Link to="/all-books" className="text-xs text-gray-700 hover:text-black transition-colors">
               Books
             </Link>
@@ -119,13 +119,14 @@ const Navbar = () => {
             ) : (
               <>
                 <Link to="/login" className="text-xs text-gray-700 hover:text-black transition-colors">
-                  Log in
+                  Sign in
                 </Link>
                 <Link
-                  to="/register"
-                  className="px-3 py-1 text-xs text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
+                  to="/login"
+                  className="px-7 py-3 text-xs text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
+                  style={{ color: 'white' }}
                 >
-                  Sign up
+                  Continue with Google
                 </Link>
               </>
             )}
@@ -227,15 +228,15 @@ const Navbar = () => {
                   className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
                   onClick={closeMenu}
                 >
-                  Log in
+                  Sign in
                 </Link>
                 <Link
-                  to="/register"
+                  to="/login"
                   className="mx-6 my-3 px-4 py-2 text-center text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
                   style={{ color: 'white' }}
                   onClick={closeMenu}
                 >
-                  Sign up
+                  Continue with Google
                 </Link>
               </>
             )}

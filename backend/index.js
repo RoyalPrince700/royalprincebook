@@ -2,11 +2,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const passport = require('passport');
+const configurePassport = require('./config/passport');
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
+configurePassport();
 
 // Middleware
 app.use(cors({
@@ -15,6 +18,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bookwriter')

@@ -1,118 +1,42 @@
+const passport = require('passport');
 const User = require('../models/User');
-const jwt = require('jsonwebtoken');
 
-// Generate JWT token
-const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: '7d' // 7 days
-  });
+const getFrontendUrl = () => {
+  const isProdLike =
+    process.env.NODE_ENV === 'production' ||
+    !!process.env.RENDER_EXTERNAL_URL ||
+    !!process.env.RENDER ||
+    !!process.env.VERCEL;
+
+  return (
+    process.env.FRONTEND_URL ||
+    (isProdLike ? 'https://www.jubiac.com' : 'http://localhost:5173')
+  );
 };
 
-// Register new user
-const register = async (req, res) => {
-  try {
-    const { username, email, password, role } = req.body;
+const googleAuth = passport.authenticate('google', {
+  scope: ['profile', 'email'],
+  session: false
+});
 
-    // Create capitalized username first
-    const capitalizedUsername = username.charAt(0).toUpperCase() + username.slice(1);
+const googleAuthCallback = (req, res, next) => {
+  const frontendUrl = getFrontendUrl();
 
-    // Check if user already exists
-    const existingUserByEmail = await User.findOne({ email });
-    if (existingUserByEmail) {
-      return res.status(400).json({
-        message: 'Email already exists',
-        field: 'email'
-      });
+  passport.authenticate('google', { session: false }, (err, data) => {
+    if (err) {
+      console.error('[Auth] Google Auth Error:', err);
+      return res.redirect(`${frontendUrl}/login?error=auth_failed`);
     }
 
-    // Check against the capitalized username since that's what we save
-    const existingUserByUsername = await User.findOne({ username: capitalizedUsername });
-    if (existingUserByUsername) {
-      return res.status(400).json({
-        message: 'Username is already in use',
-        field: 'username'
-      });
+    if (!data || !data.token) {
+      console.error('[Auth] No token returned from Google auth flow.');
+      return res.redirect(`${frontendUrl}/login?error=no_token`);
     }
 
-    // Create new user
-    const user = new User({
-      username: capitalizedUsername,
-      email,
-      password,
-      role: 'user' // Always default to user
-    });
-
-    await user.save();
-
-    // Generate token
-    const token = generateToken(user._id);
-
-    res.status(201).json({
-      message: 'User registered successfully',
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        purchasedBooks: user.purchasedBooks || []
-      },
-      token
-    });
-  } catch (error) {
-    console.error('Registration error:', error);
-    if (error.code === 11000) {
-      if (error.keyPattern.username) {
-        return res.status(400).json({ 
-          message: 'Username is already in use', 
-          field: 'username' 
-        });
-      }
-      if (error.keyPattern.email) {
-        return res.status(400).json({ 
-          message: 'Email already exists', 
-          field: 'email' 
-        });
-      }
-    }
-    res.status(500).json({ message: 'Server error during registration' });
-  }
-};
-
-// Login user
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Find user by email
-    const user = await User.findOne({ email });
-    if (!user || !user.isActive) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    // Check password
-    const isValidPassword = await user.comparePassword(password);
-    if (!isValidPassword) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    // Generate token
-    const token = generateToken(user._id);
-
-    res.json({
-      message: 'Login successful',
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        purchasedBooks: user.purchasedBooks || []
-      },
-      token
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: 'Server error during login' });
-  }
+    return res.redirect(
+      `${frontendUrl}/auth/callback?token=${encodeURIComponent(data.token)}`
+    );
+  })(req, res, next);
 };
 
 // Get current user profile
@@ -242,8 +166,8 @@ const getAllUsers = async (req, res) => {
 };
 
 module.exports = {
-  register,
-  login,
+  googleAuth,
+  googleAuthCallback,
   getProfile,
   updateProfile,
   updateUserRole,

@@ -1,8 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const AuthContext = createContext();
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
+axios.defaults.baseURL = apiBaseUrl;
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -17,9 +20,6 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
-
-  // Configure axios defaults
-  axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
   // Set auth header if token exists
   if (token) {
@@ -45,64 +45,55 @@ export const AuthProvider = ({ children }) => {
     initAuth();
   }, [token]);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (!token) return null;
 
     const response = await axios.get('/auth/profile');
     setUser(response.data.user);
     return response.data.user;
-  };
+  }, [token]);
 
-  const login = async (email, password) => {
+  const completeGoogleAuth = useCallback(async (newToken) => {
+    if (!newToken) {
+      return {
+        success: false,
+        message: 'No authentication token was returned.'
+      };
+    }
+
     try {
-      const response = await axios.post('/auth/login', { email, password });
-      const { user, token: newToken } = response.data;
-
       localStorage.setItem('token', newToken);
       setToken(newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      setUser(user);
 
-      return { success: true, user };
+      const profileResponse = await axios.get('/auth/profile');
+      setUser(profileResponse.data.user);
+
+      return { success: true, user: profileResponse.data.user };
     } catch (error) {
+      localStorage.removeItem('token');
+      setToken(null);
+      setUser(null);
+      delete axios.defaults.headers.common['Authorization'];
+
       return {
         success: false,
-        message: error.response?.data?.message || 'Login failed'
+        message: error.response?.data?.message || 'Google sign-in failed'
       };
     }
-  };
+  }, []);
 
-  const register = async (username, email, password) => {
-    try {
-      const response = await axios.post('/auth/register', {
-        username,
-        email,
-        password
-      });
-      const { user, token: newToken } = response.data;
+  const loginWithGoogle = useCallback(() => {
+    window.location.href = `${apiBaseUrl}/auth/google`;
+  }, []);
 
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      setUser(user);
-
-      return { success: true, user };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Registration failed',
-        field: error.response?.data?.field
-      };
-    }
-  };
-
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
     navigate('/login');
-  };
+  }, [navigate]);
 
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
@@ -123,7 +114,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, [navigate]);
 
-  const updateProfile = async (profileData) => {
+  const updateProfile = useCallback(async (profileData) => {
     try {
       const response = await axios.put('/auth/profile', profileData);
       setUser(response.data.user);
@@ -134,9 +125,9 @@ export const AuthProvider = ({ children }) => {
         message: error.response?.data?.message || 'Profile update failed'
       };
     }
-  };
+  }, []);
 
-  const addPurchasedBook = (bookId) => {
+  const addPurchasedBook = useCallback((bookId) => {
     if (!bookId) return;
 
     setUser((prevUser) => {
@@ -151,14 +142,14 @@ export const AuthProvider = ({ children }) => {
         purchasedBooks: [...purchasedBooks, bookId]
       };
     });
-  };
+  }, []);
 
   const value = {
     user,
     token,
     loading,
-    login,
-    register,
+    loginWithGoogle,
+    completeGoogleAuth,
     logout,
     updateProfile,
     refreshProfile,
