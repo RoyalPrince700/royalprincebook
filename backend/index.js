@@ -11,9 +11,56 @@ dotenv.config();
 const app = express();
 configurePassport();
 
+const buildAllowedOrigins = () => {
+  const configuredOrigins = [
+    process.env.FRONTEND_URL,
+    process.env.CORS_ORIGINS
+  ]
+    .filter(Boolean)
+    .flatMap((value) => value.split(','))
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  const defaultOrigins = [
+    'http://localhost:5173',
+    'https://royalprincehub.com',
+    'https://www.royalprincehub.com'
+  ];
+
+  const originVariants = new Set([...defaultOrigins, ...configuredOrigins]);
+
+  for (const origin of [...originVariants]) {
+    try {
+      const url = new URL(origin);
+      const host = url.hostname;
+
+      if (host.startsWith('www.')) {
+        url.hostname = host.replace(/^www\./, '');
+      } else if (host.includes('.')) {
+        url.hostname = `www.${host}`;
+      }
+
+      originVariants.add(url.origin);
+    } catch (_error) {
+      // Ignore invalid origin strings from env so one bad value does not break boot.
+    }
+  }
+
+  return [...originVariants];
+};
+
+const allowedOrigins = buildAllowedOrigins();
+
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true
 }));
 app.use(express.json());

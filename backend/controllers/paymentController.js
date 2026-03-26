@@ -1,6 +1,7 @@
 const axios = require('axios');
 const Book = require('../models/Book');
 const User = require('../models/User');
+const { sendBookPurchaseEmail } = require('../mailtrap/emails');
 
 // Verify payment
 const verifyPayment = async (req, res) => {
@@ -58,6 +59,14 @@ const verifyPayment = async (req, res) => {
     if (!alreadyPurchased) {
       user.purchasedBooks.push(bookId);
       await user.save();
+
+      sendBookPurchaseEmail({
+        user,
+        book,
+        paymentData: data
+      }).catch((error) => {
+        console.error('Book purchase email error:', error.message);
+      });
     }
 
     res.json({

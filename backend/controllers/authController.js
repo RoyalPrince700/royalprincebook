@@ -10,7 +10,7 @@ const getFrontendUrl = () => {
 
   return (
     process.env.FRONTEND_URL ||
-    (isProdLike ? 'https://www.jubiac.com' : 'http://localhost:5173')
+    (isProdLike ? 'https://www.royalprincehub.com' : 'http://localhost:5173')
   );
 };
 

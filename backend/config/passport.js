@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const User = require('../models/User');
+const { sendWelcomeEmail } = require('../mailtrap/emails');
 
 const generateToken = (userId) =>
   jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -60,6 +61,7 @@ const configurePassport = () => {
       async (_accessToken, _refreshToken, profile, done) => {
         try {
           const email = profile.emails?.[0]?.value?.toLowerCase();
+          let isNewUser = false;
 
           if (!email) {
             return done(new Error('Google account email is required.'));
@@ -77,6 +79,7 @@ const configurePassport = () => {
               googleId: profile.id,
               authProvider: 'google'
             });
+            isNewUser = true;
           } else {
             let shouldSave = false;
 
@@ -98,6 +101,12 @@ const configurePassport = () => {
             if (shouldSave) {
               await user.save();
             }
+          }
+
+          if (isNewUser) {
+            sendWelcomeEmail(user).catch((error) => {
+              console.error('Welcome email error:', error.message);
+            });
           }
 
           return done(null, {

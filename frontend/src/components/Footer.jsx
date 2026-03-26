@@ -40,7 +40,7 @@ const Footer = () => {
               onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
               onMouseLeave={(e) => e.target.style.color = 'var(--text-primary)'}
               >
-                Royal Prince Book
+                RoyalPrinceHub
               </h3>
             </Link>
             <p style={{
@@ -141,7 +141,7 @@ For readers committed to growth, clarity, and meaningful progress.
           gap: '1rem'
         }}>
           <div style={{ color: 'var(--text-secondary)' }}>
-            © {currentYear} Royal Prince Book. All rights reserved.
+            © {currentYear} RoyalPrinceHub. All rights reserved.
           </div>
           <div style={{
             display: 'flex',
