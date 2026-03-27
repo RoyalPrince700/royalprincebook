@@ -3,11 +3,20 @@ import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 const CART_STORAGE_KEY = 'book-cart-items';
+const PRELAUNCH_BOOK_MATCHERS = ['leading from within', 'leadership from within'];
+const PRELAUNCH_PRICE = 1000;
+
+const getEffectivePrice = (book) => {
+  const title = (book?.title || '').toLowerCase();
+  const isPrelaunchBook = PRELAUNCH_BOOK_MATCHERS.some((matcher) => title.includes(matcher));
+  return isPrelaunchBook ? PRELAUNCH_PRICE : book?.price || 0;
+};
 
 const getStoredCart = () => {
   try {
     const storedCart = localStorage.getItem(CART_STORAGE_KEY);
-    return storedCart ? JSON.parse(storedCart) : [];
+    const parsedCart = storedCart ? JSON.parse(storedCart) : [];
+    return Array.isArray(parsedCart) ? parsedCart.map(normalizeBook) : [];
   } catch (error) {
     console.error('Failed to load cart from storage:', error);
     return [];
@@ -19,7 +28,7 @@ const normalizeBook = (book) => ({
   title: book.title,
   description: book.description,
   genre: book.genre,
-  price: book.price || 0
+  price: getEffectivePrice(book)
 });
 
 export const useCart = () => {

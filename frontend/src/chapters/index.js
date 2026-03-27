@@ -11,7 +11,7 @@ export const bookData = {
   title: "Leading from Within: Mastering Self to Impact Others",
   description: "A guide on how mastering self-leadership is the foundation for leading others and achieving success.",
   genre: "Leadership / Self-Development",
-  price: 2000,
+  price: 1000,
   status: "published",
   coverImage: "https://placehold.co/300x450/e9ecef/333333?text=Leading+from+Within",
   pages: [

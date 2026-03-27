@@ -31,6 +31,7 @@ const chapterHighlights = [
 ];
 
 const Home = () => {
+  const launchPrice = 2000;
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,11 +59,11 @@ const Home = () => {
     [books]
   );
 
-  const currentPrice = leadingFromWithinBook?.price ?? 2000;
+  const currentPrice = leadingFromWithinBook?.price ?? 1000;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200">
-      <Hero currentPrice={currentPrice} />
+      <Hero currentPrice={currentPrice} launchPrice={launchPrice} />
 
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
@@ -107,10 +108,10 @@ const Home = () => {
             </p>
           </div>
           <div className="rounded-2xl bg-white/10 p-6 backdrop-blur">
-            <p className="text-sm font-medium text-blue-100">Special launch price</p>
+            <p className="text-sm font-medium text-blue-100">Special prelaunch price</p>
             <p className="mt-1 text-4xl font-bold">NGN {currentPrice.toLocaleString()}</p>
             <p className="mt-2 text-sm text-blue-100">
-              Perfect for students, young professionals, and anyone ready to lead with intention.
+              Buy now for NGN {currentPrice.toLocaleString()}. After launch, the price goes up to NGN {launchPrice.toLocaleString()}.
             </p>
             <Link
               to="/all-books"

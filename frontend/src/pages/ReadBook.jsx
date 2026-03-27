@@ -193,6 +193,9 @@ const ReadBook = () => {
           <div style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
             Price: ₦{book.price.toLocaleString()}
           </div>
+          <p style={{ marginTop: '-1rem', marginBottom: '2rem', color: '#666' }}>
+            Prelaunch offer: buy now for ₦{book.price.toLocaleString()}. After launch, the price goes back to ₦2,000.
+          </p>
           <button 
             className="btn-primary" 
             onClick={handlePayment}

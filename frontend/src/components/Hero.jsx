@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import leadingFromWithinImage from '../assets/leadershipfromwithin.jpg';
 
-const Hero = ({ currentPrice }) => {
+const Hero = ({ currentPrice, launchPrice }) => {
   const [showDesktopAboutBook, setShowDesktopAboutBook] = useState(false);
   const [showMobileAboutBook, setShowMobileAboutBook] = useState(false);
 
   return (
-    <section className="relative overflow-hidden px-4 pb-20 pt-28 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden px-4 pb-20 pt-16 md:pt-28 sm:px-6 lg:px-8">
       <div className="absolute inset-x-0 -top-24 h-72 bg-linear-to-b from-blue-100/80 via-indigo-100/40 to-transparent blur-3xl" />
       <div className="relative mx-auto hidden max-w-7xl items-center gap-12 lg:grid lg:grid-cols-2">
         <div>
@@ -28,9 +28,10 @@ const Hero = ({ currentPrice }) => {
               <p className="text-sm text-slate-500">Price</p>
               <p className="text-4xl font-bold text-slate-900">NGN {currentPrice.toLocaleString()}</p>
             </div>
-            <p className="max-w-xs text-sm text-slate-500">
-              One-time purchase. Read instantly after payment.
-            </p>
+            <div className="max-w-xs text-sm text-slate-500">
+              <p>Prelaunch price is live now.</p>
+              <p>Launch price returns to NGN {launchPrice.toLocaleString()}.</p>
+            </div>
           </div>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -106,11 +107,11 @@ const Hero = ({ currentPrice }) => {
           <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-slate-900">
             Lead your life from the inside out.
           </h1>
-           <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-600">
+           {/* <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-600">
             <strong>Leadership From Within</strong> is a practical leadership book built
             from real student leadership experience. It helps readers develop mindset,
             discipline, purpose, and the courage to create measurable impact.
-          </p> 
+          </p>  */}
         </div>
 
         <div className="relative mx-auto mt-10 max-w-sm">
@@ -124,13 +125,32 @@ const Hero = ({ currentPrice }) => {
           </div>
         </div>
 
+        <div className="mx-auto mt-5 max-w-sm">
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setShowMobileAboutBook((prev) => !prev)}
+              className="inline-flex w-full items-center justify-center rounded-full border border-blue-200 bg-white px-4 py-3 text-xs font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-50"
+            >
+              {showMobileAboutBook ? 'Hide About Book' : 'About Book'}
+            </button>
+            <Link
+              to="/about-author"
+              className="inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-4 py-3 text-xs font-semibold text-white! transition hover:bg-slate-700 hover:text-white!"
+            >
+              About Author
+            </Link>
+          </div>
+        </div>
+
         <div className="mx-auto mt-8 max-w-md">
           <div className="text-center">
             <p className="text-sm text-slate-500">Price</p>
             <p className="text-4xl font-bold text-slate-900">NGN {currentPrice.toLocaleString()}</p>
-            <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500">
-              One-time purchase. Read instantly after payment.
-            </p>
+            <div className="mx-auto mt-2 max-w-xs text-sm text-slate-500">
+              <p>Buy now during prelaunch for NGN {currentPrice.toLocaleString()}.</p>
+              <p>After launch, price goes to NGN {launchPrice.toLocaleString()}.</p>
+            </div>
           </div>
 
           <div className="mt-8 flex flex-col gap-3">
@@ -140,28 +160,12 @@ const Hero = ({ currentPrice }) => {
             >
               Buy Now
             </Link>
-            <Link
+            {/* <Link
               to="/login"
               className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-7 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100"
             >
               Continue with Google
-            </Link>
-          </div>
-
-          <div className="mt-5 grid gap-3">
-            <button
-              type="button"
-              onClick={() => setShowMobileAboutBook((prev) => !prev)}
-              className="inline-flex w-full items-center justify-center rounded-full border border-blue-200 bg-white px-6 py-3 text-sm font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-50"
-            >
-              {showMobileAboutBook ? 'Hide About the Book' : 'About the Book'}
-            </button>
-            <Link
-              to="/about-author"
-              className="inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white! transition hover:bg-slate-700 hover:text-white!"
-            >
-              About Author
-            </Link>
+            </Link> */}
           </div>
 
           {showMobileAboutBook && (

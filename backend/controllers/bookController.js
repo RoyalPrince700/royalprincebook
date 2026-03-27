@@ -1,5 +1,6 @@
 const Book = require('../models/Book');
 const User = require('../models/User');
+const { applyEffectivePrice } = require('../bookPricing');
 
 // Get all books for the authenticated user
 const getBooks = async (req, res) => {
@@ -22,7 +23,7 @@ const getBooks = async (req, res) => {
       .populate('author', 'username email')
       .sort({ updatedAt: -1 });
 
-    res.json({ books });
+    res.json({ books: books.map(applyEffectivePrice) });
   } catch (error) {
     console.error('Get books error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -42,7 +43,7 @@ const getPurchasedBooks = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({ books: user.purchasedBooks || [] });
+    res.json({ books: (user.purchasedBooks || []).map(applyEffectivePrice) });
   } catch (error) {
     console.error('Get purchased books error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -66,7 +67,7 @@ const getBook = async (req, res) => {
     // Allow any authenticated user to view the book details
     // Permissions for editing/deleting are handled in their respective controllers
 
-    res.json({ book });
+    res.json({ book: applyEffectivePrice(book) });
   } catch (error) {
     console.error('Get book error:', error);
     res.status(500).json({ message: 'Server error' });

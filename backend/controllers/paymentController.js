@@ -2,6 +2,7 @@ const axios = require('axios');
 const Book = require('../models/Book');
 const User = require('../models/User');
 const { sendBookPurchaseEmail } = require('../mailtrap/emails');
+const { getEffectiveBookPrice } = require('../bookPricing');
 
 // Verify payment
 const verifyPayment = async (req, res) => {
@@ -36,8 +37,11 @@ const verifyPayment = async (req, res) => {
     }
 
     // Verify amount and currency
-    if (book.price > 0) {
-      if (typeof data?.amount !== 'number' || data.amount < book.price) {
+    const requiredAmount = getEffectiveBookPrice(book);
+    book.price = requiredAmount;
+
+    if (requiredAmount > 0) {
+      if (typeof data?.amount !== 'number' || data.amount < requiredAmount) {
         return res.status(400).json({ message: 'Invalid payment amount' });
       }
 
