@@ -6,11 +6,14 @@ import { useAuth } from '../../contexts/AuthContext';
 const BookCard = ({
   book,
   isOwned = false,
+  isInCart = false,
   showDescription = true,
   showActions = true,
   showAdminActions = false,
   onRead,
   onBuy,
+  onAddToCart,
+  onRemoveFromCart,
   onEdit,
   onDelete,
   buying = false,
@@ -47,6 +50,16 @@ const BookCard = ({
   const handleDelete = (e) => {
     e.stopPropagation();
     if (onDelete) onDelete(book._id);
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    if (onAddToCart) onAddToCart(book);
+  };
+
+  const handleRemoveFromCart = (e) => {
+    e.stopPropagation();
+    if (onRemoveFromCart) onRemoveFromCart(book._id);
   };
 
   const handleEdit = (e) => {
@@ -185,7 +198,7 @@ const BookCard = ({
             }}
             onClick={(e) => e.stopPropagation()} // Prevent card click when clicking actions
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                 <button
                   onClick={canRead ? handleRead : handleBuy}
                   disabled={buying}
@@ -205,6 +218,46 @@ const BookCard = ({
                 }}>
                   {book.price && book.price > 0 ? `₦${book.price.toLocaleString()}` : 'Free'}
                 </span>
+
+                {!canRead && onAddToCart && !isInCart && (
+                  <button
+                    onClick={handleAddToCart}
+                    className="btn-secondary"
+                    style={{
+                      padding: '0.45rem 0.8rem',
+                      fontSize: '0.85rem',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Add to Cart
+                  </button>
+                )}
+
+                {!canRead && isInCart && !onRemoveFromCart && (
+                  <span
+                    style={{
+                      color: 'var(--text-secondary)',
+                      fontSize: '0.85rem',
+                      fontWeight: 600
+                    }}
+                  >
+                    In Cart
+                  </span>
+                )}
+
+                {onRemoveFromCart && (
+                  <button
+                    onClick={handleRemoveFromCart}
+                    className="btn-secondary"
+                    style={{
+                      padding: '0.45rem 0.8rem',
+                      fontSize: '0.85rem',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
               
               {showAdminActions && user?.role === 'admin' && (

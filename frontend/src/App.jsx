@@ -19,6 +19,8 @@ import UserManagement from './components/Admin/UserManagement';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
+import Cart from './pages/Cart';
+import { CartProvider } from './contexts/CartContext';
 import './App.css';
 
 const Layout = ({ children }) => {
@@ -40,53 +42,56 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <ThemeProvider>
-          <ScrollToTop />
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about-author" element={<AboutAuthor />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-of-service" element={<TermsOfService />} />
-              <Route path="/all-books" element={<BookList />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/admin/users"
-                element={
-                  <AdminRoute>
-                    <UserManagement />
-                  </AdminRoute>
-                }
-              />
-              <Route
-                path="/books/:bookId"
-                element={
-                  <PrivateRoute>
-                    <BookEditor />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/books/:bookId/read"
-                element={
-                  <PrivateRoute>
-                    <ReadBook />
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
-          </Layout>
-        </ThemeProvider>
+        <CartProvider>
+          <ThemeProvider>
+            <ScrollToTop />
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/about-author" element={<AboutAuthor />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/all-books" element={<BookList />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <PrivateRoute>
+                      <Dashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <AdminRoute>
+                      <UserManagement />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/books/:bookId"
+                  element={
+                    <PrivateRoute>
+                      <BookEditor />
+                    </PrivateRoute>
+                  }
+                />
+                <Route
+                  path="/books/:bookId/read"
+                  element={
+                    <PrivateRoute>
+                      <ReadBook />
+                    </PrivateRoute>
+                  }
+                />
+              </Routes>
+            </Layout>
+          </ThemeProvider>
+        </CartProvider>
       </AuthProvider>
     </Router>
   );

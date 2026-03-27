@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 // import ThemeToggle from './ThemeToggle';
 import '../App.css'; 
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { itemCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
@@ -76,6 +78,7 @@ const Navbar = () => {
     : scrolled || !isHome
       ? 'bg-white/80 backdrop-blur-md border-b border-gray-200/50 supports-[backdrop-filter]:bg-white/60'
       : 'bg-transparent';
+  const cartLabel = itemCount > 0 ? `Cart (${itemCount})` : 'Cart';
 
   return (
     <header 
@@ -96,6 +99,9 @@ const Navbar = () => {
           <nav className="hidden md:flex items-center space-x-8 ">
             <Link to="/all-books" className="text-xs text-gray-700 hover:text-black transition-colors">
               Books
+            </Link>
+            <Link to="/cart" className="text-xs text-gray-700 hover:text-black transition-colors">
+              {cartLabel}
             </Link>
             <Link to="/about-author" className="text-xs text-gray-700 hover:text-black transition-colors">
               About Author
@@ -118,15 +124,13 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Link to="/login" className="text-xs text-gray-700 hover:text-black transition-colors">
-                  Sign in
-                </Link>
+              
                 <Link
                   to="/login"
                   className="px-7 py-3 text-xs text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
                   style={{ color: 'white' }}
                 >
-                  Continue with Google
+                  Sign in
                 </Link>
               </>
             )}
@@ -195,6 +199,13 @@ const Navbar = () => {
               onClick={closeMenu}
             >
               About Author
+            </Link>
+            <Link
+              to="/cart"
+              className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+              onClick={closeMenu}
+            >
+              {cartLabel}
             </Link>
 
             {user ? (

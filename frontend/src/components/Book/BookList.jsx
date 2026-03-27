@@ -3,45 +3,30 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import BookCard from './BookCard';
-import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
+import { useCart } from '../../contexts/CartContext';
+import useBookPurchase from '../../hooks/useBookPurchase';
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [buyingBookId, setBuyingBookId] = useState(null);
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [flwPublicKey, setFlwPublicKey] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newBook, setNewBook] = useState({
     title: '',
     description: '',
     genre: ''
   });
-  const { user, refreshProfile, addPurchasedBook } = useAuth();
+  const { user } = useAuth();
+  const { addToCart, isInCart, itemCount, removeFromCart } = useCart();
   const navigate = useNavigate();
-
-  const paymentConfig = {
-    public_key: flwPublicKey || 'FLW_PUBLIC_KEY',
-    tx_ref: `${Date.now()}-${selectedBook?._id || 'book'}`,
-    amount: selectedBook?.price || 0,
-    currency: 'NGN',
-    payment_options: 'card,mobilemoney,ussd',
-    customer: {
-      email: user?.email || '',
-      name: user?.username || '',
-    },
-    customizations: {
-      title: selectedBook ? `Purchase ${selectedBook.title}` : 'Purchase Book',
-      description: 'Payment for book access'
+  const { checkoutBook, buyingBookId } = useBookPurchase({
+    onPurchaseSuccess: async (book) => {
+      removeFromCart(book._id);
     }
-  };
-
-  const triggerFlutterwavePayment = useFlutterwave(paymentConfig);
+  });
 
   useEffect(() => {
     fetchBooks();
-    fetchPublicKey();
   }, []);
 
   const fetchBooks = async () => {
@@ -56,15 +41,6 @@ const BookList = () => {
       setError('Failed to load books');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchPublicKey = async () => {
-    try {
-      const response = await axios.get('/config/flutterwave-public-key');
-      setFlwPublicKey(response.data.publicKey || '');
-    } catch (fetchError) {
-      console.error('Failed to fetch Flutterwave public key:', fetchError);
     }
   };
 
@@ -96,61 +72,12 @@ const BookList = () => {
   };
 
   const handleBuyBook = (book) => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    if (!flwPublicKey) {
-      alert('Payment is not ready yet. Please try again in a moment.');
-      return;
-    }
-    if (!book?.price || book.price <= 0) {
-      alert('This book is free and does not require payment.');
-      return;
-    }
-
-    setSelectedBook(book);
-    setBuyingBookId(book._id);
+    checkoutBook(book);
   };
 
-  useEffect(() => {
-    if (!selectedBook || !buyingBookId) return;
-    const currentBook = selectedBook;
-
-    triggerFlutterwavePayment({
-      callback: async (response) => {
-        closePaymentModal();
-
-        if (response.status !== 'successful') {
-          setBuyingBookId(null);
-          setSelectedBook(null);
-          alert('Payment was not successful.');
-          return;
-        }
-
-        try {
-          await axios.post('/payment/verify', {
-            transaction_id: response.transaction_id,
-            bookId: currentBook._id
-          });
-
-          addPurchasedBook(currentBook._id);
-          await refreshProfile();
-          alert('Payment successful. You can now read this book.');
-        } catch (verifyError) {
-          console.error('Payment verification failed:', verifyError);
-          alert('Payment verification failed. Please contact support.');
-        } finally {
-          setBuyingBookId(null);
-          setSelectedBook(null);
-        }
-      },
-      onClose: () => {
-        setBuyingBookId(null);
-        setSelectedBook(null);
-      }
-    });
-  }, [selectedBook, buyingBookId, triggerFlutterwavePayment, refreshProfile, addPurchasedBook]);
+  const handleAddBookToCart = (book) => {
+    addToCart(book);
+  };
 
   const handleReadBook = (book) => {
     navigate(`/books/${book._id}/read`);
@@ -200,6 +127,11 @@ const BookList = () => {
           <h1 style={{ margin: 0, color: 'var(--text-primary)' }}>All Books</h1>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <Link to="/cart" style={{ textDecoration: 'none' }}>
+            <button className="btn-secondary">
+              View My Cart{itemCount > 0 ? ` (${itemCount})` : ''}
+            </button>
+          </Link>
           {user?.role === 'admin' && (
             <>
               <Link to="/admin/users" style={{ textDecoration: 'none' }}>
@@ -310,8 +242,10 @@ const BookList = () => {
                   key={book._id}
                   book={book}
                   isOwned={getIsOwned(book)}
+                  isInCart={isInCart(book._id)}
                   onRead={handleReadBook}
                   onBuy={handleBuyBook}
+                  onAddToCart={handleAddBookToCart}
                   onDelete={handleDeleteBook}
                   showActions={true}
                   showAdminActions={user?.role === 'admin'}
