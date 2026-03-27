@@ -72,244 +72,136 @@ const BookCard = ({
   };
 
   return (
-    <div 
-      className={`book-card ${className || ''}`}
-      style={{
-        border: '1px solid var(--border-color)',
-        borderRadius: '12px',
-        backgroundColor: 'var(--card-bg)',
-        overflow: 'hidden',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        minHeight: '450px',
-        cursor: 'pointer',
-        position: 'relative',
-        ...style
-      }}
+    <article
+      className={`group relative flex h-full min-h-[480px] cursor-pointer flex-col overflow-hidden rounded-4xl border border-white/70 bg-white/75 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)] ${className || ''}`}
+      style={style}
       onClick={handleRead}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-5px)';
-        e.currentTarget.style.boxShadow = '0 10px 15px rgba(0,0,0,0.1)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
-      }}
     >
-      <div style={{
-        width: '100%',
-        height: '300px',
-        backgroundColor: 'var(--input-bg)',
-        backgroundImage: `url(${getBookCover(book.title)})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        borderBottom: '1px solid var(--border-color)',
-        position: 'relative',
-        backgroundRepeat: 'no-repeat'
-      }}>
-        <div className="book-hover-overlay" style={{
-             position: 'absolute',
-             top: 0,
-             left: 0,
-             width: '100%',
-             height: '100%',
-             backgroundColor: 'rgba(0,0,0,0.5)',
-             display: 'flex',
-             alignItems: 'center',
-             justifyContent: 'center',
-             opacity: 0,
-             transition: 'opacity 0.2s'
+      <div
+        className="relative h-[320px] overflow-hidden rounded-t-4xl bg-slate-100"
+        style={{
+          backgroundImage: `url(${getBookCover(book.title)})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
-        onMouseLeave={(e) => e.currentTarget.style.opacity = 0}
-        >
-             <span style={{
-                 color: 'white',
-                 fontWeight: 'bold',
-                 fontSize: '1.2rem',
-                 padding: '0.5rem 1rem',
-                 border: '2px solid white',
-                 borderRadius: '4px'
-             }}>
-                 {canRead ? 'Read Now' : 'View Book'}
-             </span>
+      >
+        <div className="absolute inset-0 bg-linear-to-t from-slate-950/78 via-slate-950/18 to-transparent" />
+        <div className="absolute left-4 top-4 rounded-full border border-white/25 bg-white/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white backdrop-blur">
+          {book.genre || 'General'}
+        </div>
+        <div className="absolute inset-x-0 bottom-0 p-5">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
+                {book.price && book.price > 0 ? 'Available now' : 'Included'}
+              </p>
+              <p className="mt-1 text-2xl font-semibold tracking-tight text-white">
+                {book.price && book.price > 0 ? `NGN ${book.price.toLocaleString()}` : 'Free'}
+              </p>
+            </div>
+            <span className="hidden rounded-full border border-white/30 px-4 py-2 text-sm font-medium text-white backdrop-blur md:inline-flex">
+              {canRead ? 'Read Now' : 'View Book'}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h4 style={{ 
-          margin: '0 0 0.5rem 0', 
-          color: 'var(--text-primary)',
-          fontSize: '1.1rem',
-          lineHeight: '1.4',
-          height: '2.8em', // Limit to 2 lines approximately
-          overflow: 'hidden',
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical'
-        }}>
+      <div className="flex flex-1 flex-col p-6">
+        <h4
+          className="text-xl font-semibold tracking-tight text-slate-950"
+          style={{
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical'
+          }}
+        >
           {book.title}
         </h4>
-        
-        <div style={{ 
-          fontSize: '0.85rem', 
-          color: 'var(--text-secondary)', 
-          marginBottom: '1rem',
-          display: 'flex',
-          gap: '0.5rem',
-          flexWrap: 'wrap'
-        }}>
-          <span style={{ 
-            backgroundColor: 'var(--bg-color)', 
-            padding: '0.2rem 0.5rem', 
-            borderRadius: '4px',
-            color: 'var(--text-secondary)'
-          }}>
-            {book.genre || 'General'}
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+            Premium reading
           </span>
+          {isOwned && (
+            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+              Owned
+            </span>
+          )}
+          {isInCart && !canRead && (
+            <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+              In cart
+            </span>
+          )}
         </div>
 
         {showDescription && (
-          <p style={{ 
-            margin: '0 0 1rem 0', 
-            color: 'var(--text-secondary)', 
-            fontSize: '0.9rem',
-            flex: 1,
-            overflow: 'hidden',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical'
-          }}>
+          <p
+            className="mt-4 flex-1 text-sm leading-relaxed text-slate-600"
+            style={{
+              overflow: 'hidden',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical'
+            }}
+          >
             {book.description || 'No description available.'}
           </p>
         )}
 
         {showActions && (
-            <div style={{ 
-              marginTop: 'auto',
-              paddingTop: '1rem',
-              borderTop: '1px solid var(--border-color)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
-            }}
-            onClick={(e) => e.stopPropagation()} // Prevent card click when clicking actions
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="mt-6 border-t border-slate-200 pt-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={canRead ? handleRead : handleBuy}
+                disabled={buying}
+                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {canRead ? 'Read' : buying ? 'Processing...' : 'Buy Now'}
+              </button>
+
+              {!canRead && onAddToCart && !isInCart && (
                 <button
-                  onClick={canRead ? handleRead : handleBuy}
-                  disabled={buying}
-                  className="btn-primary"
-                  style={{
-                    padding: '0.45rem 0.8rem',
-                    fontSize: '0.85rem',
-                    whiteSpace: 'nowrap'
-                  }}
+                  onClick={handleAddToCart}
+                  className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
                 >
-                  {canRead ? 'Read' : buying ? 'Processing...' : 'Buy Now'}
+                  Add to Cart
                 </button>
-                <span style={{ 
-                  color: '#2563eb', 
-                  fontWeight: 'bold', 
-                  fontSize: '0.95rem'
-                }}>
-                  {book.price && book.price > 0 ? `₦${book.price.toLocaleString()}` : 'Free'}
-                </span>
+              )}
 
-                {!canRead && onAddToCart && !isInCart && (
-                  <button
-                    onClick={handleAddToCart}
-                    className="btn-secondary"
-                    style={{
-                      padding: '0.45rem 0.8rem',
-                      fontSize: '0.85rem',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    Add to Cart
-                  </button>
-                )}
-
-                {!canRead && isInCart && !onRemoveFromCart && (
-                  <span
-                    style={{
-                      color: 'var(--text-secondary)',
-                      fontSize: '0.85rem',
-                      fontWeight: 600
-                    }}
-                  >
-                    In Cart
-                  </span>
-                )}
-
-                {onRemoveFromCart && (
-                  <button
-                    onClick={handleRemoveFromCart}
-                    className="btn-secondary"
-                    style={{
-                      padding: '0.45rem 0.8rem',
-                      fontSize: '0.85rem',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-              
-              {showAdminActions && user?.role === 'admin' && (
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button
-                    onClick={handleEdit}
-                    title="Edit Book"
-                    style={{ 
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: '#3b82f6',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      transition: 'background 0.2s',
-                      fontSize: '0.9rem'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eff6ff'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={handleDelete}
-                    title="Delete Book"
-                    style={{ 
-                      background: 'none', 
-                      border: 'none', 
-                      cursor: 'pointer',
-                      color: '#ef4444',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'background 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    Delete
-                  </button>
-                </div>
+              {onRemoveFromCart && (
+                <button
+                  onClick={handleRemoveFromCart}
+                  className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                >
+                  Remove
+                </button>
               )}
             </div>
+
+            {showAdminActions && user?.role === 'admin' && (
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={handleEdit}
+                  title="Edit Book"
+                  className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={handleDelete}
+                  title="Delete Book"
+                  className="inline-flex items-center justify-center rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
-    </div>
+    </article>
   );
 };
 

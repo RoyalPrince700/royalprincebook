@@ -3,189 +3,136 @@ import { Link } from 'react-router-dom';
 import leadingFromWithinImage from '../assets/leadershipfromwithin.jpg';
 
 const Hero = ({ currentPrice, launchPrice }) => {
-  const [showDesktopAboutBook, setShowDesktopAboutBook] = useState(false);
-  const [showMobileAboutBook, setShowMobileAboutBook] = useState(false);
+  const [showAboutBook, setShowAboutBook] = useState(false);
 
   return (
-    <section className="relative overflow-hidden px-4 pb-20 pt-16 md:pt-28 sm:px-6 lg:px-8">
-      <div className="absolute inset-x-0 -top-24 h-72 bg-linear-to-b from-blue-100/80 via-indigo-100/40 to-transparent blur-3xl" />
-      <div className="relative mx-auto hidden max-w-7xl items-center gap-12 lg:grid lg:grid-cols-2">
-        <div>
-          <span className="inline-flex items-center rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
-            New Release • First Book
-          </span>
-          <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-slate-900 md:text-6xl">
-            Lead your life from the inside out.
-          </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
-            <strong>Leadership From Within</strong> is a practical leadership book built
-            from real student leadership experience. It helps readers develop mindset,
-            discipline, purpose, and the courage to create measurable impact.
-          </p>
+    <section className="relative overflow-hidden bg-slate-50 px-4 pb-20 pt-20 sm:px-6 md:pt-28 lg:px-8">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(241,245,249,0.92)_45%,rgba(226,232,240,0.7)_100%)]" />
+      <div className="absolute inset-x-0 top-0 h-80 bg-linear-to-b from-white via-white/80 to-transparent" />
+      <div className="absolute left-1/2 top-40 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-200/30 blur-3xl" />
 
-          <div className="mt-8 flex flex-wrap items-end gap-6">
-            <div>
-              <p className="text-sm text-slate-500">Price</p>
-              <p className="text-4xl font-bold text-slate-900">NGN {currentPrice.toLocaleString()}</p>
-            </div>
-            <div className="max-w-xs text-sm text-slate-500">
-              <p>Prelaunch price is live now.</p>
-              <p>Launch price returns to NGN {launchPrice.toLocaleString()}.</p>
+      <div className="relative mx-auto max-w-6xl text-center">
+        <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600 shadow-sm backdrop-blur">
+          First Book Release
+        </span>
+
+        <h1 className="mx-auto mt-5 max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:mt-6 sm:text-6xl lg:text-7xl">
+          Leadership that starts within.
+        </h1>
+
+        <p className="mx-auto mt-5 hidden max-w-2xl text-base leading-relaxed text-slate-600 sm:block sm:text-lg">
+          <strong>Leadership From Within</strong> is a modern, practical guide to mindset,
+          discipline, purpose, and becoming the kind of leader people can trust.
+        </p>
+
+        <div className="mt-8 hidden flex-col items-center justify-center gap-3 sm:flex sm:flex-row">
+          <Link
+            to="/all-books"
+            className="inline-flex min-w-40 items-center justify-center rounded-full bg-slate-950 px-8 py-3 text-sm font-medium text-white! transition hover:bg-slate-800 hover:text-white!"
+          >
+            Order Now
+          </Link>
+          <button
+            type="button"
+            onClick={() => setShowAboutBook((prev) => !prev)}
+            className="inline-flex min-w-40 items-center justify-center rounded-full border border-slate-300 bg-white/80 px-8 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-white"
+          >
+            {showAboutBook ? 'Hide Details' : 'Learn More'}
+          </button>
+        </div>
+
+        <p className="mt-4 hidden text-sm text-slate-500 sm:block">
+          Available now for NGN {currentPrice.toLocaleString()}.
+          <span className="mx-2 hidden sm:inline text-slate-300">|</span>
+          <span className="block sm:inline">Launch price returns to NGN {launchPrice.toLocaleString()}.</span>
+        </p>
+
+        <div className="mt-8 sm:mt-14">
+          <div className="relative mx-auto max-w-4xl">
+            <div className="absolute inset-x-10 -bottom-6 h-24 rounded-full bg-slate-900/15 blur-3xl" />
+            <div className="mx-auto max-w-sm rounded-4xl border border-white/70 bg-white/70 p-3 shadow-[0_25px_90px_rgba(15,23,42,0.16)] backdrop-blur-xl sm:max-w-md lg:max-w-lg">
+              <div className="relative overflow-hidden rounded-3xl">
+                <img
+                  src={leadingFromWithinImage}
+                  alt="Leadership From Within Book Cover"
+                  className="h-[420px] w-full object-cover sm:h-[500px] lg:h-[580px]"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-slate-950/85 via-slate-950/45 to-transparent p-4 pt-20 sm:hidden">
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link
+                      to="/all-books"
+                      className="inline-flex items-center justify-center rounded-full bg-white px-4 py-3 text-sm font-medium text-slate-950 transition hover:bg-slate-100"
+                    >
+                      Order Now
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setShowAboutBook((prev) => !prev)}
+                      className="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15"
+                    >
+                      {showAboutBook ? 'Hide Details' : 'Learn More'}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/all-books"
-              className="inline-flex items-center justify-center rounded-full bg-blue-600 px-7 py-3 text-sm font-semibold text-white! transition hover:bg-blue-700 hover:text-white!"
-            >
-              Buy Now
-            </Link>
-            {/* <Link
-              to="/login"
-              className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-7 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100"
-            >
-              Continue with Google
-            </Link> */}
+          <div className="mx-auto mt-8 grid max-w-4xl gap-4 text-left md:grid-cols-3">
+            <div className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Price</p>
+              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+                NGN {currentPrice.toLocaleString()}
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Built For</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                Students, young professionals, and emerging leaders who want practical direction.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Focus</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                Mindset, self-leadership, discipline, and lasting impact in everyday life.
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute inset-0 -z-10 rounded-4xl bg-linear-to-br from-blue-100 via-indigo-100 to-white blur-2xl" />
-          <div className="mx-auto max-w-md rounded-4xl border border-white/70 bg-white/80 p-4 shadow-2xl backdrop-blur">
-            <img
-              src={leadingFromWithinImage}
-              alt="Leading From Within Book Cover"
-              className="h-[520px] w-full rounded-2xl object-cover"
-            />
-          </div>
-          <div className="mx-auto mt-5 max-w-md">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => setShowDesktopAboutBook((prev) => !prev)}
-                className="inline-flex w-full items-center justify-center rounded-full border border-blue-200 bg-white px-6 py-3 text-sm font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-50"
-              >
-                {showDesktopAboutBook ? 'Hide About the Book' : 'About the Book'}
-              </button>
+        {showAboutBook && (
+          <div className="mx-auto mt-8 max-w-3xl rounded-4xl border border-white/70 bg-white/80 p-6 text-left shadow-xl backdrop-blur">
+            <h3 className="text-xl font-semibold tracking-tight text-slate-950">
+              About <em>Leadership From Within</em>
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+              This book follows a personal and practical leadership journey, moving from
+              mindset shift to self-leadership, discipline, purpose, and measurable action.
+              It is designed to help readers grow internally first, then lead with clarity
+              in visible ways.
+            </p>
+            <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
+              Each chapter turns lived experience into useful lessons for real life, so the
+              result feels less like theory and more like a clear path forward.
+            </p>
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <Link
                 to="/about-author"
-                className="inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white! transition hover:bg-slate-700 hover:text-white!"
+                className="inline-flex items-center justify-center rounded-full border border-slate-300 px-6 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
               >
                 About Author
               </Link>
-            </div>
-
-            {showDesktopAboutBook && (
-              <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm">
-                <h3 className="text-lg font-semibold text-slate-900">About Leading From Within</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                  <em>Leading From Within</em> is a deeply personal and practical leadership journey. In Chapters 1
-                  to 6, the author moves from humble beginnings and a mindset shift, to self-leadership, discipline,
-                  and purpose-driven action. The book shows how growth starts internally before it becomes visible
-                  externally.
-                </p>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  Readers will discover how consistency builds confidence, how purpose gives direction under pressure,
-                  and how service transforms influence into lasting impact. This is more than inspiration: each chapter
-                  includes practical lessons that help students, young professionals, and aspiring leaders take bold,
-                  measurable steps in real life.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile */}
-
-      <div className="relative mx-auto max-w-7xl lg:hidden">
-        <div className="text-center">
-          <span className="inline-flex items-center rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
-            New Release • First Book
-          </span>
-          <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-slate-900">
-            Lead your life from the inside out.
-          </h1>
-           {/* <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-600">
-            <strong>Leadership From Within</strong> is a practical leadership book built
-            from real student leadership experience. It helps readers develop mindset,
-            discipline, purpose, and the courage to create measurable impact.
-          </p>  */}
-        </div>
-
-        <div className="relative mx-auto mt-10 max-w-sm">
-          <div className="absolute inset-0 -z-10 rounded-4xl bg-linear-to-br from-blue-100 via-indigo-100 to-white blur-2xl" />
-          <div className="rounded-4xl border border-white/70 bg-white/80 p-4 shadow-2xl backdrop-blur">
-            <img
-              src={leadingFromWithinImage}
-              alt="Leading From Within Book Cover"
-              className="h-[460px] w-full rounded-2xl object-cover"
-            />
-          </div>
-        </div>
-
-        <div className="mx-auto mt-5 max-w-sm">
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setShowMobileAboutBook((prev) => !prev)}
-              className="inline-flex w-full items-center justify-center rounded-full border border-blue-200 bg-white px-4 py-3 text-xs font-semibold text-blue-700 transition hover:border-blue-300 hover:bg-blue-50"
-            >
-              {showMobileAboutBook ? 'Hide About Book' : 'About Book'}
-            </button>
-            <Link
-              to="/about-author"
-              className="inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-4 py-3 text-xs font-semibold text-white! transition hover:bg-slate-700 hover:text-white!"
-            >
-              About Author
-            </Link>
-          </div>
-        </div>
-
-        <div className="mx-auto mt-8 max-w-md">
-          <div className="text-center">
-            <p className="text-sm text-slate-500">Price</p>
-            <p className="text-4xl font-bold text-slate-900">NGN {currentPrice.toLocaleString()}</p>
-            <div className="mx-auto mt-2 max-w-xs text-sm text-slate-500">
-              <p>Buy now during prelaunch for NGN {currentPrice.toLocaleString()}.</p>
-              <p>After launch, price goes to NGN {launchPrice.toLocaleString()}.</p>
+              <Link
+                to="/all-books"
+                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white! transition hover:bg-slate-800 hover:text-white!"
+              >
+                Buy Your Copy
+              </Link>
             </div>
           </div>
-
-          <div className="mt-8 flex flex-col gap-3">
-            <Link
-              to="/all-books"
-              className="inline-flex items-center justify-center rounded-full bg-blue-600 px-7 py-3 text-sm font-semibold text-white! transition hover:bg-blue-700 hover:text-white!"
-            >
-              Buy Now
-            </Link>
-            {/* <Link
-              to="/login"
-              className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-7 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100"
-            >
-              Continue with Google
-            </Link> */}
-          </div>
-
-          {showMobileAboutBook && (
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm">
-              <h3 className="text-lg font-semibold text-slate-900">About Leading From Within</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                <em>Leading From Within</em> is a deeply personal and practical leadership journey. In Chapters 1
-                to 6, the author moves from humble beginnings and a mindset shift, to self-leadership, discipline,
-                and purpose-driven action. The book shows how growth starts internally before it becomes visible
-                externally.
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                Readers will discover how consistency builds confidence, how purpose gives direction under pressure,
-                and how service transforms influence into lasting impact. This is more than inspiration: each chapter
-                includes practical lessons that help students, young professionals, and aspiring leaders take bold,
-                measurable steps in real life.
-              </p>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </section>
   );

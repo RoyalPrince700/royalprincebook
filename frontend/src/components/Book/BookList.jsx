@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
@@ -16,6 +16,7 @@ const BookList = () => {
     description: '',
     genre: ''
   });
+
   const { user } = useAuth();
   const { addToCart, isInCart, itemCount, removeFromCart } = useCart();
   const navigate = useNavigate();
@@ -32,12 +33,9 @@ const BookList = () => {
   const fetchBooks = async () => {
     try {
       const response = await axios.get('/books');
-      
-      let fetchedBooks = response.data.books;
-      
-      setBooks(fetchedBooks);
-    } catch (error) {
-      console.error('Failed to fetch books:', error);
+      setBooks(response.data.books || []);
+    } catch (fetchError) {
+      console.error('Failed to fetch books:', fetchError);
       setError('Failed to load books');
     } finally {
       setLoading(false);
@@ -48,11 +46,11 @@ const BookList = () => {
     e.preventDefault();
     try {
       const response = await axios.post('/books', newBook);
-      setBooks([...books, response.data.book]);
+      setBooks((prev) => [...prev, response.data.book]);
       setNewBook({ title: '', description: '', genre: '' });
       setShowCreateForm(false);
-    } catch (error) {
-      console.error('Failed to create book:', error);
+    } catch (createError) {
+      console.error('Failed to create book:', createError);
       setError('Failed to create book');
     }
   };
@@ -64,9 +62,9 @@ const BookList = () => {
 
     try {
       await axios.delete(`/books/${bookId}`);
-      setBooks(books.filter(book => book._id !== bookId));
-    } catch (error) {
-      console.error('Failed to delete book:', error);
+      setBooks((prev) => prev.filter((book) => book._id !== bookId));
+    } catch (deleteError) {
+      console.error('Failed to delete book:', deleteError);
       setError('Failed to delete book');
     }
   };
@@ -86,159 +84,194 @@ const BookList = () => {
   const getIsOwned = (book) => {
     if (!user) return false;
     if (user.role === 'admin') return true;
+
     const purchasedBooks = Array.isArray(user.purchasedBooks) ? user.purchasedBooks : [];
     return purchasedBooks.includes(book._id) || !book.price || book.price === 0;
   };
 
   if (loading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--bg-color)',
-        color: 'var(--text-primary)'
-      }}>
-        <div className="card text-center">
-          <h3>Loading books...</h3>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <div className="rounded-4xl border border-white/70 bg-white/80 px-8 py-6 text-center shadow-xl backdrop-blur">
+          <h3 className="text-xl font-semibold tracking-tight text-slate-950">Loading books...</h3>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-color)', color: 'var(--text-primary)' }}>
-      {/* Header */}
-      <header style={{
-        backgroundColor: 'var(--card-bg)',
-        padding: '1rem 2rem',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          {user?.role === 'admin' && (
-            <Link to="/dashboard" style={{ textDecoration: 'none', color: 'var(--primary-color)' }}>
-              ← Back to Dashboard
-            </Link>
-          )}
-          <h1 style={{ margin: 0, color: 'var(--text-primary)' }}>All Books</h1>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <Link to="/cart" style={{ textDecoration: 'none' }}>
-            <button className="btn-secondary">
-              View My Cart{itemCount > 0 ? ` (${itemCount})` : ''}
-            </button>
-          </Link>
-          {user?.role === 'admin' && (
-            <>
-              <Link to="/admin/users" style={{ textDecoration: 'none' }}>
-                <button className="btn-secondary">
-                  User Management
-                </button>
-              </Link>
-              <button
-                className="btn-success"
-                onClick={() => setShowCreateForm(!showCreateForm)}
-              >
-                {showCreateForm ? 'Cancel' : 'Create New Book'}
-              </button>
-            </>
-          )}
-        </div>
-      </header>
+    <div className="min-h-screen overflow-hidden bg-slate-50 text-slate-900">
+      <section className="relative px-4 pb-12 pt-20 sm:px-6 md:pt-28 lg:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(241,245,249,0.92)_45%,rgba(226,232,240,0.7)_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-80 bg-linear-to-b from-white via-white/80 to-transparent" />
+        <div className="absolute left-1/2 top-32 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-200/25 blur-3xl" />
 
-      <div className="container">
-        {error && (
-          <div style={{
-            color: '#dc3545',
-            backgroundColor: '#f8d7da',
-            padding: '10px',
-            borderRadius: '4px',
-            marginBottom: '1rem',
-            border: '1px solid #f5c6cb'
-          }}>
-            {error}
+        <div className="relative mx-auto max-w-7xl">
+          <div className="text-center">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600 shadow-sm backdrop-blur">
+              Library
+            </span>
+            <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-6xl">
+              Explore the full collection.
+            </h1>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
+              Browse every title in a cleaner, more focused storefront designed to keep attention on the books.
+            </p>
           </div>
-        )}
 
-        {/* Create Book Form */}
-        {showCreateForm && user?.role === 'admin' && (
-          <div className="card" style={{ marginBottom: '2rem' }}>
-            <h3>Create New Book</h3>
-            <form onSubmit={handleCreateBook}>
-              <div className="mb-3">
-                <label htmlFor="title" style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-                  Title:
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={newBook.title}
-                  onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
-                  required
-                  style={{ width: '100%', backgroundColor: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '0.5rem', borderRadius: '4px' }}
-                />
-              </div>
+          <div className="mx-auto mt-10 grid max-w-5xl gap-4 md:grid-cols-3">
+            <div className="rounded-4xl border border-white/70 bg-white/75 p-6 shadow-sm backdrop-blur">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Titles</p>
+              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{books.length}</p>
+            </div>
+            <div className="rounded-4xl border border-white/70 bg-white/75 p-6 shadow-sm backdrop-blur">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Cart</p>
+              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{itemCount}</p>
+            </div>
+            <div className="rounded-4xl border border-white/70 bg-white/75 p-6 shadow-sm backdrop-blur">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Experience</p>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                Fast checkout, clean browsing, and a product-first layout.
+              </p>
+            </div>
+          </div>
 
-              <div className="mb-3">
-                <label htmlFor="description" style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-                  Description:
-                </label>
-                <textarea
-                  id="description"
-                  value={newBook.description}
-                  onChange={(e) => setNewBook({ ...newBook, description: e.target.value })}
-                  rows="3"
-                  style={{ width: '100%', backgroundColor: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '0.5rem', borderRadius: '4px' }}
-                />
-              </div>
-
-              <div className="mb-4">
-                <label htmlFor="genre" style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>
-                  Genre:
-                </label>
-                <input
-                  type="text"
-                  id="genre"
-                  value={newBook.genre}
-                  onChange={(e) => setNewBook({ ...newBook, genre: e.target.value })}
-                  placeholder="e.g., Fiction, Non-fiction, Mystery, etc."
-                  style={{ width: '100%', backgroundColor: 'var(--input-bg)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '0.5rem', borderRadius: '4px' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <button type="submit" className="btn-success">
-                  Create Book
-                </button>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              to="/cart"
+              className="inline-flex min-w-40 items-center justify-center rounded-full bg-slate-950 px-8 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              View Cart{itemCount > 0 ? ` (${itemCount})` : ''}
+            </Link>
+            {user?.role === 'admin' ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="inline-flex min-w-40 items-center justify-center rounded-full border border-slate-300 bg-white/80 px-8 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-white"
+                >
+                  Dashboard
+                </Link>
                 <button
                   type="button"
-                  className="btn-secondary"
-                  onClick={() => setShowCreateForm(false)}
+                  onClick={() => setShowCreateForm((prev) => !prev)}
+                  className="inline-flex min-w-40 items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-8 py-3 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
                 >
-                  Cancel
+                  {showCreateForm ? 'Close Form' : 'Create New Book'}
                 </button>
-              </div>
-            </form>
+                <Link
+                  to="/admin/users"
+                  className="inline-flex min-w-40 items-center justify-center rounded-full border border-slate-300 bg-white/80 px-8 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-white"
+                >
+                  User Management
+                </Link>
+              </>
+            ) : null}
           </div>
-        )}
+        </div>
+      </section>
 
-        {/* Books List */}
-        <div className="card">
-          <h3>All Books ({books.length})</h3>
+      <section className="px-4 pb-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          {error && (
+            <div className="mb-6 rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          {showCreateForm && user?.role === 'admin' && (
+            <div className="mb-8 rounded-4xl border border-white/70 bg-white/80 p-6 shadow-xl backdrop-blur">
+              <div className="mb-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Admin
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                  Create a new book
+                </h2>
+              </div>
+
+              <form onSubmit={handleCreateBook} className="grid gap-5">
+                <div>
+                  <label htmlFor="title" className="mb-2 block text-sm font-medium text-slate-700">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    value={newBook.title}
+                    onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
+                    required
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="description" className="mb-2 block text-sm font-medium text-slate-700">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    value={newBook.description}
+                    onChange={(e) => setNewBook({ ...newBook, description: e.target.value })}
+                    rows="4"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="genre" className="mb-2 block text-sm font-medium text-slate-700">
+                    Genre
+                  </label>
+                  <input
+                    type="text"
+                    id="genre"
+                    value={newBook.genre}
+                    onChange={(e) => setNewBook({ ...newBook, genre: e.target.value })}
+                    placeholder="e.g. Leadership, Growth, Business"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400"
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                  >
+                    Create Book
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateForm(false)}
+                    className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Collection
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+                All books
+              </h2>
+            </div>
+          </div>
+
           {books.length === 0 ? (
-            <p>No books found. Create your first book above!</p>
+            <div className="rounded-4xl border border-white/70 bg-white/80 px-6 py-16 text-center shadow-xl backdrop-blur">
+              <h3 className="text-2xl font-semibold tracking-tight text-slate-950">No books found</h3>
+              <p className="mt-3 text-slate-600">
+                Add a book to start building the collection.
+              </p>
+            </div>
           ) : (
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', 
-              gap: '2rem' 
-            }}>
-              {books.map(book => (
-                <BookCard 
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {books.map((book) => (
+                <BookCard
                   key={book._id}
                   book={book}
                   isOwned={getIsOwned(book)}
@@ -255,7 +288,7 @@ const BookList = () => {
             </div>
           )}
         </div>
-      </div>
+      </section>
     </div>
   );
 };
