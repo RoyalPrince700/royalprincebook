@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import leadingFromWithinImage from '../assets/Leadershipfromwithin.jpg';
+import leadingFromWithinImage from '../assets/leadershipfromwithin.jpg';
 
 const Hero = ({ currentPrice }) => {
   const [showDesktopAboutBook, setShowDesktopAboutBook] = useState(false);

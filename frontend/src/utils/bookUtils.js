@@ -1,4 +1,4 @@
-import leadingFromWithinImage from '../assets/leadingfromwithin.jpg';
+import leadingFromWithinImage from '../assets/leadershipfromwithin.jpg';
 
 const normalizeTitle = (title = '') => title.toLowerCase().replace(/\s+/g, ' ').trim();
 
