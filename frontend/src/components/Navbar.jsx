@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-// import ThemeToggle from './ThemeToggle';
-import '../App.css'; 
+import '../App.css';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -35,7 +34,7 @@ const Navbar = () => {
   };
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+    setIsMenuOpen((prev) => !prev);
   };
 
   const closeMenu = () => {
@@ -73,91 +72,116 @@ const Navbar = () => {
   }, [isMenuOpen]);
 
   const isHome = location.pathname === '/';
-  const headerBackgroundClass = isMenuOpen
-    ? 'bg-white border-b border-gray-200'
-    : scrolled || !isHome
-      ? 'bg-white/80 backdrop-blur-md border-b border-gray-200/50 supports-[backdrop-filter]:bg-white/60'
-      : 'bg-transparent';
   const cartLabel = itemCount > 0 ? `Cart (${itemCount})` : 'Cart';
+  const navLinks = [
+    { to: '/', label: 'Home' },
+    { to: '/all-books', label: 'Books' },
+    { to: '/cart', label: cartLabel },
+    { to: '/about-author', label: 'About Author' }
+  ];
+
+  if (user) {
+    navLinks.push({ to: '/dashboard', label: 'Dashboard' });
+  }
+
+  const isTransparent = isHome && !scrolled && !isMenuOpen;
+  const shellClass = isTransparent
+    ? 'border-transparent bg-transparent shadow-none'
+    : 'border-white/70 bg-white/78 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur-xl';
+
+  const getLinkClassName = (to) => {
+    const isActive = location.pathname === to;
+    return `rounded-full px-4 py-2 text-sm font-medium transition ${
+      isActive
+        ? 'bg-slate-950 text-white'
+        : 'text-slate-600 hover:bg-white/80 hover:text-slate-950'
+    }`;
+  };
+
+  const getLinkStyle = (to) => (
+    location.pathname === to ? { color: '#fff' } : undefined
+  );
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out ${headerBackgroundClass}`}
-    >
-      <div className="max-w-7xl mx-auto px-4 py-1 md:py-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-12">
-          {/* Logo */}
-          <div className="shrink-0 flex items-center">
-            <Link to="/" className="text-gray-900 font-semibold tracking-tight hover:opacity-80 transition-opacity">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
+    <header className="fixed left-0 right-0 top-0 z-50 transition-all duration-300 ease-out">
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+        <div
+          className={`flex min-h-16 items-center justify-between rounded-[2rem] border px-4 py-3 transition-all duration-300 sm:px-5 ${shellClass}`}
+        >
+          <div className="flex shrink-0 items-center">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-3 rounded-full px-2 py-1 text-slate-950 transition hover:opacity-85"
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/90 shadow-sm">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </span>
+              <span className="hidden sm:block">
+                <span className="block text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  RoyalPrince
+                </span>
+                <span className="block text-sm font-semibold tracking-tight text-slate-950">
+                  Hub
+                </span>
+              </span>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8 ">
-            <Link to="/all-books" className="text-xs text-gray-700 hover:text-black transition-colors">
-              Books
-            </Link>
-            <Link to="/cart" className="text-xs text-gray-700 hover:text-black transition-colors">
-              {cartLabel}
-            </Link>
-            <Link to="/about-author" className="text-xs text-gray-700 hover:text-black transition-colors">
-              About Author
-            </Link>
+          <nav className="hidden items-center gap-1 md:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={getLinkClassName(link.to)}
+                style={getLinkStyle(link.to)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="hidden items-center gap-3 md:flex">
             {user ? (
               <>
-                <Link to="/dashboard" className="text-xs text-gray-700 hover:text-black transition-colors">
-                  Dashboard
-                </Link>
+                <div className="rounded-full border border-slate-200 bg-white/75 px-4 py-2 text-sm font-medium text-slate-500">
+                  {user.username}
+                </div>
                 <button
                   onClick={handleLogout}
-                  className="text-xs text-gray-700 hover:text-black transition-colors"
+                  className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white/80 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-white"
                 >
                   Log out
                 </button>
-                <div className="w-px h-4 bg-gray-300 mx-2"></div>
-                <span className="text-xs text-gray-500">
-                  {user.username}
-                </span>
               </>
             ) : (
-              <>
-              
-                <Link
-                  to="/login"
-                  className="px-7 py-3 text-xs text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
-                  style={{ color: 'white' }}
-                >
-                  Sign in
-                </Link>
-              </>
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+             style={{ color: 'white' }}>
+                Sign in
+              </Link>
             )}
-            {/* <div className="ml-2">
-              <ThemeToggle />
-            </div> */}
-          </nav>
+          </div>
 
-          {/* Hamburger Menu Button - Only visible on smaller screens */}
           <button
             onClick={toggleMenu}
-            className="md:hidden flex flex-col justify-center items-center w-8 h-8 space-y-1 hover:bg-gray-100 rounded-md transition-colors p-1"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-700 transition hover:bg-white md:hidden"
             aria-label="Toggle menu"
           >
-            <span className={`block w-5 h-0.5 bg-gray-700 transition-transform duration-300 ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
-            <span className={`block w-5 h-0.5 bg-gray-700 transition-opacity duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
-            <span className={`block w-5 h-0.5 bg-gray-700 transition-transform duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
+            <div className="flex flex-col gap-1">
+              <span className={`block h-0.5 w-5 bg-current transition-transform duration-300 ${isMenuOpen ? 'translate-y-1.5 rotate-45' : ''}`}></span>
+              <span className={`block h-0.5 w-5 bg-current transition-opacity duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+              <span className={`block h-0.5 w-5 bg-current transition-transform duration-300 ${isMenuOpen ? '-translate-y-1.5 -rotate-45' : ''}`}></span>
+            </div>
           </button>
         </div>
       </div>
 
-      {/* Hamburger Menu Overlay */}
-      <div
-        className={`fixed inset-0 z-40 ${isMenuOpen ? 'visible' : 'invisible'}`}
-      >
+      <div className={`fixed inset-0 z-40 md:hidden ${isMenuOpen ? 'visible' : 'invisible'}`}>
         <div
-          className={`absolute inset-0 bg-white transition-opacity duration-300 ease-in-out ${
+          className={`absolute inset-0 bg-slate-950/30 backdrop-blur-sm transition-opacity duration-300 ${
             isMenuOpen ? 'opacity-100' : 'opacity-0'
           }`}
           onClick={closeMenu}
@@ -165,93 +189,86 @@ const Navbar = () => {
         />
         <div
           ref={menuRef}
-          className={`absolute top-0 left-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl transform transition-transform duration-500 ease-in-out ${
-            isMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          className={`absolute right-4 top-4 w-[calc(100%-2rem)] max-w-sm rounded-[2rem] border border-white/70 bg-white/92 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 ${
+            isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'
           }`}
-          style={{ backgroundColor: 'white', opacity: 1 }}
         >
-          {/* Menu Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                Navigation
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                Menu
+              </h2>
+            </div>
             <button
               onClick={closeMenu}
-              className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50"
               aria-label="Close menu"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          {/* Menu Content */}
-          <nav className="flex flex-col py-4">
-            <Link
-              to="/all-books"
-              className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-              onClick={closeMenu}
-            >
-              Books
-            </Link>
-            <Link
-              to="/about-author"
-              className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-              onClick={closeMenu}
-            >
-              About Author
-            </Link>
-            <Link
-              to="/cart"
-              className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-              onClick={closeMenu}
-            >
-              {cartLabel}
-            </Link>
+          <nav className="mt-6 flex flex-col gap-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                  location.pathname === link.to
+                    ? 'bg-slate-950 text-white'
+                    : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                }`}
+                style={getLinkStyle(link.to)}
+                onClick={closeMenu}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
+          <div className="mt-6 border-t border-slate-200 pt-5">
             {user ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                  onClick={closeMenu}
-                >
-                  Dashboard
-                </Link>
-                <div className="border-t border-gray-200 my-2"></div>
-                <div className="px-6 py-2">
-                  <span className="text-sm text-gray-500 block mb-2">Welcome, {user.username}</span>
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Signed in as
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-slate-900">{user.username}</p>
                 </div>
                 <button
                   onClick={() => {
                     handleLogout();
                     closeMenu();
                   }}
-                  className="px-6 py-3 text-left text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+                  className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                 >
                   Log out
                 </button>
-              </>
+              </div>
             ) : (
-              <>
-                <div className="border-t border-gray-200 my-2"></div>
+              <div className="space-y-3">
                 <Link
                   to="/login"
-                  className="px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                  className="inline-flex w-full items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
                   onClick={closeMenu}
-                >
+              style={{ color: 'white' }} >
                   Sign in
                 </Link>
-                <Link
-                  to="/login"
-                  className="mx-6 my-3 px-4 py-2 text-center text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
-                  style={{ color: 'white' }}
+                {/* <Link
+                  to="/register"
+                  className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
                   onClick={closeMenu}
                 >
-                  Continue with Google
-                </Link>
-              </>
+                  Sign up with Google
+                </Link> */}
+              </div>
             )}
-          </nav>
+          </div>
         </div>
       </div>
     </header>
