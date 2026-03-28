@@ -104,7 +104,8 @@ const Cart = () => {
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               to="/all-books"
-              className="inline-flex min-w-40 items-center justify-center rounded-full bg-slate-950 px-8 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="inline-flex min-w-40 items-center justify-center rounded-full bg-slate-950 px-8 py-3 text-sm font-medium transition hover:bg-slate-800"
+              style={{ color: 'white' }}
             >
               Continue Shopping
             </Link>
@@ -132,7 +133,7 @@ const Cart = () => {
               <Link
                 to="/all-books"
                 className="mt-6 inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-              >
+                style={{ color: 'white' }}>
                 Browse Books
               </Link>
             </div>

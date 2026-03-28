@@ -28,20 +28,28 @@ const getWelcomeEmailTemplate = ({ username, loginUrl }) => {
   const safeLoginUrl = escapeHtml(loginUrl);
 
   return {
-    subject: `Welcome to ${APP_NAME}`,
+    subject: `A personal welcome to ${APP_NAME}`,
     text: `Hi ${username || 'Reader'},
 
-Welcome to ${APP_NAME}. Your account has been created successfully and you can now start exploring books on the platform.
+Welcome to ${APP_NAME}.
+
+I am Royal Prince, and I want to personally thank you for joining us. It truly means a lot to have you here.
+
+I created ${APP_NAME} to be more than just a platform for books. My desire is for it to feel like a place where you can learn, grow, and stay connected to ideas that truly matter.
+
+As you begin your journey with us, please know that you are not just another user here. You are part of a community I deeply care about, and I am genuinely glad to welcome you personally.
 
 Open ${APP_NAME}: ${loginUrl}
 
-We are excited to have you with us.
-The ${APP_NAME} Team`,
+With gratitude,
+Royal Prince
+CEO, ${APP_NAME}`,
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width: 640px; margin: 0 auto;">
         <h2 style="color: #111827;">Welcome to ${APP_NAME}, ${safeUsername}!</h2>
-        <p>Your account has been created successfully.</p>
-        <p>You can now sign in and start reading, discovering, and purchasing books on ${APP_NAME}.</p>
+        <p>I am Royal Prince, and I want to personally thank you for joining us.</p>
+        <p>I created ${APP_NAME} to be more than just a platform for books. My hope is that it becomes a place where you can learn, grow, and stay connected to ideas that truly matter.</p>
+        <p>As you begin your journey with us, please know that you are not just another user here. You are part of a community I deeply care about, and I am genuinely glad to welcome you personally.</p>
         <p style="margin: 24px 0;">
           <a
             href="${safeLoginUrl}"
@@ -50,8 +58,8 @@ The ${APP_NAME} Team`,
             Open ${APP_NAME}
           </a>
         </p>
-        <p>We are excited to have you with us.</p>
-        <p>The ${APP_NAME} Team</p>
+        <p>With gratitude,</p>
+        <p><strong>Royal Prince</strong><br />CEO, ${APP_NAME}</p>
       </div>
     `
   };
@@ -72,21 +80,28 @@ const getBookPurchaseEmailTemplate = ({
   const safeTransactionId = transactionId ? escapeHtml(transactionId) : null;
 
   return {
-    subject: `Payment confirmed for ${bookTitle || 'your book'}`,
+    subject: `Your book is ready on ${APP_NAME}`,
     text: `Hi ${username || 'Reader'},
 
-Payment confirmed. Congratulations on purchasing "${bookTitle || 'your book'}" on ${APP_NAME}.
+Thank you for purchasing "${bookTitle || 'your book'}" on ${APP_NAME}.
+
+I truly appreciate your support. Every time you choose a book through ${APP_NAME}, it means more than a transaction to me. It is a sign that this vision is reaching real people like you, and that means a lot.
+
+I hope this book brings you value, insight, and inspiration.
 
 Amount paid: ${paymentAmount}
-${transactionId ? `Transaction ID: ${transactionId}\n` : ''}You can continue on ${APP_NAME}: ${libraryUrl}
+${transactionId ? `Transaction ID: ${transactionId}\n` : ''}You can continue reading here: ${libraryUrl}
 
-Thank you for your purchase.
-The ${APP_NAME} Team`,
+With gratitude,
+Royal Prince
+CEO, ${APP_NAME}`,
     html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width: 640px; margin: 0 auto;">
-        <h2 style="color: #111827;">Payment received successfully</h2>
+        <h2 style="color: #111827;">Your book is ready, ${safeUsername}</h2>
         <p>Hi ${safeUsername},</p>
-        <p>Congratulations on purchasing <strong>${safeBookTitle}</strong> on ${APP_NAME}.</p>
+        <p>Thank you for purchasing <strong>${safeBookTitle}</strong> on ${APP_NAME}.</p>
+        <p>I truly appreciate your support. Every time you choose a book through ${APP_NAME}, it means more than a transaction to me. It is a sign that this vision is reaching real people like you, and that means a lot.</p>
+        <p>I hope this book brings you value, insight, and inspiration.</p>
         <p><strong>Amount paid:</strong> ${escapeHtml(paymentAmount)}</p>
         ${
           safeTransactionId
@@ -101,8 +116,8 @@ The ${APP_NAME} Team`,
             Continue on ${APP_NAME}
           </a>
         </p>
-        <p>Thank you for your purchase, and enjoy your new book.</p>
-        <p>The ${APP_NAME} Team</p>
+        <p>With gratitude,</p>
+        <p><strong>Royal Prince</strong><br />CEO, ${APP_NAME}</p>
       </div>
     `
   };

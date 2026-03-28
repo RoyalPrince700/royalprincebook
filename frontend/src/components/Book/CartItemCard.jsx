@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBookCover } from '../../utils/bookUtils';
+import { getBookCover, getOriginalBookPrice } from '../../utils/bookUtils';
 
 const CartItemCard = ({
   book,
@@ -11,6 +11,8 @@ const CartItemCard = ({
   onRemove,
   onRead
 }) => {
+  const originalPrice = getOriginalBookPrice(book?.title, book?.price);
+
   return (
     <article
       className={`grid gap-4 rounded-4xl border p-4 transition duration-200 md:grid-cols-[auto_96px_1fr] md:items-center ${
@@ -53,11 +55,18 @@ const CartItemCard = ({
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 md:min-w-36">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Price
+              {originalPrice ? 'Prelaunch price' : 'Price'}
             </p>
-            <p className="mt-1 text-lg font-semibold text-slate-950">
-              {book.price && book.price > 0 ? `NGN ${book.price.toLocaleString()}` : 'Free'}
-            </p>
+            <div className="mt-1 flex flex-wrap items-baseline gap-2">
+              {originalPrice && (
+                <span className="text-sm font-medium text-slate-400 line-through">
+                  NGN {originalPrice.toLocaleString()}
+                </span>
+              )}
+              <p className="text-lg font-semibold text-slate-950">
+                {book.price && book.price > 0 ? `NGN ${book.price.toLocaleString()}` : 'Free'}
+              </p>
+            </div>
           </div>
         </div>
 

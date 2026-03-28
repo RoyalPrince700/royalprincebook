@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
+import PageLoader from '../PageLoader';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -47,16 +48,10 @@ const UserManagement = () => {
 
   if (loading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div className="card text-center">
-          <h3>Loading users...</h3>
-        </div>
-      </div>
+      <PageLoader
+        title="Loading user management"
+        message="Fetching team accounts, roles, and access controls."
+      />
     );
   }
 

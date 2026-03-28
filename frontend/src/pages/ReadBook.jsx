@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import ChapterReader from '../components/Book/ChapterReader';
 import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
+import { getOriginalBookPrice } from '../utils/bookUtils';
+import PageLoader from '../components/PageLoader';
 import './ReadBook.css';
 
 const ReadBook = () => {
@@ -155,20 +157,22 @@ const ReadBook = () => {
 
   if (loading) {
     return (
-      <div className="read-book-container" style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <div className="card text-center">
-          <h3>Loading book...</h3>
-        </div>
-      </div>
+      <PageLoader
+        title="Opening your book"
+        message="Loading chapters, reader controls, and access details."
+      />
     );
   }
 
   if (error || !book) {
     return (
-      <div className="read-book-container" style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <div className="card text-center">
-          <h3>{error || 'Book not found'}</h3>
-          <Link to="/dashboard">Back to Dashboard</Link>
+      <div className="read-book-empty-state">
+        <div className="read-book-message-card">
+          <p className="reader-eyebrow">Reader</p>
+          <h3 className="reader-message-title">{error || 'Book not found'}</h3>
+          <Link to="/dashboard" className="reader-link-button">
+            Back to Dashboard
+          </Link>
         </div>
       </div>
     );
@@ -179,58 +183,71 @@ const ReadBook = () => {
   const isAdmin = user && user.role === 'admin';
   const hasPurchased = user && user.purchasedBooks && user.purchasedBooks.includes(book._id);
   const isFree = !book.price || book.price === 0;
+  const originalPrice = getOriginalBookPrice(book?.title, book?.price);
 
   const hasAccess = isAuthor || isAdmin || hasPurchased || isFree;
 
   if (!hasAccess) {
     return (
-      <div className="read-book-container" style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <div className="card text-center" style={{ maxWidth: '500px', padding: '2rem' }}>
-          <h2 style={{ marginBottom: '1rem' }}>{book.title}</h2>
-          <p style={{ marginBottom: '2rem', fontSize: '1.1rem', color: '#666' }}>
-            To read this book, you need to purchase it.
+      <div className="read-book-empty-state">
+        <div className="read-book-message-card read-book-purchase-card">
+          <p className="reader-eyebrow">Premium Access</p>
+          <h2 className="reader-message-title">{book.title}</h2>
+          <p className="reader-message-copy">
+            To continue into this reading experience, purchase the book and unlock full access.
           </p>
-          <div style={{ marginBottom: '2rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
-            Price: ₦{book.price.toLocaleString()}
+          <div className="reader-price-block">
+            <span className="reader-price-label">
+              {originalPrice ? 'Prelaunch price' : 'Price'}
+            </span>
+            <strong className="reader-price-value">NGN {book.price.toLocaleString()}</strong>
           </div>
-          <p style={{ marginTop: '-1rem', marginBottom: '2rem', color: '#666' }}>
-            Prelaunch offer: buy now for ₦{book.price.toLocaleString()}. After launch, the price goes back to ₦2,000.
+          {originalPrice && (
+            <p className="reader-original-price">
+              Original price: NGN {originalPrice.toLocaleString()}
+            </p>
+          )}
+          <p className="reader-message-copy">
+            {originalPrice
+              ? `Prelaunch access is live now at NGN ${book.price.toLocaleString()}. Standard price returns to NGN ${originalPrice.toLocaleString()}.`
+              : `Buy now for NGN ${book.price.toLocaleString()}.`}
           </p>
           <button 
-            className="btn-primary" 
+            className="reader-primary-button" 
             onClick={handlePayment}
-            style={{ fontSize: '1.2rem', padding: '0.8rem 2rem', width: '100%' }}
           >
             Buy Now
           </button>
-          <div style={{ marginTop: '1rem' }}>
-             <Link to="/dashboard" style={{ color: '#666' }}>Back to Dashboard</Link>
-          </div>
+          <Link to="/dashboard" className="reader-text-link">Back to Dashboard</Link>
         </div>
       </div>
     );
   }
 
   const currentPage = getCurrentPage();
-  const totalPages = book.pages.length;
+  const sortedPages = [...book.pages].sort((a, b) => a.pageNumber - b.pageNumber);
+  const totalPages = sortedPages.length;
+  const maxPageNumber = Math.max(...book.pages.map((p) => p.pageNumber), 0);
 
   return (
     <div className="read-book-container">
-      {/* Reader Header */}
       <header className="reader-header">
         <div className="header-left">
-          <h1 className="book-title">
-            <span style={{ fontWeight: 'bold' }}>{book.title}</span>
-          </h1>
+          <div>
+            <p className="reader-header-label">Now Reading</p>
+            <h1 className="book-title">{book.title}</h1>
+          </div>
         </div>
 
         <div className="header-right">
-           {/* Download Dropdown */}
-           <div style={{ position: 'relative' }}>
+           <div className="reader-pill">
+             Chapter {currentPageNum} / {totalPages}
+           </div>
+
+           <div className="download-wrap">
              <button 
-               className="btn-secondary" 
+               className="reader-secondary-button" 
                onClick={() => setDownloadDropdownOpen(!downloadDropdownOpen)}
-               style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
              >
                Download ▾
              </button>
@@ -259,21 +276,11 @@ const ReadBook = () => {
              )}
            </div>
 
-           {/* Edit Mode Icon Button */}
            {user?.role === 'admin' && (
-             <Link to={`/books/${bookId}`} className="edit-button-link" style={{ textDecoration: 'none' }}>
+             <Link to={`/books/${bookId}`} className="edit-button-link">
               <button 
-                className="btn-secondary" 
+                className="reader-icon-button" 
                 title="Edit Mode"
-                style={{ 
-                  fontSize: '0.9rem',
-                  padding: '0.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '36px',
-                  width: '36px'
-                }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -286,95 +293,90 @@ const ReadBook = () => {
       </header>
 
       <div className="reader-body">
-        {/* Table of Contents Sidebar */}
-        <div className={`sidebar-container ${sidebarOpen ? 'open' : 'closed'}`} style={{
-            width: sidebarOpen ? '280px' : '0' // Keep inline style for desktop override if needed, but CSS handles mobile
-        }}>
-            <div className="sidebar-content" style={{ 
-                display: sidebarOpen ? 'block' : 'none'
-            }}>
-                <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.1rem', color: '#888', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                Table of Contents
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {book.pages
-                    .sort((a, b) => a.pageNumber - b.pageNumber)
-                    .map((page) => (
-                    <button
-                    key={page.pageNumber}
-                    className="toc-button"
-                    onClick={() => {
-                        setCurrentPageNum(page.pageNumber);
-                        window.scrollTo(0, 0);
-                        if (window.innerWidth < 768) setSidebarOpen(false); // Auto-close on mobile selection
-                    }}
-                    style={{
-                        backgroundColor: currentPageNum === page.pageNumber ? 'var(--input-bg)' : 'transparent',
-                        color: currentPageNum === page.pageNumber ? 'var(--primary-color)' : 'var(--text-secondary)',
-                        fontWeight: currentPageNum === page.pageNumber ? 'bold' : 'normal',
-                    }}
-                    >
-                    <span style={{ opacity: 0.5, marginRight: '8px' }}>{page.pageNumber}.</span>
-                    {page.title || 'Untitled Chapter'}
-                    </button>
-                ))}
-                </div>
+        <aside className={`sidebar-container ${sidebarOpen ? 'open' : 'closed'}`}>
+          <div className="sidebar-content">
+            <p className="reader-sidebar-label">Table of Contents</p>
+            <div className="toc-list">
+              {sortedPages.map((page) => (
+                <button
+                  key={page.pageNumber}
+                  className={`toc-button ${currentPageNum === page.pageNumber ? 'active' : ''}`}
+                  onClick={() => {
+                    setCurrentPageNum(page.pageNumber);
+                    window.scrollTo(0, 0);
+                    if (window.innerWidth < 768) setSidebarOpen(false);
+                  }}
+                >
+                  <span className="toc-number">{page.pageNumber}.</span>
+                  <span>{page.title || 'Untitled Chapter'}</span>
+                </button>
+              ))}
             </div>
+          </div>
 
-            {/* Toggle Button on the Edge */}
-            <button
-                className="sidebar-toggle"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-            >
-                {sidebarOpen ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                )}
-            </button>
-        </div>
+          <button
+            className="sidebar-toggle"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            title={sidebarOpen ? 'Collapse Sidebar' : 'Expand Sidebar'}
+          >
+            {sidebarOpen ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            )}
+          </button>
+        </aside>
 
-        {/* Main Reading Area */}
         <div className="content-area">
+          <div className="reader-top-meta">
+            <div>
+              <p className="reader-content-label">Reading Experience</p>
+              <h2 className="reader-content-title">
+                {currentPage?.title || 'Current Chapter'}
+              </h2>
+            </div>
+            <div className="reader-meta-card">
+              <span>Page {currentPageNum}</span>
+              <span className="reader-meta-divider" />
+              <span>{totalPages} chapters</span>
+            </div>
+          </div>
+
           {currentPage ? (
             <>
               <ChapterReader 
                 title={currentPage.title} 
                 content={currentPage.formattedContent || currentPage.rawContent} 
               />
-              
-              {/* Navigation Controls */}
+
               <div className="nav-controls">
                 <button
-                  className="btn-secondary"
+                  className="reader-secondary-button nav-button"
                   onClick={handlePrevPage}
                   disabled={currentPageNum <= 1}
-                  style={{ visibility: currentPageNum <= 1 ? 'hidden' : 'visible' }}
                 >
-                  ← Previous Chapter
+                  Previous Chapter
                 </button>
                 
-                <span style={{ color: '#999' }}>
+                <span className="reader-page-indicator">
                   Page {currentPageNum} of {totalPages}
                 </span>
 
                 <button
-                  className="btn-primary"
+                  className="reader-primary-button nav-button"
                   onClick={handleNextPage}
-                  disabled={currentPageNum >= Math.max(...book.pages.map(p => p.pageNumber), 0)}
-                  style={{ visibility: currentPageNum >= Math.max(...book.pages.map(p => p.pageNumber), 0) ? 'hidden' : 'visible' }}
+                  disabled={currentPageNum >= maxPageNumber}
                 >
-                  Next Chapter →
+                  Next Chapter
                 </button>
               </div>
             </>
           ) : (
-             <div style={{ textAlign: 'center', marginTop: '3rem', color: '#666' }}>
+            <div className="reader-no-content">
               <p>No content available for this page.</p>
             </div>
           )}

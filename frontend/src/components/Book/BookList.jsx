@@ -5,6 +5,7 @@ import axios from 'axios';
 import BookCard from './BookCard';
 import { useCart } from '../../contexts/CartContext';
 import useBookPurchase from '../../hooks/useBookPurchase';
+import PageLoader from '../PageLoader';
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -91,11 +92,10 @@ const BookList = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <div className="rounded-4xl border border-white/70 bg-white/80 px-8 py-6 text-center shadow-xl backdrop-blur">
-          <h3 className="text-xl font-semibold tracking-tight text-slate-950">Loading books...</h3>
-        </div>
-      </div>
+      <PageLoader
+        title="Loading the collection"
+        message="Fetching available books, cart details, and store highlights."
+      />
     );
   }
 
@@ -140,6 +140,7 @@ const BookList = () => {
             <Link
               to="/cart"
               className="inline-flex min-w-40 items-center justify-center rounded-full bg-slate-950 px-8 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+              style={{ color: 'white' }}
             >
               View Cart{itemCount > 0 ? ` (${itemCount})` : ''}
             </Link>

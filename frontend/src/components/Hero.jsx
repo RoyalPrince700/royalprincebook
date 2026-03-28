@@ -4,6 +4,7 @@ import leadingFromWithinImage from '../assets/leadershipfromwithin.jpg';
 
 const Hero = ({ currentPrice, launchPrice }) => {
   const [showAboutBook, setShowAboutBook] = useState(false);
+  const isPrelaunchPricing = currentPrice < launchPrice;
 
   return (
     <section className="relative overflow-hidden bg-slate-50 px-4 pb-20 pt-20 sm:px-6 md:pt-28 lg:px-8">
@@ -35,17 +36,28 @@ const Hero = ({ currentPrice, launchPrice }) => {
           <button
             type="button"
             onClick={() => setShowAboutBook((prev) => !prev)}
-            className="inline-flex min-w-40 items-center justify-center rounded-full border border-slate-300 bg-white/80 px-8 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-white"
+            className="inline-flex min-w-40 items-center justify-center rounded-full border border-white/60 bg-white/35 px-8 py-3 text-sm font-medium text-slate-900 shadow-[0_10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl transition hover:border-white/80 hover:bg-white/45"
           >
             {showAboutBook ? 'Hide Details' : 'Learn More'}
           </button>
         </div>
 
-        <p className="mt-4 hidden text-sm text-slate-500 sm:block">
-          Available now for NGN {currentPrice.toLocaleString()}.
-          <span className="mx-2 hidden sm:inline text-slate-300">|</span>
-          <span className="block sm:inline">Launch price returns to NGN {launchPrice.toLocaleString()}.</span>
-        </p>
+        <div className="mt-4 hidden items-center justify-center gap-3 text-sm text-slate-500 sm:flex">
+          {isPrelaunchPricing && (
+            <span className="text-slate-400 line-through">
+              NGN {launchPrice.toLocaleString()}
+            </span>
+          )}
+          <span>
+            {isPrelaunchPricing ? 'Prelaunch price' : 'Available now'}: NGN {currentPrice.toLocaleString()}
+          </span>
+          {isPrelaunchPricing && (
+            <>
+              <span className="text-slate-300">|</span>
+              <span>Standard price is NGN {launchPrice.toLocaleString()}.</span>
+            </>
+          )}
+        </div>
 
         <div className="mt-8 sm:mt-14">
           <div className="relative mx-auto max-w-4xl">
@@ -57,7 +69,61 @@ const Hero = ({ currentPrice, launchPrice }) => {
                   alt="Leadership From Within Book Cover"
                   className="h-[420px] w-full object-cover sm:h-[500px] lg:h-[580px]"
                 />
-                <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-slate-950/85 via-slate-950/45 to-transparent p-4 pt-20 sm:hidden">
+                {showAboutBook && (
+                  <div className="absolute inset-0 z-20 flex items-end bg-slate-950/45 p-4 sm:hidden">
+                    <div className="max-h-full w-full overflow-y-auto rounded-[1.75rem] border border-white/30 bg-white/15 p-5 text-left text-white shadow-[0_20px_60px_rgba(15,23,42,0.25)] backdrop-blur-2xl">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
+                            About The Book
+                          </p>
+                          <h3 className="mt-2 text-xl font-semibold tracking-tight">
+                            Leadership From Within
+                          </h3>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowAboutBook(false)}
+                          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 text-lg text-white backdrop-blur-xl transition hover:bg-white/20"
+                          aria-label="Close details"
+                        >
+                          x
+                        </button>
+                      </div>
+                      <p className="mt-4 text-sm leading-relaxed text-white/85">
+                        <em>Leadership From Within</em> is a call to wake up and take control
+                        of your life. It begins from a place many people know too well,
+                        starting small, unseen, and dealing with the struggles that happen
+                        inside.
+                      </p>
+                      <p className="mt-3 text-sm leading-relaxed text-white/75">
+                        From there, the author challenges weak thinking and replaces it with
+                        discipline and self-control. It shows that leadership is first shaped
+                        in private, through the choices you make every day.
+                      </p>
+                      <p className="mt-3 text-sm leading-relaxed text-white/75">
+                        At its core, <em>Leadership From Within</em> reminds you that
+                        leadership is not something you claim. It is something you build
+                        quietly within yourself long before anyone else sees it.
+                      </p>
+                      <div className="mt-5 flex flex-col gap-3">
+                        <Link
+                          to="/about-author"
+                          className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/10 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/20"
+                        >
+                          About Author
+                        </Link>
+                        <Link
+                          to="/all-books"
+                          className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-slate-100"
+                        >
+                          Buy Your Copy
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="absolute inset-x-0 bottom-0 z-10 bg-linear-to-t from-slate-950/85 via-slate-950/45 to-transparent p-4 pt-20 sm:hidden">
                   <div className="grid grid-cols-2 gap-3">
                     <Link
                       to="/all-books"
@@ -68,7 +134,7 @@ const Hero = ({ currentPrice, launchPrice }) => {
                     <button
                       type="button"
                       onClick={() => setShowAboutBook((prev) => !prev)}
-                      className="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/15"
+                      className="inline-flex items-center justify-center rounded-full border border-white/35 bg-white/12 px-4 py-3 text-sm font-medium text-white shadow-[0_10px_30px_rgba(15,23,42,0.16)] backdrop-blur-xl transition hover:bg-white/20"
                     >
                       {showAboutBook ? 'Hide Details' : 'Learn More'}
                     </button>
@@ -81,9 +147,21 @@ const Hero = ({ currentPrice, launchPrice }) => {
           <div className="mx-auto mt-8 grid max-w-4xl gap-4 text-left md:grid-cols-3">
             <div className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Price</p>
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
-                NGN {currentPrice.toLocaleString()}
-              </p>
+              <div className="mt-2 flex flex-wrap items-baseline gap-2">
+                {isPrelaunchPricing && (
+                  <span className="text-base font-medium text-slate-400 line-through">
+                    NGN {launchPrice.toLocaleString()}
+                  </span>
+                )}
+                <p className="text-3xl font-semibold tracking-tight text-slate-950">
+                  NGN {currentPrice.toLocaleString()}
+                </p>
+                {isPrelaunchPricing && (
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
+                    Prelaunch
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
@@ -103,19 +181,22 @@ const Hero = ({ currentPrice, launchPrice }) => {
         </div>
 
         {showAboutBook && (
-          <div className="mx-auto mt-8 max-w-3xl rounded-4xl border border-white/70 bg-white/80 p-6 text-left shadow-xl backdrop-blur">
+          <div className="mx-auto mt-8 hidden max-w-3xl rounded-4xl border border-white/70 bg-white/80 p-6 text-left shadow-xl backdrop-blur sm:block">
             <h3 className="text-xl font-semibold tracking-tight text-slate-950">
               About <em>Leadership From Within</em>
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-              This book follows a personal and practical leadership journey, moving from
-              mindset shift to self-leadership, discipline, purpose, and measurable action.
-              It is designed to help readers grow internally first, then lead with clarity
-              in visible ways.
+              <em>Leadership From Within</em> is a call to wake up and take control of your
+              life. It begins from a place many people know too well, starting small,
+              unseen, and dealing with the struggles that happen inside. From there, the
+              author challenges weak thinking and replaces it with discipline and
+              self-control. It shows that leadership is first shaped in private, through the
+              choices you make every day.
             </p>
             <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-              Each chapter turns lived experience into useful lessons for real life, so the
-              result feels less like theory and more like a clear path forward.
+              At its core, <em>Leadership From Within</em> reminds you that leadership is not
+              something you claim. It is something you build quietly within yourself long
+              before anyone else sees it.
             </p>
             <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <Link

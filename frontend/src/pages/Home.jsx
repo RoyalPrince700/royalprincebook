@@ -2,6 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Hero from '../components/Hero';
+import PageLoader from '../components/PageLoader';
+import adeyemiAvatar from '../assets/adeyemi.jpg';
+import francisAvatar from '../assets/francis.jpg';
+import favourAvatar from '../assets/favour.png';
 
 const chapterHighlights = [
   {
@@ -27,6 +31,29 @@ const chapterHighlights = [
   {
     title: 'Chapter 6 - Lasting Impact',
     summary: 'Multiply your influence by building people, not just solving problems alone.'
+  }
+];
+
+const testimonials = [
+  {
+    name: 'Adeyemi Favour',
+    role: 'Mobile Developer',
+    avatar: adeyemiAvatar,
+    quote:
+      'The book is so practical and relatable, they are principles/actions point which when engaged have one desire output which is Results. You have lived it and now you are putting it in a book for those that want to have the same results as yours. This is a book I can recommend to anyone struggling and be certain that they will find their feet.'},
+  {
+    name: 'Adeyemi Francis',
+    role: 'SU, Senate President, University of Ilorin.',
+    avatar: francisAvatar,
+    quote:
+      'I expected inspiration, but what stayed with me was the clarity. Each chapter pushed me toward discipline and real action. The practical lessons and the focus on mindset set this book apart. If you’re ready to grow as a leader and see actual results, this book will challenge and help you to do just that.'
+  },
+  {
+    name: 'Oladipo Favour',
+    role: 'Young Professional',
+    avatar: favourAvatar,
+    quote:
+      'This is the kind of book you return to when you need to reset and lead well. What I appreciate most is that it goes beyond leadership theory; it gives you simple, practical steps that anyone regardless of experience can apply and see real change. Whether you feel lost, discouraged, this book gives you the focus and courage to try again.'
   }
 ];
 
@@ -60,6 +87,16 @@ const Home = () => {
   );
 
   const currentPrice = leadingFromWithinBook?.price ?? 1000;
+  const isPrelaunchPricing = currentPrice < launchPrice;
+
+  if (loading) {
+    return (
+      <PageLoader
+        title="Loading the home experience"
+        message="Bringing in the latest book details and pricing for a smoother first look."
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200">
@@ -67,28 +104,31 @@ const Home = () => {
 
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-8 flex items-end justify-between gap-4">
-            <div>
-              <h2 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
-                What readers will gain
-              </h2>
-              <p className="mt-2 max-w-2xl text-slate-600">
-                Chapters 1 to 6 deliver clear lessons with practical action points readers can apply immediately.
-              </p>
-            </div>
-            <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white">
-              6 Key Lessons
+          <div className="mb-10 text-center">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-600 shadow-sm backdrop-blur">
+              Inside The Book
             </span>
+            <h2 className="mx-auto mt-5 max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-5xl">
+              Six focused lessons. One clear path to stronger leadership.
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600">
+              Every chapter is built to feel direct, practical, and easy to apply in real life.
+            </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {chapterHighlights.map((chapter) => (
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {chapterHighlights.map((chapter, index) => (
               <article
                 key={chapter.title}
-                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="rounded-4xl border border-white/70 bg-white/80 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(15,23,42,0.1)]"
               >
-                <h3 className="text-lg font-semibold text-slate-900">{chapter.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{chapter.summary}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  0{index + 1}
+                </p>
+                <h3 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">
+                  {chapter.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">{chapter.summary}</p>
               </article>
             ))}
           </div>
@@ -96,66 +136,135 @@ const Home = () => {
       </section>
 
       <section className="px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-6 rounded-3xl border border-blue-100 bg-linear-to-r from-blue-600 to-indigo-600 p-8 text-white lg:grid-cols-[1.25fr_1fr] lg:items-center">
+        <div className="mx-auto grid max-w-7xl gap-6 rounded-[2.5rem] border border-white/70 bg-slate-950 px-6 py-10 text-white shadow-[0_30px_100px_rgba(15,23,42,0.22)] sm:px-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-100">Why this book stands out</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight">
-              Real experiences. Actionable principles. Clear transformation path.
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/55">
+              Why It Connects
+            </p>
+            <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.03em] md:text-5xl">
+              Real experiences, practical principles, lasting direction.
             </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-blue-100">
-              This is not motivational talk without structure. It is a practical guide that shows how mindset,
-              self-leadership, and disciplined action can move a reader from confusion to purpose-driven impact.
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/70">
+              The book is written to move beyond motivation and into clarity. It helps readers build inner strength,
+              disciplined habits, and a sense of purpose they can actually live out.
             </p>
           </div>
-          <div className="rounded-2xl bg-white/10 p-6 backdrop-blur">
-            <p className="text-sm font-medium text-blue-100">Special prelaunch price</p>
-            <p className="mt-1 text-4xl font-bold">NGN {currentPrice.toLocaleString()}</p>
-            <p className="mt-2 text-sm text-blue-100">
-              Buy now for NGN {currentPrice.toLocaleString()}. After launch, the price goes up to NGN {launchPrice.toLocaleString()}.
+
+          <div className="rounded-4xl border border-white/10 bg-white/8 p-6 backdrop-blur">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55">
+              Available Now
             </p>
-            <Link
-              to="/all-books"
-              className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
-            >
-              Get Your Copy
-            </Link>
+            <div className="mt-2 flex flex-wrap items-baseline gap-3">
+              {isPrelaunchPricing && (
+                <span className="text-xl font-medium text-white/40 line-through">
+                  NGN {launchPrice.toLocaleString()}
+                </span>
+              )}
+              <p className="text-4xl font-semibold tracking-tight">
+                NGN {currentPrice.toLocaleString()}
+              </p>
+              {isPrelaunchPricing && (
+                <span className="rounded-full bg-white/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80">
+                  Prelaunch
+                </span>
+              )}
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-white/70">
+              {isPrelaunchPricing
+                ? `Prelaunch access is live now at NGN ${currentPrice.toLocaleString()}. Standard pricing is NGN ${launchPrice.toLocaleString()}.`
+                : `Current launch access is live now at NGN ${currentPrice.toLocaleString()}.`}
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to="/all-books"
+                className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-medium text-slate-950 transition hover:bg-slate-100"
+              >
+                Order Your Copy
+              </Link>
+              <Link
+                to="/about-author"
+                className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white !text-white transition hover:bg-white/10"
+                style={{ color: 'white' }}
+              >
+                Meet the Author
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Author Note</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
-            My first book, written to help you lead boldly. 
+      <section className="px-4 pb-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10 text-center">
+            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-600 shadow-sm backdrop-blur">
+              Testimonials
+            </span>
+            <h2 className="mx-auto mt-5 max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-5xl">
+              What early readers are saying.
+            </h2>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-3">
+            {testimonials.map((testimonial) => (
+              <article
+                key={testimonial.name}
+                className="rounded-4xl border border-white/70 bg-white/80 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06)] backdrop-blur"
+              >
+                <p className="text-3xl leading-none text-slate-300">"</p>
+                <p className="mt-4 text-base leading-relaxed text-slate-600">
+                  {testimonial.quote}
+                </p>
+                <div className="mt-6 flex items-center gap-4 border-t border-slate-200 pt-4">
+                  <img
+                    src={testimonial.avatar}
+                    alt={testimonial.name}
+                    className="h-14 w-14 rounded-full object-cover ring-2 ring-slate-100"
+                  />
+                  <div>
+                  <h3 className="text-lg font-semibold tracking-tight text-slate-950">
+                    {testimonial.name}
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">{testimonial.role}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 pb-20 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl rounded-[2.5rem] border border-white/70 bg-white/85 px-6 py-12 text-center shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur sm:px-10">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Author Note
+          </p>
+          <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-5xl">
+            A first book written to help people lead with more courage and clarity.
           </h2>
           <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-slate-600">
-            If you have ever felt like your background, fear, or limited resources are holding you back,
-            this book is for you. Start with this first edition of <em>Leadership From Within</em> and build
-            a stronger mindset, stronger discipline, and stronger leadership from the inside.
+            If fear, background, or limited resources have ever made you feel stuck, this book was written with you in mind.
+            <em> Leadership From Within </em>
+            is an invitation to build a stronger mindset, stronger discipline, and stronger leadership from the inside out.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               to="/all-books"
-              className="inline-flex items-center justify-center rounded-full bg-slate-900 px-8 py-3 text-sm font-semibold text-white! transition hover:bg-slate-700 hover:text-white!"
+              className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-3 text-sm font-medium transition hover:bg-slate-800"
+              style={{ color: 'white' }}
             >
-              Buy at NGN {currentPrice.toLocaleString()}
+              {isPrelaunchPricing
+                ? `Buy at Prelaunch NGN ${currentPrice.toLocaleString()}`
+                : `Buy at NGN ${currentPrice.toLocaleString()}`}
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center justify-center rounded-full border border-slate-300 px-8 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-8 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
             >
-                Sign In with Google
+              Sign In with Google
             </Link>
           </div>
         </div>
       </section>
-
-      {loading && (
-        <div className="pb-10 text-center text-sm text-slate-500">
-          Loading latest book details...
-        </div>
-      )}
     </div>
   );
 };

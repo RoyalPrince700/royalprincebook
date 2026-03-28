@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBookCover } from '../../utils/bookUtils';
+import { getBookCover, getOriginalBookPrice } from '../../utils/bookUtils';
 import { useAuth } from '../../contexts/AuthContext';
 
 const BookCard = ({
@@ -24,6 +24,7 @@ const BookCard = ({
   const navigate = useNavigate();
 
   const canRead = isOwned || !book?.price || book.price === 0 || user?.role === 'admin';
+  const originalPrice = getOriginalBookPrice(book?.title, book?.price);
 
   const handleRead = (e) => {
     if (e) e.stopPropagation();
@@ -94,11 +95,18 @@ const BookCard = ({
           <div className="flex items-end justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
-                {book.price && book.price > 0 ? 'Available now' : 'Included'}
+                {book.price && book.price > 0 ? (originalPrice ? 'Prelaunch price' : 'Available now') : 'Included'}
               </p>
-              <p className="mt-1 text-2xl font-semibold tracking-tight text-white">
-                {book.price && book.price > 0 ? `NGN ${book.price.toLocaleString()}` : 'Free'}
-              </p>
+              <div className="mt-1 flex flex-wrap items-baseline gap-2">
+                {originalPrice && (
+                  <span className="text-sm font-medium text-white/55 line-through">
+                    NGN {originalPrice.toLocaleString()}
+                  </span>
+                )}
+                <p className="text-2xl font-semibold tracking-tight text-white">
+                  {book.price && book.price > 0 ? `NGN ${book.price.toLocaleString()}` : 'Free'}
+                </p>
+              </div>
             </div>
             <span className="hidden rounded-full border border-white/30 px-4 py-2 text-sm font-medium text-white backdrop-blur md:inline-flex">
               {canRead ? 'Read Now' : 'View Book'}

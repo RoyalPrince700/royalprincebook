@@ -5,6 +5,7 @@ import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../contexts/AuthContext';
 import { bookData as leadingFromWithinBook } from '../../chapters';
 import axios from 'axios';
+import PageLoader from '../PageLoader';
 
 const BookEditor = () => {
   const { bookId } = useParams();
@@ -200,16 +201,10 @@ const BookEditor = () => {
 
   if (loading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div className="card text-center">
-          <h3>Loading book...</h3>
-        </div>
-      </div>
+      <PageLoader
+        title="Loading the editor"
+        message="Preparing pages, content tools, and book settings."
+      />
     );
   }
 
