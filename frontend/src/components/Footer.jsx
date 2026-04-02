@@ -99,7 +99,7 @@ For readers committed to growth, clarity, and meaningful progress.
             }}>
               <li>
                 <a
-                  href="mailto:contact@royalprincebook.com"
+                  href="mailto:contact@royalprincehub.com"
                   style={{
                     color: 'var(--text-secondary)',
                     textDecoration: 'none',
@@ -108,7 +108,7 @@ For readers committed to growth, clarity, and meaningful progress.
                   onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
                   onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
                 >
-                  contact@royalprincebook.com
+                  contact@royalprincehub.com
                 </a>
               </li>
              

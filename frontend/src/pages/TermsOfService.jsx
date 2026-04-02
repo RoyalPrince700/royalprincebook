@@ -39,7 +39,7 @@ const TermsOfService = () => {
                 <div>
                   <h2 className="text-2xl font-semibold text-slate-900 mb-4">Welcome to Royal Prince Book</h2>
                   <p className="text-slate-600 leading-relaxed">
-                    We're excited to share "Leading From Within" and other leadership content with you. These simple terms help keep things fair and clear for everyone.
+                    We're excited to share "Leadership From Within" and other leadership content with you. These simple terms help keep things fair and clear for everyone.
                   </p>
                 </div>
 
@@ -49,13 +49,10 @@ const TermsOfService = () => {
                     To read our books, you'll need to create a free account with:
                   </p>
                   <ul className="text-slate-600 mb-6 ml-6 list-disc leading-relaxed">
-                    <li>Your name</li>
-                    <li>A valid email address</li>
-                    <li>A secure password</li>
+                    <li>Your gmail</li>
+                  
                   </ul>
-                  <p className="text-slate-600 leading-relaxed">
-                    Keep your password safe and let us know if you think someone else is using your account.
-                  </p>
+                
                 </div>
 
                 <div>
@@ -70,13 +67,7 @@ const TermsOfService = () => {
                   </ul>
                 </div>
 
-                <div>
-                  <h2 className="text-2xl font-semibold text-slate-900 mb-4">Our Refund Promise</h2>
-                  <p className="text-slate-600 leading-relaxed">
-                    Not happy with your purchase? Contact us within 7 days and we'll give you a full refund. We want you to love what you read.
-                  </p>
-                </div>
-
+             
                 <div>
                   <h2 className="text-2xl font-semibold text-slate-900 mb-4">Using Our Service</h2>
                   <p className="text-slate-600 mb-4 leading-relaxed">

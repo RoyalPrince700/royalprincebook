@@ -42,9 +42,8 @@ const PrivacyPolicy = () => {
                     We only collect the basic information you provide when creating an account:
                   </p>
                   <ul className="text-slate-600 mb-6 ml-6 list-disc leading-relaxed">
-                    <li>Your name</li>
-                    <li>Your email address</li>
-                    <li>A secure password</li>
+                    <li>Your gmail</li>
+                  
                   </ul>
                   <p className="text-slate-600 leading-relaxed">
                     That's it. No tracking, no cookies, no personal data collection beyond what's needed for your account.
@@ -97,7 +96,7 @@ const PrivacyPolicy = () => {
                   </p>
                   <div className="bg-slate-50 p-4 rounded-lg mb-6">
                     <p className="text-slate-600">
-                      <strong>Email:</strong> contact@royalprincebook.com
+                      <strong>Email:</strong> contact@royalprincehub.com
                     </p>
                   </div>
                 </div>
