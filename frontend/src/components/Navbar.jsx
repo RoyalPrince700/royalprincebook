@@ -104,7 +104,7 @@ const Navbar = () => {
 
   return (
     <header className="fixed left-0 right-0 top-0 z-50 transition-all duration-300 ease-out">
-      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4  sm:px-6 lg:px-8">
         <div
           className={`flex min-h-16 items-center justify-between rounded-[2rem] border px-4 py-3 transition-all duration-300 sm:px-5 ${shellClass}`}
         >
@@ -259,13 +259,7 @@ const Navbar = () => {
               style={{ color: 'white' }} >
                   Sign in
                 </Link>
-                {/* <Link
-                  to="/register"
-                  className="inline-flex w-full items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-                  onClick={closeMenu}
-                >
-                  Sign up with Google
-                </Link> */}
+             
               </div>
             )}
           </div>

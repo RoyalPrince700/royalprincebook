@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Hero from '../components/Hero';
-import PageLoader from '../components/PageLoader';
 import adeyemiAvatar from '../assets/adeyemi.jpg';
 import francisAvatar from '../assets/francis.jpg';
 import favourAvatar from '../assets/favour.png';
@@ -60,7 +59,8 @@ const testimonials = [
 const Home = () => {
   const launchPrice = 2000;
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Default to a fallback price immediately so content shows instantly
+  const [isLoadingBooks, setIsLoadingBooks] = useState(true);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -71,7 +71,7 @@ const Home = () => {
         console.error('Failed to fetch books:', error);
         setBooks([]);
       } finally {
-        setLoading(false);
+        setIsLoadingBooks(false);
       }
     };
 
@@ -86,17 +86,9 @@ const Home = () => {
     [books]
   );
 
+  // Show fallback price while loading, then update when data arrives
   const currentPrice = leadingFromWithinBook?.price ?? 1000;
   const isPrelaunchPricing = currentPrice < launchPrice;
-
-  if (loading) {
-    return (
-      <PageLoader
-        title="Loading the home experience"
-        message="Bringing in the latest book details and pricing for a smoother first look."
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200">
@@ -155,7 +147,7 @@ const Home = () => {
               Available Now
             </p>
             <div className="mt-2 flex flex-wrap items-baseline gap-3">
-              {isPrelaunchPricing && (
+              {isPrelaunchPricing && !isLoadingBooks && (
                 <span className="text-xl font-medium text-white/40 line-through">
                   NGN {launchPrice.toLocaleString()}
                 </span>
@@ -163,14 +155,14 @@ const Home = () => {
               <p className="text-4xl font-semibold tracking-tight">
                 NGN {currentPrice.toLocaleString()}
               </p>
-              {isPrelaunchPricing && (
+              {isPrelaunchPricing && !isLoadingBooks && (
                 <span className="rounded-full bg-white/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80">
                   Prelaunch
                 </span>
               )}
             </div>
             <p className="mt-3 text-sm leading-relaxed text-white/70">
-              {isPrelaunchPricing
+              {!isLoadingBooks && isPrelaunchPricing
                 ? `Prelaunch access is live now at NGN ${currentPrice.toLocaleString()}. Standard pricing is NGN ${launchPrice.toLocaleString()}.`
                 : `Current launch access is live now at NGN ${currentPrice.toLocaleString()}.`}
             </p>
@@ -252,7 +244,7 @@ const Home = () => {
               className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-3 text-sm font-medium transition hover:bg-slate-800"
               style={{ color: 'white' }}
             >
-              {isPrelaunchPricing
+              {!isLoadingBooks && isPrelaunchPricing
                 ? `Buy at Prelaunch NGN ${currentPrice.toLocaleString()}`
                 : `Buy at NGN ${currentPrice.toLocaleString()}`}
             </Link>
