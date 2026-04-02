@@ -70,7 +70,7 @@ const PrivacyPolicy = () => {
                   </p>
                 </div>
 
-                <div>
+                {/* <div>
                   <h2 className="text-2xl font-semibold text-slate-900 mb-4">Your Account, Your Control</h2>
                   <p className="text-slate-600 mb-4 leading-relaxed">
                     You can:
@@ -80,12 +80,12 @@ const PrivacyPolicy = () => {
                     <li>Delete your account if you no longer want to use our service</li>
                     <li>Contact us to ask questions about your data</li>
                   </ul>
-                </div>
+                </div> */}
 
                 <div>
                   <h2 className="text-2xl font-semibold text-slate-900 mb-4">Keeping Things Safe</h2>
                   <p className="text-slate-600 leading-relaxed">
-                    We use industry-standard security to protect your information. Your password is encrypted, and we follow best practices to keep your data secure.
+                    We use industry-standard security to protect your information and we follow best practices to keep your data secure.
                   </p>
                 </div>
 
