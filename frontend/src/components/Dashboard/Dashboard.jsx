@@ -127,10 +127,10 @@ const Dashboard = () => {
                   {showCreateForm ? 'Close Form' : 'Create New Book'}
                 </button>
                 <Link
-                  to="/admin/users"
+                  to="/admin"
                   className="inline-flex min-w-40 items-center justify-center rounded-full border border-slate-300 bg-white/80 px-8 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-white"
                 >
-                  Manage Users
+                  Admin Overview
                 </Link>
               </>
             )}
@@ -237,10 +237,10 @@ const Dashboard = () => {
                 </Link>
                 {user?.role === 'admin' && (
                   <Link
-                    to="/admin/users"
+                    to="/admin"
                     className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
                   >
-                    User Management
+                    Admin Overview
                   </Link>
                 )}
               </div>

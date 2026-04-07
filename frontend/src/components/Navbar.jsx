@@ -41,6 +41,8 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  const isAdmin = user?.role === 'admin';
+
   // Handle click outside to close menu
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -84,6 +86,10 @@ const Navbar = () => {
     navLinks.push({ to: '/dashboard', label: 'Dashboard' });
   }
 
+  if (isAdmin) {
+    navLinks.push({ to: '/admin', label: 'Admin' });
+  }
+
   const isTransparent = isHome && !scrolled && !isMenuOpen;
   const shellClass = isTransparent
     ? 'border-transparent bg-transparent shadow-none'
@@ -106,7 +112,7 @@ const Navbar = () => {
     <header className="fixed left-0 right-0 top-0 z-50 transition-all duration-300 ease-out">
       <div className="mx-auto max-w-7xl px-4  sm:px-6 lg:px-8">
         <div
-          className={`flex min-h-16 items-center justify-between rounded-[2rem] border px-4 py-3 transition-all duration-300 sm:px-5 ${shellClass}`}
+          className={`flex min-h-16 items-center justify-between rounded-4xl border px-4 py-3 transition-all duration-300 sm:px-5 ${shellClass}`}
         >
           <div className="flex shrink-0 items-center">
             <Link
@@ -189,7 +195,7 @@ const Navbar = () => {
         />
         <div
           ref={menuRef}
-          className={`absolute right-4 top-4 w-[calc(100%-2rem)] max-w-sm rounded-[2rem] border border-white/70 bg-white/92 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 ${
+          className={`absolute right-4 top-4 w-[calc(100%-2rem)] max-w-sm rounded-4xl border border-white/70 bg-white/92 p-5 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-xl transition-all duration-300 ${
             isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0'
           }`}
         >

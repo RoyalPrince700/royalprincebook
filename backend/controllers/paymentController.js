@@ -1,6 +1,7 @@
 const axios = require('axios');
 const Book = require('../models/Book');
 const User = require('../models/User');
+const PaymentTransaction = require('../models/PaymentTransaction');
 const { sendBookPurchaseEmail } = require('../mailtrap/emails');
 const { getEffectiveBookPrice } = require('../bookPricing');
 
@@ -49,6 +50,31 @@ const verifyPayment = async (req, res) => {
         return res.status(400).json({ message: 'Invalid payment currency' });
       }
     }
+
+    await PaymentTransaction.findOneAndUpdate(
+      { transactionId: String(transaction_id) },
+      {
+        transactionId: String(transaction_id),
+        txRef: data?.tx_ref || '',
+        user: userId,
+        book: book._id,
+        amount: typeof data?.amount === 'number' ? data.amount : requiredAmount,
+        currency: data?.currency || 'NGN',
+        status: 'successful',
+        customerEmail: data?.customer?.email || req.user.email || '',
+        customerName: data?.customer?.name || req.user.username || '',
+        paymentType: data?.payment_type || '',
+        processorResponse: data?.processor_response || '',
+        gatewayResponse: data?.gateway_response || '',
+        paidAt: data?.created_at ? new Date(data.created_at) : new Date(),
+        verifiedAt: new Date()
+      },
+      {
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true
+      }
+    );
 
     // Add book to user's purchasedBooks
     const user = await User.findById(userId);

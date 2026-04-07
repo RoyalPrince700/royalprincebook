@@ -160,10 +160,10 @@ const BookList = () => {
                   {showCreateForm ? 'Close Form' : 'Create New Book'}
                 </button>
                 <Link
-                  to="/admin/users"
+                  to="/admin"
                   className="inline-flex min-w-40 items-center justify-center rounded-full border border-slate-300 bg-white/80 px-8 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-white"
                 >
-                  User Management
+                  Admin Overview
                 </Link>
               </>
             ) : null}

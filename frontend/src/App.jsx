@@ -15,7 +15,10 @@ import BookList from './components/Book/BookList';
 import ReadBook from './pages/ReadBook';
 import PrivateRoute from './components/Auth/PrivateRoute';
 import AdminRoute from './components/Auth/AdminRoute';
+import AdminOverview from './components/Admin/AdminOverview';
+import AdminBooks from './components/Admin/AdminBooks';
 import UserManagement from './components/Admin/UserManagement';
+import AdminFinance from './components/Admin/AdminFinance';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
@@ -65,10 +68,34 @@ function App() {
                   }
                 />
                 <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <AdminOverview />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/books"
+                  element={
+                    <AdminRoute>
+                      <AdminBooks />
+                    </AdminRoute>
+                  }
+                />
+                <Route
                   path="/admin/users"
                   element={
                     <AdminRoute>
                       <UserManagement />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/finance"
+                  element={
+                    <AdminRoute>
+                      <AdminFinance />
                     </AdminRoute>
                   }
                 />

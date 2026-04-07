@@ -74,6 +74,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bookwrite
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/admin', require('./routes/admin'));
 app.use('/api/books', require('./routes/books'));
 app.use('/api/payment', require('./routes/payment'));
 app.use('/api/export', require('./routes/export'));
