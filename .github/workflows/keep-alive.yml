@@ -25,4 +25,3 @@ jobs:
         echo "Performing health check"
         # Try to access a common health endpoint or root
         curl -f https://royalprincebook.onrender.com/health || curl -f https://royalprincebook.onrender.com/ || echo "Health check completed"
-

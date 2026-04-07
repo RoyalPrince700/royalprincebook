@@ -24,6 +24,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
 import Cart from './pages/Cart';
 import { CartProvider } from './contexts/CartContext';
+import { BlogListPage, BlogPostPage } from './blog';
 import './App.css';
 
 const Layout = ({ children }) => {
@@ -55,6 +56,8 @@ function App() {
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/all-books" element={<BookList />} />
+                <Route path="/blog" element={<BlogListPage />} />
+                <Route path="/blog/:slug" element={<BlogPostPage />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
