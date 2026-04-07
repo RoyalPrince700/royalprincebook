@@ -55,7 +55,7 @@ const CartItemCard = ({
 
           <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 md:min-w-36">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              {originalPrice ? 'Prelaunch price' : 'Price'}
+              {originalPrice ? 'Launch offer price' : 'Price'}
             </p>
             <div className="mt-1 flex flex-wrap items-baseline gap-2">
               {originalPrice && (

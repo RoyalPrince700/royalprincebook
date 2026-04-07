@@ -198,7 +198,7 @@ const ReadBook = () => {
           </p>
           <div className="reader-price-block">
             <span className="reader-price-label">
-              {originalPrice ? 'Prelaunch price' : 'Price'}
+              {originalPrice ? 'Launch offer price' : 'Price'}
             </span>
             <strong className="reader-price-value">NGN {book.price.toLocaleString()}</strong>
           </div>
@@ -209,7 +209,7 @@ const ReadBook = () => {
           )}
           <p className="reader-message-copy">
             {originalPrice
-              ? `Prelaunch access is live now at NGN ${book.price.toLocaleString()}. Standard price returns to NGN ${originalPrice.toLocaleString()}.`
+              ? `Launch offer is live now at NGN ${book.price.toLocaleString()}. Standard price returns to NGN ${originalPrice.toLocaleString()}.`
               : `Buy now for NGN ${book.price.toLocaleString()}.`}
           </p>
           <button 

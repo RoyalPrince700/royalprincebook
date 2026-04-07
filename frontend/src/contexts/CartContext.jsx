@@ -3,13 +3,13 @@ import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 const CART_STORAGE_KEY = 'book-cart-items';
-const PRELAUNCH_BOOK_MATCHERS = ['leading from within', 'leadership from within'];
-const PRELAUNCH_PRICE = 1000;
+const LAUNCH_OFFER_BOOK_MATCHERS = ['leading from within', 'leadership from within'];
+const LAUNCH_OFFER_PRICE = 1000;
 
 const getEffectivePrice = (book) => {
   const title = (book?.title || '').toLowerCase();
-  const isPrelaunchBook = PRELAUNCH_BOOK_MATCHERS.some((matcher) => title.includes(matcher));
-  return isPrelaunchBook ? PRELAUNCH_PRICE : book?.price || 0;
+  const isLaunchOfferBook = LAUNCH_OFFER_BOOK_MATCHERS.some((matcher) => title.includes(matcher));
+  return isLaunchOfferBook ? LAUNCH_OFFER_PRICE : book?.price || 0;
 };
 
 const getStoredCart = () => {

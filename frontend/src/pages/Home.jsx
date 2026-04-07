@@ -88,7 +88,7 @@ const Home = () => {
 
   // Show fallback price while loading, then update when data arrives
   const currentPrice = leadingFromWithinBook?.price ?? 1000;
-  const isPrelaunchPricing = currentPrice < launchPrice;
+  const hasLaunchOfferPricing = currentPrice < launchPrice;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200">
@@ -147,7 +147,7 @@ const Home = () => {
               Available Now
             </p>
             <div className="mt-2 flex flex-wrap items-baseline gap-3">
-              {isPrelaunchPricing && !isLoadingBooks && (
+              {hasLaunchOfferPricing && !isLoadingBooks && (
                 <span className="text-xl font-medium text-white/40 line-through">
                   NGN {launchPrice.toLocaleString()}
                 </span>
@@ -155,15 +155,15 @@ const Home = () => {
               <p className="text-4xl font-semibold tracking-tight">
                 NGN {currentPrice.toLocaleString()}
               </p>
-              {isPrelaunchPricing && !isLoadingBooks && (
+              {hasLaunchOfferPricing && !isLoadingBooks && (
                 <span className="rounded-full bg-white/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80">
-                  Prelaunch
+                  Launch Offer
                 </span>
               )}
             </div>
             <p className="mt-3 text-sm leading-relaxed text-white/70">
-              {!isLoadingBooks && isPrelaunchPricing
-                ? `Prelaunch access is live now at NGN ${currentPrice.toLocaleString()}. Standard pricing is NGN ${launchPrice.toLocaleString()}.`
+              {!isLoadingBooks && hasLaunchOfferPricing
+                ? `Launch offer is live now at NGN ${currentPrice.toLocaleString()}. Standard pricing is NGN ${launchPrice.toLocaleString()}.`
                 : `Current launch access is live now at NGN ${currentPrice.toLocaleString()}.`}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -175,7 +175,7 @@ const Home = () => {
               </Link>
               <Link
                 to="/about-author"
-                className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white !text-white transition hover:bg-white/10"
+                className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
                 style={{ color: 'white' }}
               >
                 Meet the Author
@@ -244,8 +244,8 @@ const Home = () => {
               className="inline-flex items-center justify-center rounded-full bg-slate-950 px-8 py-3 text-sm font-medium transition hover:bg-slate-800"
               style={{ color: 'white' }}
             >
-              {!isLoadingBooks && isPrelaunchPricing
-                ? `Buy at Prelaunch NGN ${currentPrice.toLocaleString()}`
+              {!isLoadingBooks && hasLaunchOfferPricing
+                ? `Buy at Launch Offer NGN ${currentPrice.toLocaleString()}`
                 : `Buy at NGN ${currentPrice.toLocaleString()}`}
             </Link>
             <Link

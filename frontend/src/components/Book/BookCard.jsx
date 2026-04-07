@@ -95,7 +95,7 @@ const BookCard = ({
           <div className="flex items-end justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
-                {book.price && book.price > 0 ? (originalPrice ? 'Prelaunch price' : 'Available now') : 'Included'}
+                {book.price && book.price > 0 ? (originalPrice ? 'Launch offer price' : 'Available now') : 'Included'}
               </p>
               <div className="mt-1 flex flex-wrap items-baseline gap-2">
                 {originalPrice && (

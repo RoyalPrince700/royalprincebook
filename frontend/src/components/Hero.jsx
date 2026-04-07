@@ -4,7 +4,7 @@ import leadingFromWithinImage from '../assets/leadershipfromwithin.jpg';
 
 const Hero = ({ currentPrice, launchPrice }) => {
   const [showAboutBook, setShowAboutBook] = useState(false);
-  const isPrelaunchPricing = currentPrice < launchPrice;
+  const hasLaunchOfferPricing = currentPrice < launchPrice;
 
   return (
     <section className="relative overflow-hidden bg-slate-50 px-4 pb-20 pt-20 sm:px-6 md:pt-28 lg:px-8">
@@ -43,15 +43,15 @@ const Hero = ({ currentPrice, launchPrice }) => {
         </div>
 
         <div className="mt-4 hidden items-center justify-center gap-3 text-sm text-slate-500 sm:flex">
-          {isPrelaunchPricing && (
+          {hasLaunchOfferPricing && (
             <span className="text-slate-400 line-through">
               NGN {launchPrice.toLocaleString()}
             </span>
           )}
           <span>
-            {isPrelaunchPricing ? 'Prelaunch price' : 'Available now'}: NGN {currentPrice.toLocaleString()}
+            {hasLaunchOfferPricing ? 'Launch offer price' : 'Available now'}: NGN {currentPrice.toLocaleString()}
           </span>
-          {isPrelaunchPricing && (
+          {hasLaunchOfferPricing && (
             <>
               <span className="text-slate-300">|</span>
               <span>Standard price is NGN {launchPrice.toLocaleString()}.</span>
@@ -152,7 +152,7 @@ const Hero = ({ currentPrice, launchPrice }) => {
             <div className="rounded-3xl border border-white/70 bg-white/70 p-5 shadow-sm backdrop-blur">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Price</p>
               <div className="mt-2 flex flex-wrap items-baseline gap-2">
-                {isPrelaunchPricing && (
+                {hasLaunchOfferPricing && (
                   <span className="text-base font-medium text-slate-400 line-through">
                     NGN {launchPrice.toLocaleString()}
                   </span>
@@ -160,9 +160,9 @@ const Hero = ({ currentPrice, launchPrice }) => {
                 <p className="text-3xl font-semibold tracking-tight text-slate-950">
                   NGN {currentPrice.toLocaleString()}
                 </p>
-                {isPrelaunchPricing && (
+                {hasLaunchOfferPricing && (
                   <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                    Prelaunch
+                    Launch Offer
                   </span>
                 )}
               </div>
