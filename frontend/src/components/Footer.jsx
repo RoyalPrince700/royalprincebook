@@ -114,7 +114,9 @@ For readers committed to growth, clarity, and meaningful progress.
              
               <li>
                 <a
-                  href="#"
+                  href="https://twitter.com/royalprincecube"
+                  target="_blank"
+                  rel="noreferrer"
                   style={{
                     color: 'var(--text-secondary)',
                     textDecoration: 'none',

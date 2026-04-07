@@ -14,8 +14,9 @@ const BlogListPage = () => {
             Stories, lessons, and practical reflections.
           </h1>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600">
-            This blog section is fully frontend-driven, making it easy to publish and manage
-            articles directly from the app codebase.
+            A collection of my experiences, thoughts, and practical reflections on
+            leadership, growth, everyday living, and the lessons that shape how I
+            see life.
           </p>
         </div>
 
