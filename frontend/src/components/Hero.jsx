@@ -69,9 +69,11 @@ const Hero = ({ currentPrice, launchPrice }) => {
                   alt="Leadership From Within Book Cover"
                   className="h-[420px] w-full object-cover sm:h-[500px] lg:h-[580px]"
                 />
+                
+                {/* Overlay content - now visible on ALL screen sizes (mobile + desktop) */}
                 {showAboutBook && (
-                  <div className="absolute inset-0 z-20 flex items-end bg-slate-950/45 p-4 sm:hidden">
-                    <div className="max-h-full w-full overflow-y-auto rounded-[1.75rem] border border-white/30 bg-white/15 p-5 text-left text-white shadow-[0_20px_60px_rgba(15,23,42,0.25)] backdrop-blur-2xl">
+                  <div className="absolute inset-0 z-20 flex items-end sm:items-center sm:justify-center bg-slate-950/45 p-4 sm:p-6">
+                    <div className="max-h-full w-full overflow-y-auto rounded-[1.75rem] border border-white/30 bg-white/15 p-5 text-left text-white shadow-[0_20px_60px_rgba(15,23,42,0.25)] backdrop-blur-2xl sm:max-w-2xl sm:p-8">
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
@@ -106,7 +108,7 @@ const Hero = ({ currentPrice, launchPrice }) => {
                         leadership is not something you claim. It is something you build
                         quietly within yourself long before anyone else sees it.
                       </p>
-                      <div className="mt-5 flex flex-col gap-3">
+                      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                         <Link
                           to="/about-author"
                           className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/10 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/20"
@@ -123,6 +125,8 @@ const Hero = ({ currentPrice, launchPrice }) => {
                     </div>
                   </div>
                 )}
+                
+                {/* Mobile-only bottom controls - hidden on desktop */}
                 <div className="absolute inset-x-0 bottom-0 z-10 bg-linear-to-t from-slate-950/85 via-slate-950/45 to-transparent p-4 pt-20 sm:hidden">
                   <div className="grid grid-cols-2 gap-3">
                     <Link
@@ -180,40 +184,8 @@ const Hero = ({ currentPrice, launchPrice }) => {
           </div>
         </div>
 
-        {showAboutBook && (
-          <div className="mx-auto mt-8 hidden max-w-3xl rounded-4xl border border-white/70 bg-white/80 p-6 text-left shadow-xl backdrop-blur sm:block">
-            <h3 className="text-xl font-semibold tracking-tight text-slate-950">
-              About <em>Leadership From Within</em>
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-              <em>Leadership From Within</em> is a call to wake up and take control of your
-              life. It begins from a place many people know too well, starting small,
-              unseen, and dealing with the struggles that happen inside. From there, the
-              author challenges weak thinking and replaces it with discipline and
-              self-control. It shows that leadership is first shaped in private, through the
-              choices you make every day.
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600 sm:text-base">
-              At its core, <em>Leadership From Within</em> reminds you that leadership is not
-              something you claim. It is something you build quietly within yourself long
-              before anyone else sees it.
-            </p>
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-              <Link
-                to="/about-author"
-                className="inline-flex items-center justify-center rounded-full border border-slate-300 px-6 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
-              >
-                About Author
-              </Link>
-              <Link
-                to="/all-books"
-                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white! transition hover:bg-slate-800 hover:text-white!"
-              >
-                Buy Your Copy
-              </Link>
-            </div>
-          </div>
-        )}
+        {/* REMOVED: Desktop-only about section that appeared below the book */}
+        {/* This content now lives exclusively in the overlay inside the book image */}
       </div>
     </section>
   );

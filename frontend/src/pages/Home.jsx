@@ -41,15 +41,15 @@ const testimonials = [
     quote:
       'The book is so practical and relatable, they are principles/actions point which when engaged have one desire output which is Results. You have lived it and now you are putting it in a book for those that want to have the same results as yours. This is a book I can recommend to anyone struggling and be certain that they will find their feet.'},
   {
-    name: 'Adeyemi Francis',
+    name: 'Adeboye Francis',
     role: 'SU, Senate President, University of Ilorin.',
     avatar: francisAvatar,
     quote:
-      'I expected inspiration, but what stayed with me was the clarity. Each chapter pushed me toward discipline and real action. The practical lessons and the focus on mindset set this book apart. If you’re ready to grow as a leader and see actual results, this book will challenge and help you to do just that.'
+      'I expected inspiration, but what stayed with me was the clarity. Each chapter pushed me toward discipline and real action. The practical lessons and the focus on mindset set this book apart. If you’re ready to grow as a leader and see actual results, this book will challenge and help you to do just that. I highly recommend this book to all aspiring leaders.'
   },
   {
     name: 'Oladipo Favour',
-    role: 'Young Professional',
+    role: 'Entrepreneur',
     avatar: favourAvatar,
     quote:
       'This is the kind of book you return to when you need to reset and lead well. What I appreciate most is that it goes beyond leadership theory; it gives you simple, practical steps that anyone regardless of experience can apply and see real change. Whether you feel lost, discouraged, this book gives you the focus and courage to try again.'

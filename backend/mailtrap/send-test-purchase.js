@@ -5,23 +5,34 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 process.env.MAILTRAP_USE_PRODUCTION = 'true';
 
-const { sendWelcomeEmail } = require('./emails');
+const { sendBookPurchaseEmail } = require('./emails');
 const { getConfiguredMode } = require('./mailtrap.config');
 
-const recipient = {
-  email: 'finetex700@gmail.com'
+const payload = {
+  user: {
+    email: 'finetex700@gmail.com'
+  },
+  book: {
+    title: 'Leadership From Within',
+    price: 1000
+  },
+  paymentData: {
+    amount: 1000,
+    currency: 'NGN',
+    id: 'TEST-PAYMENT-EMAIL-001'
+  }
 };
 
 const run = async () => {
   try {
     const mode = getConfiguredMode();
-    const result = await sendWelcomeEmail(recipient);
+    const result = await sendBookPurchaseEmail(payload);
 
-    console.log('Welcome test email sent.');
+    console.log('Purchase test email sent.');
     console.log(`Mode: ${mode}`);
     console.log(JSON.stringify(result, null, 2));
   } catch (error) {
-    console.error('Failed to send welcome test email.');
+    console.error('Failed to send purchase test email.');
     console.error(error.response?.data || error.message || error);
     process.exitCode = 1;
   }
