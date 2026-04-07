@@ -3,14 +3,26 @@ const User = require('../models/User');
 const PaymentTransaction = require('../models/PaymentTransaction');
 const { applyEffectivePrice } = require('../bookPricing');
 
+const getPurchasedBooksCount = (user) => (
+  Array.isArray(user?.purchasedBooks) ? user.purchasedBooks.length : 0
+);
+
+const getPaymentCount = (userStats) => userStats?.paymentCount || 0;
+
+const getBooksUnlockedCount = (user, userStats) => (
+  Math.max(getPurchasedBooksCount(user), getPaymentCount(userStats))
+);
+
+const hasPaidActivity = (user, userStats) => getBooksUnlockedCount(user, userStats) > 0;
+
 const getAdminOverview = async (_req, res) => {
   try {
     const [
       totalBooks,
       totalUsers,
       roleCounts,
-      paidUsersCount,
-      purchasedBooksAggregate,
+      purchaseUsers,
+      transactionStats,
       financeAggregate,
       recentTransactions,
       recentBooks
@@ -25,19 +37,13 @@ const getAdminOverview = async (_req, res) => {
           }
         }
       ]),
-      User.countDocuments({ 'purchasedBooks.0': { $exists: true } }),
-      User.aggregate([
-        {
-          $project: {
-            purchasedBooksCount: {
-              $size: { $ifNull: ['$purchasedBooks', []] }
-            }
-          }
-        },
+      User.find({}, 'purchasedBooks').lean(),
+      PaymentTransaction.aggregate([
+        { $match: { status: 'successful' } },
         {
           $group: {
-            _id: null,
-            booksUnlocked: { $sum: '$purchasedBooksCount' }
+            _id: '$user',
+            paymentCount: { $sum: 1 }
           }
         }
       ]),
@@ -72,14 +78,31 @@ const getAdminOverview = async (_req, res) => {
       totalTransactions: 0
     };
 
+    const transactionMap = new Map(
+      transactionStats.map((item) => [String(item._id), item])
+    );
+
+    const purchaseSummary = purchaseUsers.reduce((summary, user) => {
+      const userStats = transactionMap.get(String(user._id));
+      const booksUnlockedCount = getBooksUnlockedCount(user, userStats);
+
+      return {
+        paidUsers: summary.paidUsers + (hasPaidActivity(user, userStats) ? 1 : 0),
+        booksUnlocked: summary.booksUnlocked + booksUnlockedCount
+      };
+    }, {
+      paidUsers: 0,
+      booksUnlocked: 0
+    });
+
     res.json({
       stats: {
         totalBooks,
         totalUsers,
         totalAdmins: roleSummary.admin || 0,
         totalReaders: roleSummary.user || 0,
-        paidUsers: paidUsersCount,
-        booksUnlocked: purchasedBooksAggregate[0]?.booksUnlocked || 0,
+        paidUsers: purchaseSummary.paidUsers,
+        booksUnlocked: purchaseSummary.booksUnlocked,
         totalRevenue: financeSummary.totalRevenue || 0,
         totalTransactions: financeSummary.totalTransactions || 0
       },
@@ -161,17 +184,18 @@ const getAdminUsers = async (_req, res) => {
     res.json({
       users: users.map((user) => {
         const userStats = transactionMap.get(String(user._id));
-        const purchasedBooksCount = Array.isArray(user.purchasedBooks)
-          ? user.purchasedBooks.length
-          : 0;
+        const purchasedBooksCount = getPurchasedBooksCount(user);
+        const paymentCount = getPaymentCount(userStats);
+        const booksUnlockedCount = getBooksUnlockedCount(user, userStats);
 
         return {
           ...user.toObject(),
           purchasedBooksCount,
-          paymentCount: userStats?.paymentCount || 0,
+          paymentCount,
+          booksUnlockedCount,
           totalSpent: userStats?.totalSpent || 0,
           lastPaymentAt: userStats?.lastPaymentAt || null,
-          hasPaid: purchasedBooksCount > 0 || (userStats?.paymentCount || 0) > 0
+          hasPaid: hasPaidActivity(user, userStats)
         };
       })
     });
@@ -183,7 +207,7 @@ const getAdminUsers = async (_req, res) => {
 
 const getAdminFinance = async (_req, res) => {
   try {
-    const [financeAggregate, purchasedBooksAggregate, transactions, users, transactionStats] = await Promise.all([
+    const [financeAggregate, transactions, users, transactionStats] = await Promise.all([
       PaymentTransaction.aggregate([
         { $match: { status: 'successful' } },
         {
@@ -192,26 +216,6 @@ const getAdminFinance = async (_req, res) => {
             totalRevenue: { $sum: '$amount' },
             totalTransactions: { $sum: 1 },
             averageOrderValue: { $avg: '$amount' }
-          }
-        }
-      ]),
-      User.aggregate([
-        {
-          $project: {
-            purchasedBooksCount: {
-              $size: { $ifNull: ['$purchasedBooks', []] }
-            }
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            booksUnlocked: { $sum: '$purchasedBooksCount' },
-            paidUsersCount: {
-              $sum: {
-                $cond: [{ $gt: ['$purchasedBooksCount', 0] }, 1, 0]
-              }
-            }
           }
         }
       ]),
@@ -240,11 +244,6 @@ const getAdminFinance = async (_req, res) => {
       averageOrderValue: 0
     };
 
-    const purchaseSummary = purchasedBooksAggregate[0] || {
-      booksUnlocked: 0,
-      paidUsersCount: 0
-    };
-
     const transactionMap = new Map(
       transactionStats.map((item) => [String(item._id), item])
     );
@@ -252,10 +251,9 @@ const getAdminFinance = async (_req, res) => {
     const paidUsers = users
       .map((user) => {
         const userStats = transactionMap.get(String(user._id));
-        const purchasedBooksCount = Array.isArray(user.purchasedBooks)
-          ? user.purchasedBooks.length
-          : 0;
-        const paymentCount = userStats?.paymentCount || 0;
+        const purchasedBooksCount = getPurchasedBooksCount(user);
+        const paymentCount = getPaymentCount(userStats);
+        const booksUnlockedCount = getBooksUnlockedCount(user, userStats);
 
         return {
           _id: user._id,
@@ -263,19 +261,28 @@ const getAdminFinance = async (_req, res) => {
           email: user.email,
           role: user.role,
           purchasedBooksCount,
+          booksUnlockedCount,
           paymentCount,
           totalSpent: userStats?.totalSpent || 0,
           lastPaymentAt: userStats?.lastPaymentAt || null
         };
       })
-      .filter((user) => user.purchasedBooksCount > 0 || user.paymentCount > 0)
+      .filter((user) => user.booksUnlockedCount > 0 || user.paymentCount > 0)
       .sort((firstUser, secondUser) => {
         if (secondUser.totalSpent !== firstUser.totalSpent) {
           return secondUser.totalSpent - firstUser.totalSpent;
         }
 
-        return secondUser.purchasedBooksCount - firstUser.purchasedBooksCount;
+        return secondUser.booksUnlockedCount - firstUser.booksUnlockedCount;
       });
+
+    const purchaseSummary = paidUsers.reduce((summary, user) => ({
+      booksUnlocked: summary.booksUnlocked + (user.booksUnlockedCount || 0),
+      paidUsersCount: summary.paidUsersCount + 1
+    }), {
+      booksUnlocked: 0,
+      paidUsersCount: 0
+    });
 
     res.json({
       stats: {

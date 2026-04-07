@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const navItems = [
   { to: '/admin', label: 'Overview', helper: 'Performance snapshot' },
+  { to: '/admin/traffic', label: 'Traffic', helper: 'Visitors and site speed' },
   { to: '/admin/books', label: 'Books', helper: 'Catalog and sales' },
   { to: '/admin/users', label: 'Users', helper: 'Roles and access' },
   { to: '/admin/finance', label: 'Finance', helper: 'Revenue and payments' }
@@ -30,7 +31,7 @@ const AdminLayout = ({ eyebrow = 'Admin', title, description, stats = [], action
                   Admin Panel
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  Track users, books, revenue, and recent purchase activity from one place.
+                  Track visitors, books, revenue, and recent purchase activity from one place.
                 </p>
                 <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">

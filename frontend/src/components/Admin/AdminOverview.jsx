@@ -53,6 +53,12 @@ const AdminOverview = () => {
       actions={
         <>
           <Link
+            to="/admin/traffic"
+            className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
+          >
+            View Traffic
+          </Link>
+          <Link
             to="/admin/books"
             className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
           >

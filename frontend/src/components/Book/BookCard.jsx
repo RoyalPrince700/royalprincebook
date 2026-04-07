@@ -26,6 +26,11 @@ const BookCard = ({
   const canRead = isOwned || !book?.price || book.price === 0 || user?.role === 'admin';
   const originalPrice = getOriginalBookPrice(book?.title, book?.price);
 
+  const handleViewDetails = (e) => {
+    if (e) e.stopPropagation();
+    navigate(`/books/${book._id}/details`);
+  };
+
   const handleRead = (e) => {
     if (e) e.stopPropagation();
     if (onRead) {
@@ -37,15 +42,11 @@ const BookCard = ({
 
   const handleBuy = (e) => {
     e.stopPropagation();
-    if (!user) {
-      navigate('/login');
-      return;
-    }
     if (onBuy) {
       onBuy(book);
       return;
     }
-    navigate(`/books/${book._id}/read`);
+    navigate(`/books/${book._id}/details`);
   };
 
   const handleDelete = (e) => {
@@ -76,7 +77,7 @@ const BookCard = ({
     <article
       className={`group relative flex h-full min-h-[480px] cursor-pointer flex-col overflow-hidden rounded-4xl border border-white/70 bg-white/75 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)] ${className || ''}`}
       style={style}
-      onClick={handleRead}
+      onClick={handleViewDetails}
     >
       <div
         className="relative h-[320px] overflow-hidden rounded-t-4xl bg-slate-100"
@@ -162,12 +163,21 @@ const BookCard = ({
           <div className="mt-6 border-t border-slate-200 pt-5" onClick={(e) => e.stopPropagation()}>
             <div className="flex flex-wrap items-center gap-3">
               <button
-                onClick={canRead ? handleRead : handleBuy}
-                disabled={buying}
-                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                onClick={canRead ? handleRead : handleViewDetails}
+                className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
               >
-                {canRead ? 'Read' : buying ? 'Processing...' : 'Buy Now'}
+                {canRead ? 'Read' : 'View Book'}
               </button>
+
+              {!canRead && (
+                <button
+                  onClick={handleBuy}
+                  disabled={buying}
+                  className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {buying ? 'Processing...' : 'Buy Now'}
+                </button>
+              )}
 
               {!canRead && onAddToCart && !isInCart && (
                 <button

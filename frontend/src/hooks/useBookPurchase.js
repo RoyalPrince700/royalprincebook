@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { closePaymentModal, useFlutterwave } from 'flutterwave-react-v3';
 import { useAuth } from '../contexts/AuthContext';
+import { getRedirectPath } from '../utils/authRedirect';
 
 const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, refreshProfile, addPurchasedBook } = useAuth();
   const [selectedBook, setSelectedBook] = useState(null);
   const [buyingBookId, setBuyingBookId] = useState(null);
@@ -47,7 +49,11 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
 
   const checkoutBook = (book) => {
     if (!user) {
-      navigate('/login');
+      const redirectPath = getRedirectPath(location);
+      const loginPath = redirectPath
+        ? `/login?redirect=${encodeURIComponent(redirectPath)}`
+        : '/login';
+      navigate(loginPath, { state: { from: location } });
       return;
     }
 

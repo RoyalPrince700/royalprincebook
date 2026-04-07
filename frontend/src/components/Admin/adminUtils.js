@@ -5,6 +5,11 @@ export const formatCurrency = (amount = 0) =>
     maximumFractionDigits: 0
   }).format(amount || 0);
 
+export const formatNumber = (value = 0) =>
+  new Intl.NumberFormat('en-NG', {
+    maximumFractionDigits: 0
+  }).format(value || 0);
+
 export const formatDate = (value) => {
   if (!value) return 'N/A';
 
@@ -25,4 +30,10 @@ export const formatDateTime = (value) => {
     hour: 'numeric',
     minute: '2-digit'
   }).format(new Date(value));
+};
+
+export const formatDuration = (value) => {
+  if (!Number.isFinite(value)) return 'N/A';
+
+  return `${Math.round(value)} ms`;
 };

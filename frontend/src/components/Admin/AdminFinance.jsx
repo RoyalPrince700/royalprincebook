@@ -147,7 +147,7 @@ const AdminFinance = () => {
                     </span>
                   </div>
                   <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
-                    <p>Books unlocked: <span className="font-medium text-slate-900">{user.purchasedBooksCount || 0}</span></p>
+                    <p>Books unlocked: <span className="font-medium text-slate-900">{user.booksUnlockedCount ?? user.purchasedBooksCount ?? 0}</span></p>
                     <p>Payments: <span className="font-medium text-slate-900">{user.paymentCount || 0}</span></p>
                     <p>Total spent: <span className="font-medium text-slate-900">{formatCurrency(user.totalSpent || 0)}</span></p>
                     <p>Last payment: <span className="font-medium text-slate-900">{formatDate(user.lastPaymentAt)}</span></p>

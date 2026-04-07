@@ -12,13 +12,16 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import BookEditor from './components/Book/BookEditor';
 import BookList from './components/Book/BookList';
+import BookInsightPage from './pages/BookInsightPage';
 import ReadBook from './pages/ReadBook';
 import PrivateRoute from './components/Auth/PrivateRoute';
 import AdminRoute from './components/Auth/AdminRoute';
 import AdminOverview from './components/Admin/AdminOverview';
+import AdminTraffic from './components/Admin/AdminTraffic';
 import AdminBooks from './components/Admin/AdminBooks';
 import UserManagement from './components/Admin/UserManagement';
 import AdminFinance from './components/Admin/AdminFinance';
+import AnalyticsTracker from './components/Analytics/AnalyticsTracker';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
@@ -33,6 +36,7 @@ const Layout = ({ children }) => {
   
   return (
     <>
+      <AnalyticsTracker />
       <Navbar isHome={isHome} />
       <div className={`App ${isHome ? 'home-mode' : ''}`}>
         {children}
@@ -56,6 +60,7 @@ function App() {
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/all-books" element={<BookList />} />
+                <Route path="/books/:bookId/details" element={<BookInsightPage />} />
                 <Route path="/blog" element={<BlogListPage />} />
                 <Route path="/blog/:slug" element={<BlogPostPage />} />
                 <Route path="/cart" element={<Cart />} />
@@ -75,6 +80,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <AdminOverview />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/traffic"
+                  element={
+                    <AdminRoute>
+                      <AdminTraffic />
                     </AdminRoute>
                   }
                 />
@@ -112,11 +125,7 @@ function App() {
                 />
                 <Route
                   path="/books/:bookId/read"
-                  element={
-                    <PrivateRoute>
-                      <ReadBook />
-                    </PrivateRoute>
-                  }
+                  element={<ReadBook />}
                 />
               </Routes>
             </Layout>

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { consumeStoredAuthRedirect, getStoredAuthRedirect } from '../../utils/authRedirect';
 
 const AuthCallback = () => {
   const { completeGoogleAuth } = useAuth();
@@ -15,11 +16,16 @@ const AuthCallback = () => {
       const result = await completeGoogleAuth(token);
 
       if (result.success) {
-        navigate('/dashboard', { replace: true });
+        const redirectPath = consumeStoredAuthRedirect() || '/dashboard';
+        navigate(redirectPath, { replace: true });
         return;
       }
 
-      navigate('/login?error=auth_failed', { replace: true });
+      const redirectPath = getStoredAuthRedirect();
+      const loginUrl = redirectPath
+        ? `/login?error=auth_failed&redirect=${encodeURIComponent(redirectPath)}`
+        : '/login?error=auth_failed';
+      navigate(loginUrl, { replace: true });
     };
 
     finishGoogleAuth();
@@ -41,7 +47,7 @@ const AuthCallback = () => {
             Completing sign in
           </h2>
           <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-slate-600 sm:text-base">
-            Please wait while we finish your Google authentication and prepare your dashboard.
+            Please wait while we finish your Google authentication and return you to your page.
           </p>
         </div>
       </div>

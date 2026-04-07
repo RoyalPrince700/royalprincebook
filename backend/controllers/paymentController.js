@@ -76,8 +76,9 @@ const verifyPayment = async (req, res) => {
       }
     );
 
-    // Add book to user's purchasedBooks
-    const user = await User.findById(userId);
+    // Add book to the user's purchased list in a way that avoids duplicate writes.
+    const existingUser = await User.findById(userId).select('username email purchasedBooks');
+    const user = existingUser;
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -87,8 +88,11 @@ const verifyPayment = async (req, res) => {
     );
 
     if (!alreadyPurchased) {
-      user.purchasedBooks.push(bookId);
-      await user.save();
+      await User.findByIdAndUpdate(userId, {
+        $addToSet: { purchasedBooks: book._id }
+      });
+
+      user.purchasedBooks.push(book._id);
 
       sendBookPurchaseEmail({
         user,

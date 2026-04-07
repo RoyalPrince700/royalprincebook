@@ -5,7 +5,11 @@ const LEADERSHIP_FROM_WITHIN_ORIGINAL_PRICE = 2000;
 
 export const isLeadershipFromWithin = (title) => {
   const normalized = normalizeTitle(title);
-  return normalized.includes('leading from within') || normalized.includes('leading from withing');
+  return (
+    normalized.includes('leading from within') ||
+    normalized.includes('leadership from within') ||
+    normalized.includes('leading from withing')
+  );
 };
 
 export const getBookCover = (title) => {

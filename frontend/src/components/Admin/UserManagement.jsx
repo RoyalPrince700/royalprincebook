@@ -155,7 +155,7 @@ const UserManagement = () => {
                         </span>
                       </td>
                       <td className="border border-l-0 border-r-0 border-slate-200 px-4 py-4">
-                        {user.purchasedBooksCount || 0}
+                        {user.booksUnlockedCount ?? user.purchasedBooksCount ?? 0}
                       </td>
                       <td className="border border-l-0 border-r-0 border-slate-200 px-4 py-4 font-medium text-slate-900">
                         {formatCurrency(user.totalSpent || 0)}

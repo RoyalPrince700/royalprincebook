@@ -1,6 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { isLeadershipFromWithin } from '../../utils/bookUtils';
 
 const BlogTemplate = ({ post }) => {
+  const [leadershipBookPath, setLeadershipBookPath] = useState('/all-books');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadLeadershipBookLink = async () => {
+      try {
+        const response = await axios.get('/books');
+        const books = response.data.books || [];
+        const leadershipBook = books.find((book) => isLeadershipFromWithin(book.title));
+
+        if (isMounted && leadershipBook?._id) {
+          setLeadershipBookPath(`/books/${leadershipBook._id}/details`);
+        }
+      } catch (error) {
+        console.error('Failed to resolve Leadership From Within details link:', error);
+      }
+    };
+
+    loadLeadershipBookLink();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-50 px-4 pb-20 pt-28 text-slate-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl">
@@ -29,10 +58,27 @@ const BlogTemplate = ({ post }) => {
                 {section.heading}
               </h2>
               <div className="mt-4 space-y-4 text-base leading-relaxed text-slate-600">
-                {section.paragraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
+                {section.paragraphs.map((paragraph, index) => (
+                  <p key={`${section.heading}-${index}`}>{paragraph}</p>
                 ))}
               </div>
+              {section.cta && (
+                <div className="mt-6 rounded-[1.75rem] border border-blue-100 bg-blue-50/80 p-5 text-left shadow-sm">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700">
+                    {section.cta.eyebrow || 'Recommended Read'}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700">
+                    {section.cta.text}
+                  </p>
+                  <Link
+                    to={section.cta.target === 'leadership-from-within' ? leadershipBookPath : section.cta.target}
+                    className="mt-4 inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
+                    style={{ color: 'white' }}
+                  >
+                    {section.cta.label}
+                  </Link>
+                </div>
+              )}
             </section>
           ))}
         </article>

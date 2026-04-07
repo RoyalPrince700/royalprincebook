@@ -54,7 +54,6 @@ const getPurchasedBooks = async (req, res) => {
 const getBook = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user._id;
 
     const book = await Book.findById(id)
       .populate('author', 'username email')
@@ -64,8 +63,7 @@ const getBook = async (req, res) => {
       return res.status(404).json({ message: 'Book not found' });
     }
 
-    // Allow any authenticated user to view the book details
-    // Permissions for editing/deleting are handled in their respective controllers
+    // Book details are public. Editing/deleting is still protected on separate routes.
 
     res.json({ book: applyEffectivePrice(book) });
   } catch (error) {

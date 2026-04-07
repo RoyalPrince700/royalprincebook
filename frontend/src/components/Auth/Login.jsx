@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getRedirectPath, normalizeRedirectPath } from '../../utils/authRedirect';
 
 const authErrors = {
   auth_failed: 'Google sign-in failed. Please try again.',
@@ -10,8 +11,15 @@ const authErrors = {
 const Login = () => {
   const { loginWithGoogle } = useAuth();
   const location = useLocation();
-  const errorCode = new URLSearchParams(location.search).get('error');
+  const searchParams = new URLSearchParams(location.search);
+  const errorCode = searchParams.get('error');
   const error = authErrors[errorCode] || '';
+  const redirectPath =
+    normalizeRedirectPath(searchParams.get('redirect')) ||
+    normalizeRedirectPath(getRedirectPath(location.state?.from));
+  const registerHref = redirectPath
+    ? `/register?redirect=${encodeURIComponent(redirectPath)}`
+    : '/register';
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-50 px-4 py-10 text-slate-900 sm:px-6 lg:px-8">
@@ -76,7 +84,7 @@ const Login = () => {
             </p>
             <button
               type="button"
-              onClick={loginWithGoogle}
+              onClick={() => loginWithGoogle(redirectPath)}
               className="mt-4 inline-flex w-full items-center justify-center gap-3 rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -91,7 +99,7 @@ const Login = () => {
 
           <div className="mt-8 text-center text-sm text-slate-500">
             New here?{' '}
-            <Link to="/register" className="font-medium text-slate-900">
+            <Link to={registerHref} className="font-medium text-slate-900">
               Sign up with Google
             </Link>
           </div>

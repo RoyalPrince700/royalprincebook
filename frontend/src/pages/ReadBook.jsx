@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import ChapterReader from '../components/Book/ChapterReader';
 import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
 import { getOriginalBookPrice } from '../utils/bookUtils';
 import PageLoader from '../components/PageLoader';
+import { getRedirectPath } from '../utils/authRedirect';
 import './ReadBook.css';
 
 const ReadBook = () => {
   const { bookId } = useParams();
   const { user, refreshProfile, addPurchasedBook } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -53,7 +56,7 @@ const ReadBook = () => {
 
   const fetchBook = async () => {
     try {
-      const response = await axios.get(`/books/${bookId}`);
+      const response = await axios.get(`/books/details/${bookId}`);
       setBook(response.data.book);
     } catch (error) {
       console.error('Failed to fetch book:', error);
@@ -123,6 +126,15 @@ const ReadBook = () => {
   const handleFlutterwavePayment = useFlutterwave(config);
 
   const handlePayment = () => {
+    if (!user) {
+      const redirectPath = getRedirectPath(location);
+      const loginPath = redirectPath
+        ? `/login?redirect=${encodeURIComponent(redirectPath)}`
+        : '/login';
+      navigate(loginPath, { state: { from: location } });
+      return;
+    }
+
     if (!flwPublicKey) {
       alert("Payment system initializing, please try again in a moment.");
       return;
@@ -170,8 +182,8 @@ const ReadBook = () => {
         <div className="read-book-message-card">
           <p className="reader-eyebrow">Reader</p>
           <h3 className="reader-message-title">{error || 'Book not found'}</h3>
-          <Link to="/dashboard" className="reader-link-button">
-            Back to Dashboard
+          <Link to="/all-books" className="reader-link-button">
+            Back to Books
           </Link>
         </div>
       </div>
@@ -216,9 +228,9 @@ const ReadBook = () => {
             className="reader-primary-button" 
             onClick={handlePayment}
           >
-            Buy Now
+            {user ? 'Buy Now' : 'Sign in to Buy'}
           </button>
-          <Link to="/dashboard" className="reader-text-link">Back to Dashboard</Link>
+          <Link to={`/books/${bookId}/details`} className="reader-text-link">View Book Details</Link>
         </div>
       </div>
     );

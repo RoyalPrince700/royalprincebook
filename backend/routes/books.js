@@ -14,6 +14,7 @@ const { authenticateToken, authorizeAdmin } = require('../middleware/auth');
 
 // Public routes - anyone can browse books
 router.get('/', getBooks);
+router.get('/details/:id', getBook);
 
 // Protected routes - require authentication
 router.use(authenticateToken);
