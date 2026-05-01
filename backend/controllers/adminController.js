@@ -4,11 +4,14 @@ const PaymentTransaction = require('../models/PaymentTransaction');
 const AdminGameProgress = require('../models/AdminGameProgress');
 const { applyEffectivePrice } = require('../bookPricing');
 
-const gameSegments = ['vocabulary', 'conciseness', 'speech', 'presentation', 'pronunciation'];
+const gameSegments = ['vocabulary', 'conciseness', 'concisePick', 'connectors', 'fluentFraming', 'speech', 'presentation', 'pronunciation'];
 
 const defaultGameProgress = {
   vocabulary: 0,
   conciseness: 0,
+  concisePick: 0,
+  connectors: 0,
+  fluentFraming: 0,
   speech: 0,
   presentation: 0,
   pronunciation: 0
@@ -17,6 +20,9 @@ const defaultGameProgress = {
 const defaultSegmentScores = {
   vocabulary: 0,
   conciseness: 0,
+  concisePick: 0,
+  connectors: 0,
+  fluentFraming: 0,
   speech: 0,
   presentation: 0,
   pronunciation: 0

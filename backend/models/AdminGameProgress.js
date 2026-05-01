@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const segmentProgressSchema = new mongoose.Schema({
   vocabulary: { type: Number, default: 0, min: 0, max: 100 },
   conciseness: { type: Number, default: 0, min: 0, max: 100 },
+  concisePick: { type: Number, default: 0, min: 0, max: 100 },
+  connectors: { type: Number, default: 0, min: 0, max: 100 },
+  fluentFraming: { type: Number, default: 0, min: 0, max: 100 },
   speech: { type: Number, default: 0, min: 0, max: 100 },
   presentation: { type: Number, default: 0, min: 0, max: 100 },
   pronunciation: { type: Number, default: 0, min: 0, max: 100 }
@@ -11,6 +14,9 @@ const segmentProgressSchema = new mongoose.Schema({
 const segmentScoresSchema = new mongoose.Schema({
   vocabulary: { type: Number, default: 0, min: 0 },
   conciseness: { type: Number, default: 0, min: 0 },
+  concisePick: { type: Number, default: 0, min: 0 },
+  connectors: { type: Number, default: 0, min: 0 },
+  fluentFraming: { type: Number, default: 0, min: 0 },
   speech: { type: Number, default: 0, min: 0 },
   presentation: { type: Number, default: 0, min: 0 },
   pronunciation: { type: Number, default: 0, min: 0 }
@@ -19,7 +25,7 @@ const segmentScoresSchema = new mongoose.Schema({
 const recentActivitySchema = new mongoose.Schema({
   segment: {
     type: String,
-    enum: ['vocabulary', 'conciseness', 'speech', 'presentation', 'pronunciation'],
+    enum: ['vocabulary', 'conciseness', 'concisePick', 'connectors', 'fluentFraming', 'speech', 'presentation', 'pronunciation'],
     required: true
   },
   title: { type: String, required: true, trim: true, maxlength: 120 },

@@ -6,14 +6,31 @@ const segments = [
   { id: 'progress', label: 'Progress', helper: 'Your speaking growth' },
   { id: 'vocabulary', label: 'Precision Lab', helper: 'Choose exact field words' },
   { id: 'conciseness', label: 'Concise Rewrite', helper: 'Say more with fewer words' },
+  { id: 'concisePick', label: 'Tightest Line', helper: 'Pick the most concise option' },
+  { id: 'connectors', label: 'Gap Connectors', helper: 'Fill transitions naturally' },
+  { id: 'fluentFraming', label: 'Fluent Framing', helper: 'Sound natural in meetings' },
   { id: 'speech', label: 'Speech Builder', helper: 'Write confident addresses' },
   { id: 'presentation', label: 'Presentation Sim', helper: 'Pitch data and strategy' },
   { id: 'pronunciation', label: 'Delivery Drill', helper: 'Practice clear speech' }
 ];
 
+const segmentProgressLabels = {
+  vocabulary: 'Precision Lab',
+  conciseness: 'Concise rewrite',
+  concisePick: 'Tightest line',
+  connectors: 'Gap connectors',
+  fluentFraming: 'Fluent framing',
+  speech: 'Speech builder',
+  presentation: 'Presentation sim',
+  pronunciation: 'Delivery drill'
+};
+
 const defaultProgress = {
   vocabulary: 0,
   conciseness: 0,
+  concisePick: 0,
+  connectors: 0,
+  fluentFraming: 0,
   speech: 0,
   presentation: 0,
   pronunciation: 0
@@ -22,6 +39,9 @@ const defaultProgress = {
 const defaultSegmentScores = {
   vocabulary: 0,
   conciseness: 0,
+  concisePick: 0,
+  connectors: 0,
+  fluentFraming: 0,
   speech: 0,
   presentation: 0,
   pronunciation: 0
@@ -101,6 +121,306 @@ const conciseChallenges = [
     original: 'In my opinion, I strongly believe that if we are able to improve the speed of the website and make the checkout process easier for users, there is a very good possibility that more visitors will complete purchases and become paying readers.',
     ideal: 'Improving site speed and checkout can convert more visitors into paying readers.',
     keywords: ['speed', 'checkout', 'convert', 'paying']
+  }
+];
+
+const concisePickChallenges = [
+  {
+    title: 'Growth metric',
+    prompt: 'Same core meaning for executives. Which is the most concise and still professional?',
+    statements: [
+      'Conversion rose 8% after we shortened the checkout steps.',
+      'I want to inform you that after we made an effort to shorten the steps in the checkout process, we saw that conversion went up by around eight percent.',
+      'Conversion kind of went up when we changed checkout, maybe eight percent or so.',
+      'Following the implementation of checkout step reduction initiatives, an approximate eight percent uplift in conversion metrics was observed.',
+      'There was an increase in conversion of about eight percent that we believe is attributable to the fact that we shortened the checkout steps for users.'
+    ],
+    bestIndex: 0
+  },
+  {
+    title: 'Partner follow-up',
+    prompt: 'You are closing a call. Which line wastes the least airtime?',
+    statements: [
+      'We will send the Braille sampler and pricing deck by Thursday.',
+      'We would like to take this opportunity to assure you that our team will be sending across both the Braille sampler as well as the pricing deck at some point before Thursday.',
+      'By Thursday you should get the Braille samples and prices and stuff.',
+      'Please note that prior to the end of the day on Thursday, delivery of Braille sampler materials together with pricing documentation will be effected.',
+      'What we are going to do is send you the Braille sampler and also the pricing deck, and Thursday is when we plan to do that.'
+    ],
+    bestIndex: 0
+  },
+  {
+    title: 'Stakeholder ask',
+    prompt: 'You need approval. Which request is tightest without sounding rude?',
+    statements: [
+      'Please approve the ₦200,000 campaign test so we can measure checkout recovery.',
+      'I am kindly writing to humbly request that you might be able to approve an amount in the region of two hundred thousand naira so that we can run a little test on checkout recovery.',
+      'We need money for ads, like ₦200k, to see if checkout works better.',
+      'Approval is sought for campaign expenditure approximating ₦200,000, the purpose of which is measurement of checkout recovery performance.',
+      'If it is possible, we would love for you to approve this ₦200,000 campaign test because we want to measure checkout recovery.'
+    ],
+    bestIndex: 0
+  },
+  {
+    title: 'Format rollout',
+    prompt: 'Internal stand-up. Which update is clearest and shortest?',
+    statements: [
+      'Audio titles launch next week; schools get early access links Monday.',
+      'I just wanted to share with the team that when it comes to our audio titles, the launch is happening next week, and for schools we are planning to give them early access links starting from Monday.',
+      'Audio books are soon, and schools get links Monday or so.',
+      'With regard to audio titles, launch timeline is next week, while early access link distribution to school partners is scheduled for Monday commencement.',
+      'Next week is when we launch audio, and on Monday schools should receive early access links from us.'
+    ],
+    bestIndex: 0
+  },
+  {
+    title: 'Risk flag',
+    prompt: 'Escalating to the MD. Which line gets to the point?',
+    statements: [
+      'Mobile traffic is up, but checkout completion is flat; recommend a payment audit this week.',
+      'It is important for me to bring to your attention the fact that although mobile traffic numbers are trending upwards, we have not seen a corresponding improvement in checkout completion, so my recommendation would be that we conduct a payment audit sometime this week.',
+      'Mobile is busy but people are not buying enough; we should look at payments.',
+      'An upward trajectory in mobile traffic coexists with static checkout completion metrics; accordingly, a payment audit within the weekly timeframe is recommended.',
+      'We are seeing more people on mobile but checkout is not really improving, which is why I think we need to do a payment audit this week.'
+    ],
+    bestIndex: 0
+  }
+];
+
+const connectorChallenges = [
+  {
+    title: 'Marketing Spend Review',
+    sentenceParts: ['', ' investing ₦50,000 into marketing, traffic has remained low. This suggests that we need to reassess our marketing channels.'],
+    answer: 'Despite',
+    options: ['Despite', 'However', 'Accurately', 'Therefore'],
+    explanation: '"Despite" introduces contrast between the money spent and the weak traffic result.'
+  },
+  {
+    title: 'Campaign Result',
+    sentenceParts: ['We increased our social media budget; ', ', website visits did not improve enough to justify the spend.'],
+    answer: 'however',
+    options: ['however', 'because', 'accurately', 'for example'],
+    explanation: '"However" connects two opposite ideas in the middle of the sentence.'
+  },
+  {
+    title: 'Channel Diagnosis',
+    sentenceParts: ['Traffic from paid ads is low. ', ', we should compare Facebook, Google, and referral channels before increasing the budget.'],
+    answer: 'Therefore',
+    options: ['Therefore', 'Although', 'Meanwhile', 'In contrast'],
+    explanation: '"Therefore" shows that the recommendation follows from the data.'
+  },
+  {
+    title: 'Data Confidence',
+    sentenceParts: ['To report this ', ', we need verified traffic, conversion, and checkout data.'],
+    answer: 'accurately',
+    options: ['accurately', 'despite', 'however', 'unless'],
+    explanation: '"Accurately" explains how the report should be made: with correct data.'
+  },
+  {
+    title: 'Accessible Format Pitch',
+    sentenceParts: ['Parents are asking for audio books, ', ' schools still need proof that learners will use them consistently.'],
+    answer: 'but',
+    options: ['but', 'therefore', 'because', 'similarly'],
+    explanation: '"But" gives a simple contrast. It is useful when speaking naturally and directly.'
+  },
+  {
+    title: 'Partner Update',
+    sentenceParts: ['The distributor requested more Braille samples; ', ', we should prepare a small demonstration pack before the next meeting.'],
+    answer: 'as a result',
+    options: ['as a result', 'nevertheless', 'although', 'accurately'],
+    explanation: '"As a result" links the request to the next action.'
+  },
+  {
+    title: 'Low Conversion Report',
+    sentenceParts: ['The landing page attracted visitors, ', ' only a few completed payment.'],
+    answer: 'yet',
+    options: ['yet', 'because', 'therefore', 'for instance'],
+    explanation: '"Yet" creates a sharp contrast between traffic and poor conversion.'
+  },
+  {
+    title: 'Recommendation Bridge',
+    sentenceParts: ['The checkout process is slow; ', ', optimization should be our first priority this week.'],
+    answer: 'consequently',
+    options: ['consequently', 'despite', 'meanwhile', 'although'],
+    explanation: '"Consequently" shows a result or logical next step.'
+  }
+];
+
+const fluentFramingChallenges = [
+  {
+    title: 'Quarterly growth readout',
+    sentenceParts: ['', ' we should prioritize accessible formats alongside conversion discipline.'],
+    answer: 'From a growth perspective,',
+    options: ['From a growth perspective,', 'Honestly speaking,', 'Randomly enough,', 'At the end of the day,'],
+    explanation: 'Frames revenue and funnel work as growth thinking before you give priorities.'
+  },
+  {
+    title: 'Executive steering note',
+    sentenceParts: ['', ' widening Braille-ready titles supports both mission and credible partner commitments.'],
+    answer: 'From a strategic standpoint,',
+    options: ['From a strategic standpoint,', 'Sort of creatively,', 'Anyway, basically,', 'No offense, but,'],
+    explanation: 'Signals you are aligning actions with deliberate strategy, not ad-hoc activity.'
+  },
+  {
+    title: 'Publishing leadership sync',
+    sentenceParts: ['', ' learner engagement climbed while verified checkout stalled—so urgency is warranted.'],
+    answer: 'Looking at the numbers holistically,',
+    options: ['Looking at the numbers holistically,', 'Talking off the cuff,', 'Personally I guess,', 'Literally unbelievably,'],
+    explanation: 'Shows you synthesized multiple metrics before recommending a conclusion.'
+  },
+  {
+    title: 'Stakeholder escalation',
+    sentenceParts: ['', ' we underestimated how long schools need to vet accessible pricing tiers.'],
+    answer: 'To be transparent,',
+    options: ['To be transparent,', 'Obviously like,', 'Totally frankly,', 'Super obviously,'],
+    explanation: '"To be transparent" opens hard truths without sounding evasive.'
+  },
+  {
+    title: 'Partner reassurance',
+    sentenceParts: ['', ' we remain committed to VICAP and to inclusive learner outcomes—not just catalogs.'],
+    answer: 'If I frame this cleanly for you,',
+    options: ['If I frame this cleanly for you,', 'Basically whatever,', 'Umm yeah so,', 'Kind of maybe,'],
+    explanation: 'Promises clarity and summarizes complex intent for external ears.'
+  },
+  {
+    title: 'Publishing board prep',
+    sentenceParts: ['', ' audiobook completions outpaced projections while checkout hovered flat.'],
+    answer: 'The encouraging signal is that',
+    options: ['The encouraging signal is that', 'The weird thing is like', 'Honestly no idea why', 'Supposedly maybe if'],
+    explanation: 'Leads with optimism grounded in observable data—a confident cadence.'
+  },
+  {
+    title: 'Risk narration',
+    sentenceParts: ['', ' delaying payment-method testing could widen the funnel leak into Q3 reporting.'],
+    answer: 'The risk worth naming is that',
+    options: ['The risk worth naming is that', 'Stuff might happen because', 'Literally chaos if', 'Random risk alert:'],
+    explanation: '"Worth naming" flags severity without melodrama—fit for Growth Officer tone.'
+  },
+  {
+    title: 'Operational bridge',
+    sentenceParts: ['', ' we locked early-access links Monday and scaled support scripts for librarians.'],
+    answer: 'On the execution side,',
+    options: ['On the execution side,', 'So random but,', 'Totally sideways,', 'Anyway randomly,'],
+    explanation: 'Helps executives hear what became concrete versus strategy-only talk.'
+  },
+  {
+    title: 'Unit economics cue',
+    sentenceParts: ['', ' widening digital margins hinges on tighter checkout flows, not louder ads alone.'],
+    answer: 'From a unit economics angle,',
+    options: ['From a unit economics angle,', 'From a vibes angle,', 'Money vibes aside,', 'Cash stuff maybe,'],
+    explanation: 'Invites disciplined profit thinking without fluff.'
+  },
+  {
+    title: 'Market context Nigeria',
+    sentenceParts: ['', ' parents prioritize verified payments and multilingual support when sourcing learning materials.'],
+    answer: 'In the Nigerian education market,',
+    options: ['In the Nigerian education market,', 'In random markets,', 'Globally supposedly,', 'Locally whatever,'],
+    explanation: 'Grounds Accessible Publishers realities in geography your partners recognize.'
+  },
+  {
+    title: 'Digital product roadmap',
+    sentenceParts: ['', ' personalization without accessibility guardrails hurts trust once campaigns scale.'],
+    answer: 'On the digital product side,',
+    options: ['On the digital product side,', 'On the vibes side,', 'On TikTok vibes,', 'On random apps,'],
+    explanation: 'Flags product ownership before you dive into feature trade-offs.'
+  },
+  {
+    title: 'Values alignment pitch',
+    sentenceParts: ['', ' doubling down on adaptive formats reinforces both accessibility and disciplined growth.'],
+    answer: 'To connect this directly to VICAP,',
+    options: ['To connect this directly to VICAP,', 'Forget VICAP but,', 'Against VICAP maybe,', 'Ignore values and,'],
+    explanation: 'Ties stakeholder asks to recognizable company pillars.'
+  },
+  {
+    title: 'Learner-impact lens',
+    sentenceParts: ['', ' narration quality and captions matter as much as distribution reach when we measure completion.'],
+    answer: 'From a learner-impact lens,',
+    options: ['From a learner-impact lens,', 'From a boredom lens,', 'From vibes only,', 'From guessing,'],
+    explanation: 'Centers humane outcomes—a strong Accessible Publishers refrain.'
+  },
+  {
+    title: 'Partnership subplot',
+    sentenceParts: ['', ' ministries want evidence packs before approving statewide audio-Braille bundles.'],
+    answer: 'On the partnership desk,',
+    options: ['On the partnership desk,', 'Partnership rumor has it', 'Partnership chaos says', 'Partner drama—'],
+    explanation: 'Isolates relationship dynamics cleanly from funnel metrics chatter.'
+  },
+  {
+    title: 'Inclusive formats council',
+    sentenceParts: ['', ' multilingual captions paired with tactile-ready files reduce drop-off mid-lesson.'],
+    answer: 'From an accessibility lens,',
+    options: ['From an accessibility lens,', 'Accessibility allegedly,', 'A11y maybe if', 'Disable stuff—'],
+    explanation: 'Elevates mandate language without minimizing rigor.'
+  },
+  {
+    title: 'Revenue pacing',
+    sentenceParts: ['', ' recurring school licenses outpaced single-title spikes for the quarter.'],
+    answer: 'Drilling into revenue pacing,',
+    options: ['Drilling into revenue pacing,', 'Revenue magically,', 'Money randomly,', 'Cash accidents,'],
+    explanation: '"Drilling into" primes listeners for detail after a headline metric.'
+  },
+  {
+    title: 'Pivot guardrail',
+    sentenceParts: ['', ' pilot analytics must stay statistically honest before nationwide promotion.'],
+    answer: 'Before we scale this pilot,',
+    options: ['Before we scale this pilot,', 'After we wreck this pilot,', 'Once we sabotage rollout,', 'Scale blindly because'],
+    explanation: 'Signals pacing and governance before expansion.'
+  },
+  {
+    title: 'Returning to KPI set',
+    sentenceParts: ['', ' verified checkout stabilized week-over-week after we tightened payment retries.'],
+    answer: 'Circling back to conversion,',
+    options: ['Circling back to conversion,', 'Ghosting conversion forever,', 'Ignoring conversion boldly,', 'Conversion who cares,'],
+    explanation: 'Classic meeting signpost—you resume a thread politely but decisively.'
+  },
+  {
+    title: 'Agenda pacing',
+    sentenceParts: ['', ' stakeholder concerns on pricing fidelity deserve five focused minutes next.'],
+    answer: 'If we zoom out for a second,',
+    options: ['If we zoom out for a second,', 'Zoom forever randomly,', 'Zoom doom scroll,', 'Zoom confusingly—'],
+    explanation: 'Creates breathing room when discussion gets lost in trivia.'
+  },
+  {
+    title: 'Friction diagnosis',
+    sentenceParts: ['', ' intermittent OTP failures clustered on Friday afternoons—we should rebalance gateways.'],
+    answer: 'On the learner checkout experience,',
+    options: ['On the learner checkout experience,', 'Checkout vibes toxic,', 'People hate paying duh', 'Cart ghosting yay'],
+    explanation: 'Names the shopper journey succinctly ahead of remediation detail.'
+  },
+  {
+    title: 'Inclusive distribution',
+    sentenceParts: ['', ' warehousing Braille pallets alongside audiobook CDN contracts keeps SLAs coherent.'],
+    answer: 'From a distribution standpoint,',
+    options: ['From a distribution standpoint,', 'Distribution magically,', 'Ship random boxes,', 'Logistics shrug—'],
+    explanation: 'Separates fulfilment realism from glossy marketing slogans.'
+  },
+  {
+    title: 'Confidence without hype',
+    sentenceParts: ['', ' we can commit to audited engagement snapshots before declaring victory.'],
+    answer: 'What I want to underscore is',
+    options: ['What I want to underscore is', 'What I vaguely think is', 'What nobody knows is', 'What chaos implies is'],
+    explanation: '"Underscore" highlights a takeaway once evidence is outlined.'
+  },
+  {
+    title: 'Trade-off narration',
+    sentenceParts: ['', ' flashy campaigns without inclusive assets erode credibility with ministries we court.'],
+    answer: 'The trade-off to flag is',
+    options: ['The trade-off to flag is', 'Trade-off shrug emoji', 'Trade-off whatever', 'Cool trade-off bro'],
+    explanation: 'Prepares analytical listeners for explicit cost-benefit thinking.'
+  },
+  {
+    title: 'Q&A bridging',
+    sentenceParts: ['', ' our Braille onboarding kit answers the scalability question stakeholders raised earlier.'],
+    answer: 'To pick up the thread from earlier,',
+    options: ['To pick up the thread from earlier,', 'Thread dropped forever', 'Ignoring earlier nonsense', 'Who remembers earlier'],
+    explanation: 'Acknowledges prior questions—professional recall during live Q&A.'
+  },
+  {
+    title: 'Summary compression',
+    sentenceParts: ['', ' widen accessible pilots, stabilize payments, narrate learner proof for partners—that is our sequence.'],
+    answer: 'If I distill the playbook,',
+    options: ['If I distill the playbook,', 'If I ruin the playbook,', 'Distill chaos maybe', 'Playbook vibes only'],
+    explanation: '"Distill" signals you respect busy executives schedules.'
   }
 ];
 
@@ -198,6 +518,12 @@ const AdminArticulationGame = () => {
   const [conciseIndex, setConciseIndex] = useState(0);
   const [conciseDraft, setConciseDraft] = useState('');
   const [conciseFeedback, setConciseFeedback] = useState('');
+  const [concisePickIndex, setConcisePickIndex] = useState(0);
+  const [selectedConcisePickIndex, setSelectedConcisePickIndex] = useState(null);
+  const [concisePickFeedback, setConcisePickFeedback] = useState('');
+  const [connectorIndex, setConnectorIndex] = useState(0);
+  const [selectedConnector, setSelectedConnector] = useState('');
+  const [connectorFeedback, setConnectorFeedback] = useState('');
   const [speechIndex, setSpeechIndex] = useState(0);
   const [speechDraft, setSpeechDraft] = useState('');
   const [speechFeedback, setSpeechFeedback] = useState('');
@@ -205,20 +531,36 @@ const AdminArticulationGame = () => {
   const [presentationDraft, setPresentationDraft] = useState('');
   const [presentationFeedback, setPresentationFeedback] = useState('');
   const [drillIndex, setDrillIndex] = useState(0);
+  const [fluentFramingIndex, setFluentFramingIndex] = useState(0);
+  const [selectedFluentFraming, setSelectedFluentFraming] = useState('');
+  const [fluentFramingFeedback, setFluentFramingFeedback] = useState('');
   const [deliveryRating, setDeliveryRating] = useState(3);
   const [deliveryFeedback, setDeliveryFeedback] = useState('');
 
   const overallProgress = useMemo(() => getOverallProgress(academy.progress), [academy.progress]);
   const currentTerm = precisionTerms[precisionIndex];
   const currentConcise = conciseChallenges[conciseIndex];
+  const currentConcisePick = concisePickChallenges[concisePickIndex];
+  const currentConnector = connectorChallenges[connectorIndex];
   const currentSpeech = speechBriefs[speechIndex];
   const currentPresentation = presentationScenarios[presentationIndex];
   const currentDrill = pronunciationDrills[drillIndex];
+  const currentFluentFraming = fluentFramingChallenges[fluentFramingIndex];
 
   const precisionOptions = useMemo(() => {
     const other = precisionTerms[(precisionIndex + 2) % precisionTerms.length];
     return [currentTerm.strong, currentTerm.weak, other.strong].sort(() => Math.random() - 0.5);
   }, [currentTerm, precisionIndex]);
+
+  const concisePickOrdered = useMemo(() => (
+    currentConcisePick.statements
+      .map((text, originalIndex) => ({ text, originalIndex }))
+      .sort(() => Math.random() - 0.5)
+  ), [currentConcisePick]);
+
+  const fluentFramingOptionsOrdered = useMemo(() => (
+    [...currentFluentFraming.options].sort(() => Math.random() - 0.5)
+  ), [currentFluentFraming]);
 
   useEffect(() => {
     const loadProgress = async () => {
@@ -284,6 +626,9 @@ const AdminArticulationGame = () => {
       if (getOverallProgress(nextProgress) >= 50) achievements.add('Halfway to confident delivery');
       if (nextScore >= 160) achievements.add('Presentation-ready speaker');
       if (nextProgress.conciseness >= 70) achievements.add('Concise communicator');
+      if (nextProgress.concisePick >= 70) achievements.add('Tightest line eye');
+      if (nextProgress.connectors >= 70) achievements.add('Smooth transition speaker');
+      if (nextProgress.fluentFraming >= 70) achievements.add('Fluent growth voice');
       if (nextProgress.pronunciation >= 70) achievements.add('Clear delivery streak');
 
       const nextAcademy = {
@@ -364,6 +709,60 @@ const AdminArticulationGame = () => {
       setConciseFeedback('');
       setConciseIndex((index) => (index + 1) % conciseChallenges.length);
     }, 3500);
+  };
+
+  const handleConcisePickAnswer = (originalIndex) => {
+    const isCorrect = originalIndex === currentConcisePick.bestIndex;
+    const points = isCorrect ? 14 : 5;
+    const feedback = isCorrect
+      ? 'Right. The best option drops filler and jargon while keeping the message credible.'
+      : 'Not quite. Compare word count and filler: the tightest line keeps facts and drops throat-clearing.';
+
+    setSelectedConcisePickIndex(originalIndex);
+    setConcisePickFeedback(feedback);
+    completeSegment('concisePick', points, isCorrect ? 13 : 6, currentConcisePick.title, feedback);
+    setTimeout(() => {
+      setSelectedConcisePickIndex(null);
+      setConcisePickFeedback('');
+      setConcisePickIndex((index) => (index + 1) % concisePickChallenges.length);
+    }, 2400);
+  };
+
+  const handleConnectorAnswer = (answer) => {
+    const isCorrect = answer.toLowerCase() === currentConnector.answer.toLowerCase();
+    const points = isCorrect ? 14 : 5;
+    const fullSentence = `${currentConnector.sentenceParts[0]}${currentConnector.answer}${currentConnector.sentenceParts[1]}`;
+    const feedback = isCorrect
+      ? `Correct. ${currentConnector.explanation} Say it aloud: "${fullSentence}"`
+      : `Not quite. The strongest connector is "${currentConnector.answer}" because ${currentConnector.explanation.toLowerCase()}`;
+
+    setSelectedConnector(answer);
+    setConnectorFeedback(feedback);
+    completeSegment('connectors', points, isCorrect ? 13 : 6, currentConnector.title, feedback);
+    setTimeout(() => {
+      setSelectedConnector('');
+      setConnectorFeedback('');
+      setConnectorIndex((index) => (index + 1) % connectorChallenges.length);
+    }, 2600);
+  };
+
+  const handleFluentFramingAnswer = (phrase) => {
+    const normalized = (value) => value.trim().toLowerCase();
+    const isCorrect = normalized(phrase) === normalized(currentFluentFraming.answer);
+    const points = isCorrect ? 14 : 5;
+    const fullSentence = `${currentFluentFraming.sentenceParts[0]}${currentFluentFraming.answer}${currentFluentFraming.sentenceParts[1]}`;
+    const feedback = isCorrect
+      ? `Yes. ${currentFluentFraming.explanation} Try saying the whole sentence: "${fullSentence}"`
+      : `Not quite. "${currentFluentFraming.answer}" fits best because ${currentFluentFraming.explanation.toLowerCase()}`;
+
+    setSelectedFluentFraming(phrase);
+    setFluentFramingFeedback(feedback);
+    completeSegment('fluentFraming', points, isCorrect ? 13 : 6, currentFluentFraming.title, feedback);
+    setTimeout(() => {
+      setSelectedFluentFraming('');
+      setFluentFramingFeedback('');
+      setFluentFramingIndex((index) => (index + 1) % fluentFramingChallenges.length);
+    }, 2600);
   };
 
   const evaluateSpeech = () => {
@@ -447,7 +846,7 @@ const AdminArticulationGame = () => {
     <AdminLayout
       eyebrow="Growth Officer Academy"
       title="Speak with precision, clarity, and authority."
-      description="This is not just a game. It is a speaking practice system for your Growth Officer work: precise publishing vocabulary, concise statements, stakeholder speeches, data-backed presentations, and clear delivery drills."
+      description="This is not just a game. It is a speaking practice system for your Growth Officer work: precise publishing vocabulary, concise statements, picking the tightest line, natural connectors, fluent executive framing, stakeholder speeches, data-backed presentations, and clear delivery drills."
       stats={[
         { label: 'Current Level', value: academy.level, helper: `${academy.score} pts across ${academy.completedSessions} sessions` },
         { label: 'Overall Progress', value: `${overallProgress}%`, helper: 'Average speaking mastery' },
@@ -470,7 +869,7 @@ const AdminArticulationGame = () => {
       ) : null}
 
       <section className="rounded-[1.75rem] border border-white/70 bg-white/80 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:rounded-4xl sm:p-6 lg:p-8">
-        <div className="grid grid-cols-2 gap-2 rounded-3xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-2 rounded-3xl border border-slate-200 bg-slate-50/80 p-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-9">
           {segments.map((segment) => (
             <button
               key={segment.id}
@@ -496,13 +895,13 @@ const AdminArticulationGame = () => {
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Your Speaking Dashboard</p>
                 <h3 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">Train for real meetings, not random points.</h3>
                 <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  Each segment trains a real communication skill: choosing exact terms, removing weak words, opening speeches, making data-backed recommendations, and delivering sentences clearly.
+                  Each segment trains a real communication skill: choosing exact terms, tightening lines, spotting the shortest professional wording, smooth connectors, senior framing phrases for natural meetings, opening speeches, making data-backed recommendations, and delivering sentences clearly.
                 </p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   {Object.entries(academy.progress).map(([key, value]) => (
                     <div key={key} className="rounded-2xl border border-slate-200 bg-white p-4">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{key}</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{segmentProgressLabels[key] || key}</p>
                         <p className="text-sm font-semibold text-slate-950">{value}%</p>
                       </div>
                       <div className="mt-3 h-2 rounded-full bg-slate-100">
@@ -518,7 +917,7 @@ const AdminArticulationGame = () => {
                 <div className="mt-4 space-y-3">
                   {academy.recentActivity.length === 0 ? (
                     <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
-                      No drills completed yet. Start with Precision Lab or Concise Rewrite.
+                      No drills completed yet. Start with Precision Lab, Tightest Line, or Concise Rewrite.
                     </p>
                   ) : academy.recentActivity.map((activity, index) => (
                     <div key={`${activity.title}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -626,6 +1025,163 @@ const AdminArticulationGame = () => {
                 </div>
               </div>
               {conciseFeedback ? <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-5 text-sm text-emerald-800">{conciseFeedback}</div> : null}
+            </div>
+          ) : null}
+
+          {activeTab === 'concisePick' ? (
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+              <div className="rounded-3xl border border-teal-100 bg-teal-50/70 p-5 sm:p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">Tightest line</p>
+                <h3 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">{currentConcisePick.title}</h3>
+                <p className="mt-4 text-sm leading-relaxed text-slate-700">{currentConcisePick.prompt}</p>
+                <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Five options — pick the most concise</p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
+                <div className="space-y-3">
+                  {concisePickOrdered.map((item, displayIndex) => (
+                    <button
+                      key={`${item.originalIndex}-${displayIndex}`}
+                      type="button"
+                      onClick={() => handleConcisePickAnswer(item.originalIndex)}
+                      disabled={selectedConcisePickIndex !== null}
+                      className={`w-full rounded-2xl border p-4 text-left text-sm leading-relaxed transition hover:shadow-sm disabled:cursor-not-allowed ${
+                        selectedConcisePickIndex === item.originalIndex
+                          ? item.originalIndex === currentConcisePick.bestIndex
+                            ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                            : 'border-red-200 bg-red-50 text-red-700'
+                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      {item.text}
+                    </button>
+                  ))}
+                </div>
+                {concisePickFeedback ? (
+                  <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700">
+                    {concisePickFeedback}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
+          {activeTab === 'connectors' ? (
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.7fr)]">
+              <div className="rounded-3xl border border-indigo-100 bg-indigo-50/70 p-5 sm:p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-700">Fill the Gap</p>
+                <h3 className="mt-2 text-2xl font-semibold text-slate-950">{currentConnector.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                  Choose the connector that makes the sentence sound natural and professional. Some gaps begin the sentence; others sit in the middle, like real meeting speech.
+                </p>
+
+                <div className="mt-6 rounded-3xl border border-indigo-100 bg-white p-5 text-lg leading-relaxed text-slate-900 sm:p-6 sm:text-xl">
+                  <span>{currentConnector.sentenceParts[0]}</span>
+                  <span className="mx-1 inline-flex min-w-28 justify-center rounded-2xl border border-dashed border-indigo-300 bg-indigo-50 px-4 py-1 text-sm font-semibold uppercase tracking-[0.18em] text-indigo-500">
+                    gap
+                  </span>
+                  <span>{currentConnector.sentenceParts[1]}</span>
+                </div>
+
+                <button
+                  onClick={() => speak(`${currentConnector.sentenceParts[0]}${currentConnector.answer}${currentConnector.sentenceParts[1]}`)}
+                  className="mt-4 w-full rounded-3xl border border-indigo-200 bg-white px-5 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50"
+                >
+                  Hear correct sentence
+                </button>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Choose one connector</p>
+                <div className="mt-4 grid gap-3">
+                  {currentConnector.options.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => handleConnectorAnswer(option)}
+                      disabled={Boolean(selectedConnector)}
+                      className={`rounded-2xl border p-4 text-left text-sm font-semibold transition hover:shadow-sm disabled:cursor-not-allowed ${
+                        selectedConnector === option
+                          ? option.toLowerCase() === currentConnector.answer.toLowerCase()
+                            ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                            : 'border-red-200 bg-red-50 text-red-700'
+                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                {connectorFeedback ? (
+                  <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700">
+                    {connectorFeedback}
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-600">
+                    Practice goal: use connectors like <strong>despite</strong>, <strong>however</strong>, <strong>therefore</strong>, and <strong>accurately</strong> so your business speech flows clearly.
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
+
+          {activeTab === 'fluentFraming' ? (
+            <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.7fr)]">
+              <div className="rounded-3xl border border-rose-100 bg-rose-50/70 p-5 sm:p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-700">Fluent Framing</p>
+                <h3 className="mt-2 text-2xl font-semibold text-slate-950">{currentFluentFraming.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                  Growth officers sound senior when they bridge ideas with purposeful phrases—signposting insights, risks, and context without rambling. Pick the opener that fits this scenario.
+                </p>
+
+                <div className="mt-6 rounded-3xl border border-rose-100 bg-white p-5 text-lg leading-relaxed text-slate-900 sm:p-6 sm:text-xl">
+                  <span>{currentFluentFraming.sentenceParts[0]}</span>
+                  <span className="mx-1 inline-flex min-w-36 justify-center rounded-2xl border border-dashed border-rose-300 bg-rose-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-rose-600">
+                    framing
+                  </span>
+                  <span>{currentFluentFraming.sentenceParts[1]}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => speak(`${currentFluentFraming.sentenceParts[0]}${currentFluentFraming.answer}${currentFluentFraming.sentenceParts[1]}`)}
+                  className="mt-4 w-full rounded-3xl border border-rose-200 bg-white px-5 py-3 text-sm font-semibold text-rose-800 transition hover:bg-rose-50"
+                >
+                  Hear full sentence
+                </button>
+              </div>
+
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Choose the best framing phrase</p>
+                <div className="mt-4 grid gap-3">
+                  {fluentFramingOptionsOrdered.map((phrase) => (
+                    <button
+                      type="button"
+                      key={phrase}
+                      onClick={() => handleFluentFramingAnswer(phrase)}
+                      disabled={Boolean(selectedFluentFraming)}
+                      className={`rounded-2xl border p-4 text-left text-sm font-medium leading-relaxed transition hover:shadow-sm disabled:cursor-not-allowed ${
+                        selectedFluentFraming === phrase
+                          ? phrase.trim().toLowerCase() === currentFluentFraming.answer.trim().toLowerCase()
+                            ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                            : 'border-red-200 bg-red-50 text-red-700'
+                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300'
+                      }`}
+                    >
+                      {phrase}
+                    </button>
+                  ))}
+                </div>
+                {fluentFramingFeedback ? (
+                  <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700">
+                    {fluentFramingFeedback}
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-600">
+                    Rotate through {fluentFramingChallenges.length} scenarios so phrases like{' '}
+                    <strong>from a growth perspective</strong>, <strong>speaking transparently</strong>, and{' '}
+                    <strong>circling back</strong> feel automatic—not stiff.
+                  </div>
+                )}
+              </div>
             </div>
           ) : null}
 
