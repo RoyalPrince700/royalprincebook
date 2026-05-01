@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from './AdminLayout';
-import { useAuth } from '../../contexts/AuthContext';
 
 const AdminGame = () => {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('progress');
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -333,45 +331,44 @@ const AdminGame = () => {
         </button>
       }
     >
-      <div className="rounded-4xl border border-white/70 bg-white/80 p-5 sm:p-6 lg:p-8 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur">
-        {/* Tabs - Mobile optimized horizontal scroll */}
-        <div className="flex border-b border-slate-200 mb-6 sm:mb-8 overflow-x-auto pb-3 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">
+      <div className="rounded-[1.75rem] border border-white/70 bg-white/80 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:rounded-4xl sm:p-6 lg:p-8">
+        {/* Compact tabs keep all game segments reachable on small screens. */}
+        <div className="mb-6 grid grid-cols-2 gap-2 rounded-3xl border border-slate-200 bg-slate-50/80 p-2 sm:mb-8 sm:flex sm:overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-4 text-sm font-semibold transition-all flex items-center gap-2 border-b-2 whitespace-nowrap shrink-0 snap-start active:scale-95 min-w-0 ${
+              className={`flex min-w-0 items-center justify-center gap-2 rounded-2xl border px-3 py-3 text-xs font-semibold transition-all active:scale-95 sm:shrink-0 sm:px-5 sm:text-sm ${
                 activeTab === tab.id 
-                  ? 'border-slate-950 text-slate-950' 
-                  : 'border-transparent text-slate-500 hover:text-slate-700'
+                  ? 'border-slate-950 bg-slate-950 text-white shadow-sm' 
+                  : 'border-transparent bg-white/70 text-slate-500 hover:text-slate-700'
               }`}
             >
-              <span className="text-xl shrink-0">{tab.icon}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
-              <span className="sm:hidden text-xs font-medium">{tab.label.split(' ')[0]}</span>
+              <span className="shrink-0 text-base sm:text-lg">{tab.icon}</span>
+              <span className="truncate">{tab.label}</span>
             </button>
           ))}
         </div>
 
         {/* Progress Tab */}
         {activeTab === 'progress' && (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div className="text-center px-2">
-              <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-linear-to-br from-emerald-400 to-blue-600 flex items-center justify-center text-5xl mb-6 shadow-inner">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-linear-to-br from-emerald-400 to-blue-600 text-4xl shadow-inner sm:mb-6 sm:h-24 sm:w-24 sm:text-5xl">
                 👑
               </div>
-              <h3 className="text-2xl sm:text-3xl font-semibold text-slate-950 mb-3">Welcome, Growth Officer</h3>
-              <p className="text-slate-600 max-w-md mx-auto text-sm sm:text-base leading-relaxed px-2">
+              <h3 className="mb-3 text-2xl font-semibold text-slate-950 sm:text-3xl">Welcome, Growth Officer</h3>
+              <p className="mx-auto max-w-md px-1 text-sm leading-relaxed text-slate-600 sm:px-2 sm:text-base">
                 Your journey to becoming the MD's trusted representative begins here. 
                 Practice daily to speak with the eloquence of kings and presidents.
               </p>
-              <div className="mt-8 inline-flex items-center gap-2 rounded-3xl bg-emerald-50 px-5 py-2.5 text-emerald-700 text-xs sm:text-sm font-medium mx-auto">
+              <div className="mx-auto mt-6 inline-flex items-center gap-2 rounded-3xl bg-emerald-50 px-4 py-2.5 text-xs font-medium text-emerald-700 sm:mt-8 sm:px-5 sm:text-sm">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                 Accessible Publishers Ltd • Ibadan
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <div className="rounded-3xl border border-emerald-100 bg-emerald-50/80 p-5 sm:p-6">
                 <div className="text-emerald-600 text-xs font-semibold tracking-widest">VOCABULARY</div>
                 <div className="text-4xl sm:text-5xl font-semibold text-emerald-700 mt-3">{progress.vocabulary}%</div>
@@ -400,24 +397,24 @@ const AdminGame = () => {
               </div>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8">
-              <h4 className="font-semibold mb-6 flex items-center gap-3">
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 sm:p-8">
+              <h4 className="mb-5 flex items-center gap-3 text-sm font-semibold sm:mb-6">
                 <span className="text-xl">🏆</span> YOUR GROWTH JOURNEY
               </h4>
               <div className="space-y-4 text-sm">
-                <div className="flex justify-between items-center py-3 border-b">
+                <div className="flex flex-col gap-1 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
                   <span>Current Streak</span>
                   <span className="font-mono font-semibold text-emerald-600">{streak} days 🔥</span>
                 </div>
-                <div className="flex justify-between items-center py-3 border-b">
+                <div className="flex flex-col gap-1 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
                   <span>Total Points Earned</span>
                   <span className="font-mono font-semibold">{score} pts</span>
                 </div>
-                <div className="flex justify-between items-center py-3 border-b">
+                <div className="flex flex-col gap-2 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
                   <span>Current Level</span>
-                  <span className="px-4 py-1 bg-slate-900 text-white text-xs rounded-full font-medium">{level}</span>
+                  <span className="w-fit rounded-full bg-slate-900 px-4 py-1 text-xs font-medium text-white">{level}</span>
                 </div>
-                <div className="flex justify-between items-center py-3">
+                <div className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <span>Next Milestone</span>
                   <span className="text-slate-500">Confident Orator (200 pts)</span>
                 </div>
@@ -447,12 +444,12 @@ const AdminGame = () => {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-8">
+            <div className="rounded-3xl border border-slate-200 bg-white p-4 sm:p-8">
               <div className="text-xs uppercase tracking-[0.125em] text-slate-500 mb-3">TERM #{currentVocabIndex + 1} • FILL IN THE BLANK</div>
-              <div className="text-3xl sm:text-4xl font-semibold text-slate-950 mb-6 tracking-tight">
+              <div className="mb-5 wrap-break-word text-3xl font-semibold tracking-tight text-slate-950 sm:mb-6 sm:text-4xl">
                 {vocabularyTerms[currentVocabIndex].word}
               </div>
-              <div className="text-slate-600 mb-8 leading-relaxed text-sm sm:text-[15px]">
+              <div className="mb-6 text-sm leading-relaxed text-slate-600 sm:mb-8 sm:text-[15px]">
                 {vocabularyTerms[currentVocabIndex].example}
               </div>
 
@@ -462,7 +459,7 @@ const AdminGame = () => {
                   <button
                     key={idx}
                     onClick={() => handleVocabAnswer(option.includes('measurements') || option.includes('definition') || option.includes('Quantitative') ? 'correct' : 'wrong')}
-                    className={`w-full text-left p-5 sm:p-6 rounded-2xl border transition-all text-sm hover:shadow-md active:scale-[0.985] ${
+                    className={`w-full rounded-2xl border p-4 text-left text-sm leading-relaxed transition-all hover:shadow-md active:scale-[0.985] sm:p-6 ${
                       selectedAnswer && showVocabFeedback 
                         ? (option.includes('measurements') || option.includes('definition') || option.includes('Quantitative') ? 'border-emerald-500 bg-emerald-50' : 'border-red-200 bg-red-50 opacity-70')
                         : 'border-slate-200 hover:border-slate-300'
@@ -482,10 +479,10 @@ const AdminGame = () => {
               )}
             </div>
 
-            <div className="mt-6 text-xs text-slate-500 flex items-center gap-2">
-              <div className="flex-1 h-px bg-slate-200"></div>
-              TIP: Practice saying each term aloud with the speak button. Confidence comes from repetition.
-              <div className="flex-1 h-px bg-slate-200"></div>
+            <div className="mt-6 flex flex-col items-center gap-2 text-center text-xs text-slate-500 sm:flex-row sm:text-left">
+              <div className="hidden h-px flex-1 bg-slate-200 sm:block"></div>
+              <span>TIP: Practice saying each term aloud with the speak button. Confidence comes from repetition.</span>
+              <div className="hidden h-px flex-1 bg-slate-200 sm:block"></div>
             </div>
           </div>
         )}
@@ -493,18 +490,18 @@ const AdminGame = () => {
         {/* Conciseness Tab */}
         {activeTab === 'conciseness' && (
           <div>
-            <div className="mb-8">
-              <h3 className="text-2xl font-semibold mb-3">Conciseness Training</h3>
-              <p className="text-slate-600 max-w-2xl">Transform long-winded reports and communications into powerful, succinct statements. Essential for presentations, emails to partners, and representing the MD effectively.</p>
-              <div className="mt-4 inline-flex px-5 py-2 bg-amber-50 text-amber-700 rounded-3xl text-sm items-center gap-2">
+            <div className="mb-6 sm:mb-8">
+              <h3 className="mb-3 text-xl font-semibold sm:text-2xl">Conciseness Training</h3>
+              <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">Transform long-winded reports and communications into powerful, succinct statements. Essential for presentations, emails to partners, and representing the MD effectively.</p>
+              <div className="mt-4 inline-flex flex-wrap items-center gap-2 rounded-3xl bg-amber-50 px-4 py-2 text-sm text-amber-700 sm:px-5">
                 <span>Exercise {currentExerciseIndex + 1} of {concisenessExercises.length}</span>
                 <span className="text-xs px-2 py-0.5 bg-amber-200 rounded">SCORE: {concisenessScore}</span>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-amber-200 bg-amber-50/60 p-8 mb-8">
+            <div className="mb-6 rounded-3xl border border-amber-200 bg-amber-50/60 p-4 sm:mb-8 sm:p-8">
               <div className="uppercase text-[10px] font-mono tracking-[1px] text-amber-600 mb-3">ORIGINAL (VERBOSE)</div>
-              <div className="text-slate-700 leading-relaxed text-[15px] italic border-l-4 border-amber-300 pl-6">
+              <div className="border-l-4 border-amber-300 pl-4 text-sm italic leading-relaxed text-slate-700 sm:pl-6 sm:text-[15px]">
                 "{concisenessExercises[currentExerciseIndex].original}"
               </div>
             </div>
@@ -516,7 +513,7 @@ const AdminGame = () => {
               <textarea
                 value={userShortened}
                 onChange={(e) => setUserShortened(e.target.value)}
-                className="w-full h-32 p-6 rounded-3xl border border-slate-200 focus:border-slate-400 focus:ring-1 bg-white resize-y text-slate-700 text-[15px] leading-relaxed"
+                className="h-36 w-full resize-y rounded-3xl border border-slate-200 bg-white p-4 text-[15px] leading-relaxed text-slate-700 focus:border-slate-400 focus:ring-1 sm:h-32 sm:p-6"
                 placeholder="Rewrite this professionally and concisely..."
               />
               <button
@@ -528,7 +525,7 @@ const AdminGame = () => {
             </div>
 
             {concisenessFeedback && (
-              <div className="mt-6 p-6 rounded-3xl bg-white border border-emerald-100 text-slate-700">
+              <div className="mt-6 rounded-3xl border border-emerald-100 bg-white p-5 text-sm leading-relaxed text-slate-700 sm:p-6 sm:text-base">
                 {concisenessFeedback}
                 <div className="mt-4 text-xs text-emerald-600">💡 Pro tip: Use active voice and specific metrics when possible.</div>
               </div>
@@ -538,14 +535,14 @@ const AdminGame = () => {
 
         {/* Speech Practice Tab */}
         {activeTab === 'speech' && (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <div>
-              <h3 className="text-2xl font-semibold mb-2">Speech &amp; Address Practice</h3>
-              <p className="text-slate-600">Write, refine, and practice delivering powerful addresses. Build the skill to win partners and represent leadership with confidence.</p>
+              <h3 className="mb-2 text-xl font-semibold sm:text-2xl">Speech &amp; Address Practice</h3>
+              <p className="text-sm leading-relaxed text-slate-600 sm:text-base">Write, refine, and practice delivering powerful addresses. Build the skill to win partners and represent leadership with confidence.</p>
             </div>
 
-            <div className="rounded-3xl bg-white border p-8">
-              <div className="flex justify-between items-start mb-6">
+            <div className="rounded-3xl border bg-white p-4 sm:p-8">
+              <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div className="uppercase text-xs font-semibold tracking-widest text-purple-500">PROMPT {currentSpeechIndex + 1}</div>
                   <div className="text-xl font-semibold text-slate-900 mt-1">
@@ -554,34 +551,34 @@ const AdminGame = () => {
                 </div>
                 <button 
                   onClick={() => speak(speechPrompts[currentSpeechIndex].example)}
-                  className="flex items-center gap-2 text-xs border border-slate-300 hover:bg-slate-50 px-5 py-2 rounded-3xl transition"
+                  className="flex w-full items-center justify-center gap-2 rounded-3xl border border-slate-300 px-5 py-2 text-xs transition hover:bg-slate-50 sm:w-auto"
                 >
                   🔊 Listen to Example
                 </button>
               </div>
               
-              <div className="bg-slate-50 border border-slate-100 p-5 rounded-2xl text-sm text-slate-600 mb-8">
+              <div className="mb-6 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm leading-relaxed text-slate-600 sm:mb-8 sm:p-5">
                 {speechPrompts[currentSpeechIndex].prompt}
               </div>
 
               <textarea
                 value={userSpeech}
                 onChange={(e) => setUserSpeech(e.target.value)}
-                className="w-full h-52 p-6 rounded-3xl border border-slate-200 focus-within:border-slate-400 bg-white text-slate-800 placeholder:text-slate-400 text-[15px]"
+                className="h-52 w-full rounded-3xl border border-slate-200 bg-white p-4 text-[15px] text-slate-800 placeholder:text-slate-400 focus-within:border-slate-400 sm:p-6"
                 placeholder="Write your speech here... Aim for clarity, confidence, and impact. Reference our mission, metrics, and VICAP values."
               />
 
-              <div className="flex gap-4 mt-6">
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <button
                   onClick={checkSpeech}
-                  className="flex-1 bg-slate-900 text-white py-4 rounded-3xl font-semibold hover:bg-slate-800 transition"
+                  className="flex-1 rounded-3xl bg-slate-900 py-4 text-sm font-semibold text-white transition hover:bg-slate-800"
                 >
                   SUBMIT FOR FEEDBACK
                 </button>
                 <button
                   onClick={() => speak(userSpeech || speechPrompts[currentSpeechIndex].example)}
                   disabled={!userSpeech && !speechPrompts[currentSpeechIndex].example}
-                  className="flex-1 border border-slate-300 hover:bg-slate-50 py-4 rounded-3xl font-medium transition flex items-center justify-center gap-2 disabled:opacity-40"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-3xl border border-slate-300 py-4 text-sm font-medium transition hover:bg-slate-50 disabled:opacity-40"
                 >
                   🎤 PRACTICE DELIVERY (TTS)
                 </button>
@@ -589,8 +586,8 @@ const AdminGame = () => {
             </div>
 
             {speechFeedback && (
-              <div className="rounded-3xl bg-emerald-50 border border-emerald-100 p-8 text-emerald-800">
-                <div className="font-semibold mb-4 flex items-center gap-2">
+              <div className="rounded-3xl border border-emerald-100 bg-emerald-50 p-5 text-sm leading-relaxed text-emerald-800 sm:p-8 sm:text-base">
+                <div className="mb-4 flex items-center gap-2 font-semibold">
                   <span>📝 FEEDBACK FROM THE ROYAL COURT</span>
                 </div>
                 <p className="leading-relaxed">{speechFeedback}</p>
@@ -600,7 +597,7 @@ const AdminGame = () => {
               </div>
             )}
 
-            <div className="text-xs bg-white/70 border border-slate-100 p-6 rounded-3xl text-slate-500">
+            <div className="rounded-3xl border border-slate-100 bg-white/70 p-5 text-xs leading-relaxed text-slate-500 sm:p-6">
               <strong>Pro Delivery Tips:</strong> Stand tall. Breathe. Pause for emphasis after key metrics. Use hand gestures. Speak at 120-150 words per minute. Your voice is your most powerful tool for growing the company.
             </div>
           </div>
@@ -608,7 +605,7 @@ const AdminGame = () => {
       </div>
 
       {/* Footer motivation */}
-      <div className="mt-12 text-center text-xs text-slate-400">
+      <div className="mt-10 px-4 text-center text-xs leading-relaxed text-slate-400 sm:mt-12">
         Built for the Growth Officer of Accessible Publishers Limited • Practice makes perfect representation • From Ibadan to Africa and beyond
       </div>
     </AdminLayout>
