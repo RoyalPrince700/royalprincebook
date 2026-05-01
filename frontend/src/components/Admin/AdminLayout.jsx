@@ -7,7 +7,8 @@ const navItems = [
   { to: '/admin/traffic', label: 'Traffic', helper: 'Visitors and site speed' },
   { to: '/admin/books', label: 'Books', helper: 'Catalog and sales' },
   { to: '/admin/users', label: 'Users', helper: 'Roles and access' },
-  { to: '/admin/finance', label: 'Finance', helper: 'Revenue and payments' }
+  { to: '/admin/finance', label: 'Finance', helper: 'Revenue and payments' },
+  { to: '/admin/game', label: 'Game', helper: 'English & speech mastery' }
 ];
 
 const AdminLayout = ({ eyebrow = 'Admin', title, description, stats = [], actions, children }) => {
@@ -15,15 +16,15 @@ const AdminLayout = ({ eyebrow = 'Admin', title, description, stats = [], action
 
   return (
     <div className="min-h-screen overflow-hidden bg-slate-50 text-slate-900">
-      <section className="relative px-4 pb-16 pt-20 sm:px-6 md:pt-28 lg:px-8">
+      <section className="relative px-4 pb-16 pt-16 sm:pt-20 md:pt-28 sm:px-6 lg:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(241,245,249,0.92)_45%,rgba(226,232,240,0.7)_100%)]" />
-        <div className="absolute inset-x-0 top-0 h-80 bg-linear-to-b from-white via-white/80 to-transparent" />
-        <div className="absolute left-1/2 top-28 h-80 w-80 -translate-x-1/2 rounded-full bg-blue-200/25 blur-3xl" />
+        <div className="absolute inset-x-0 top-0 h-64 sm:h-80 bg-linear-to-b from-white via-white/80 to-transparent" />
+        <div className="absolute left-1/2 top-20 sm:top-28 h-64 w-64 sm:h-80 sm:w-80 -translate-x-1/2 rounded-full bg-blue-200/25 blur-3xl" />
 
         <div className="relative mx-auto max-w-7xl">
           <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-            <aside className="h-fit rounded-4xl border border-white/70 bg-white/82 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur lg:sticky lg:top-28">
-              <div className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/90 p-5">
+            <aside className="h-fit rounded-4xl border border-white/70 bg-white/82 p-4 sm:p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur lg:sticky lg:top-28 max-w-full">
+              <div className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/90 p-4 sm:p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                   RoyalPrince Hub
                 </p>
@@ -42,14 +43,14 @@ const AdminLayout = ({ eyebrow = 'Admin', title, description, stats = [], action
                 </div>
               </div>
 
-              <nav className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible">
+              <nav className="mt-5 flex gap-2 overflow-x-auto pb-3 lg:flex-col lg:overflow-visible snap-x snap-mandatory scrollbar-hide">
                 {navItems.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     end={item.to === '/admin'}
                     className={({ isActive }) =>
-                    `min-w-[180px] rounded-3xl border px-4 py-3 transition lg:min-w-0 ${
+                    `min-w-[138px] sm:min-w-[155px] lg:min-w-0 shrink-0 rounded-3xl border px-3.5 py-3 transition-all active:scale-[0.985] lg:active:scale-100 snap-start ${
                         isActive
                           ? 'border-slate-950 bg-slate-950 text-white shadow-lg'
                           : 'border-white/70 bg-white/70 text-slate-700 hover:border-slate-200 hover:bg-white'
@@ -70,16 +71,16 @@ const AdminLayout = ({ eyebrow = 'Admin', title, description, stats = [], action
                 ))}
               </nav>
 
-              <div className="mt-5 flex flex-wrap gap-3">
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
                 <Link
                   to="/dashboard"
-                  className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
+                  className="inline-flex items-center justify-center rounded-3xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 sm:flex-1"
                 >
-                  Dashboard
+                  ← Dashboard
                 </Link>
                 <Link
                   to="/all-books"
-                  className="inline-flex items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                  className="inline-flex items-center justify-center rounded-3xl bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-95 sm:flex-1"
                   style={{ color: 'white' }}
                 >
                   Browse Books
@@ -88,37 +89,41 @@ const AdminLayout = ({ eyebrow = 'Admin', title, description, stats = [], action
             </aside>
 
             <main className="min-w-0">
-              <div className="rounded-4xl border border-white/70 bg-white/80 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:p-8">
+              <div className="rounded-4xl border border-white/70 bg-white/80 p-5 sm:p-6 lg:p-8 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur">
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  <div className="flex-1">
+                    <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                       {eyebrow}
                     </p>
-                    <h1 className="mt-3 text-3xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
+                    <h1 className="mt-3 text-2xl sm:text-3xl lg:text-5xl font-semibold tracking-[-0.04em] text-slate-950 leading-tight">
                       {title}
                     </h1>
                     <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
                       {description}
                     </p>
                   </div>
-                  {actions ? <div className="flex flex-wrap gap-3">{actions}</div> : null}
+                  {actions ? (
+                    <div className="flex flex-wrap gap-3 pt-2 lg:pt-0">
+                      {actions}
+                    </div>
+                  ) : null}
                 </div>
 
                 {stats.length > 0 ? (
-                  <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {stats.map((stat) => (
                       <div
                         key={stat.label}
-                        className="rounded-[1.75rem] border border-slate-200 bg-slate-50/90 p-5"
+                        className="rounded-3xl border border-slate-200 bg-slate-50/90 p-5 sm:p-6 transition-all hover:shadow-sm"
                       >
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                        <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                           {stat.label}
                         </p>
-                        <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+                        <p className="mt-3 text-3xl sm:text-4xl font-semibold tracking-tight text-slate-950">
                           {stat.value}
                         </p>
                         {stat.helper ? (
-                          <p className="mt-2 text-sm text-slate-600">{stat.helper}</p>
+                          <p className="mt-3 text-xs sm:text-sm text-slate-600 leading-tight">{stat.helper}</p>
                         ) : null}
                       </div>
                     ))}

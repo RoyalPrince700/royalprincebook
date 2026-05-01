@@ -21,6 +21,7 @@ import AdminTraffic from './components/Admin/AdminTraffic';
 import AdminBooks from './components/Admin/AdminBooks';
 import UserManagement from './components/Admin/UserManagement';
 import AdminFinance from './components/Admin/AdminFinance';
+import AdminGame from './components/Admin/AdminGame';
 import AnalyticsTracker from './components/Analytics/AnalyticsTracker';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -112,6 +113,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <AdminFinance />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/game"
+                  element={
+                    <AdminRoute>
+                      <AdminGame />
                     </AdminRoute>
                   }
                 />
