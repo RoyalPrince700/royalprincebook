@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const GTM_ID = 'GTM-P8JVN6V2';
+const GTM_ID = 'GTM-PWW8K4CL';
 const BOOTSTRAP_SCRIPT_ID = 'gtm-bootstrap';
 const NOSCRIPT_ID = 'gtm-noscript';
 
