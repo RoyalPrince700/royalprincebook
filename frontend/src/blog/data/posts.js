@@ -1,5 +1,191 @@
 export const blogPosts = [
   {
+    id: 'lead-yourself-before-the-world-calls-your-name',
+    slug: 'lead-yourself-before-the-world-calls-your-name',
+    title: 'Lead Yourself Before the World Calls Your Name',
+    category: 'Self-Leadership',
+    author: 'RoyalPrince',
+    publishedAt: '2026-05-04',
+    readTime: '6 min read',
+    excerpt:
+      'Visible leadership is borrowed spotlight. Lasting leadership is built in private habits, honest standards, and the courage to move before anyone applauds.',
+    intro:
+      'If you are waiting for a title, a follower count, or perfect conditions before you take your plan seriously, you have the sequence backwards. The leaders people trust usually did not begin by commanding rooms. They began by keeping promises to themselves long enough that responsibility stopped feeling like a costume. This article is a push to close that gap between who you say you are and what your week actually proves.',
+    sections: [
+      {
+        heading: 'The spotlight reveals what was already forming',
+        paragraphs: [
+          'Public roles do not create leadership character; they expose it. Pressure magnifies your habits, your emotional baseline, and how you respond when nobody is cheering. That is why two people can wear the same title and produce completely different trust in a room.',
+          'If you want to be ready when opportunity shows up, audit your private life with the same seriousness you would bring to a performance review. What does your sleep say about your stewardship of energy? What does your handling of small deadlines say about how you will handle crises?',
+          'Self-leadership is not performative humility. It is the steady decision that your standards are not negotiable just because the audience went home.'
+        ]
+      },
+      {
+        heading: 'Before the roadmap, you need a direction you refuse to betray',
+        paragraphs: [
+          'Most people freeze because they confuse clarity with certainty. You may not know every lane change ahead. That does not excuse you from choosing a destination honest enough to organize your effort.',
+          'When I reflect on my own path—including seasons where resources were tight and options felt narrow—the breakthrough was rarely a perfectly drawn plan. It was a refusal to live as if the future had no say in today.',
+          'Give yourself permission to outline the next chapter without needing every footnote. Leadership grows when you treat direction as a commitment, not as a mood.'
+        ]
+      },
+      {
+        heading: 'Credibility is compiled from tiny receipts',
+        paragraphs: [
+          'We live in a culture that celebrates announcements more than maintenance. But teams, clients, and communities eventually ask a quieter question: When this person is unseen, do they still behave like someone worth following?',
+          'Answering that question does not require drama. It requires repetition—showing up prepared, communicating early when you miss, keeping confidences, finishing what you start.',
+          'Those receipts accumulate into influence without you needing to advertise them. People trust patterns more than speeches.'
+        ],
+        cta: {
+          eyebrow: 'Build the foundation',
+          text:
+            'If you want a fuller walkthrough of how inner order prepares you for visible responsibility, Leadership From Within expands on these themes with lived examples you can translate into your own context—not copied sentences, but the same conviction.',
+          label: 'View Leadership From Within',
+          target: 'leadership-from-within'
+        }
+      },
+      {
+        heading: 'Your environment is watching—even when they say nothing',
+        paragraphs: [
+          'Leadership rubs off. Friends adjust their ambition around what feels normal in the room. Families calm down or tighten up based on emotional leadership at home. Your discipline—or lack of it—signals what you truly believe about possibility.',
+          'That is both responsibility and opportunity. You may not control everyone around you, but you can decide not to be the gravitational pull toward cynicism.',
+          'Choose excellence without needing applause for every increment. Some people will rise simply because you made seriousness feel attainable.'
+        ]
+      },
+      {
+        heading: 'Today: one decision your calendar cannot negotiate away',
+        paragraphs: [
+          'Pick a single action that moves your plan from intention to evidence: the awkward outreach, the hour of deep work, the apology, the enrollment, the workout block, the budget review—whatever you have been postponing because it lacks glamour.',
+          'Schedule it as if it were an appointment with your integrity. Then complete it without renegotiating with yourself.',
+          'That kind of move does not guarantee overnight outcomes. It does something more dependable—it proves you are no longer waiting for permission to behave like the leader your mission demands.'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'mindset-first-why-discipline-finally-follows',
+    slug: 'mindset-first-why-discipline-finally-follows',
+    title: 'Mindset First: Why Discipline Finally Follows',
+    category: 'Leadership Mindset',
+    author: 'RoyalPrince',
+    publishedAt: '2026-05-02',
+    readTime: '6 min read',
+    excerpt:
+      'Force and guilt only carry you so far. Lasting discipline is not the starting point—it is what shows up after your identity agrees with the life you say you want.',
+    intro:
+      'We are taught to drag ourselves into better habits by sheer effort. That can work during a sprint—exam season, a launch week, a deadline crunch—but it collapses when fatigue returns and motivation clocks out. If you want discipline that survives ordinary Tuesdays, you need something underneath willpower. You need a story about yourself that makes consistency feel reasonable instead of heroic.',
+    sections: [
+      {
+        heading: 'Why brute force cracks under normal life',
+        paragraphs: [
+          'Effort without belief turns life into a courtroom where you are always on trial. Every missed workout becomes evidence that you are lazy. Every distraction becomes proof that you lack grit. That emotional tax drains the same energy you need for the next attempt.',
+          'High performers are not immune to this—they just learn to separate failure from identity faster. A missed day can be data, not a verdict.',
+          'If your discipline strategy depends on shame, you will keep rebuilding from zero. If it depends on mindset, you rebound because the mission still makes sense.'
+        ]
+      },
+      {
+        heading: 'Mindset is not fantasy—it is the agreement your actions obey',
+        paragraphs: [
+          'I am not asking you to chant affirmations while ignoring reality. I am pointing at something simpler: your behavior follows what you genuinely expect from yourself.',
+          'When your expectations rise, ordinary tasks start carrying meaning. Practice stops feeling like punishment and starts feeling like preparation. You study because you are becoming someone worth listening to. You train because your future responsibilities will require stamina. You save because you are learning stewardship.',
+          'That inner agreement does not remove difficulty. It removes the constant negotiation where you debate whether you feel like doing the right thing.'
+        ]
+      },
+      {
+        heading: 'Replace vague guilt with one sentence you can defend',
+        paragraphs: [
+          'Modern stress often comes from overloaded intentions and under-defined identity. You want “better habits,” but your brain hears noise.',
+          'Compress your aim into a single operational sentence you can repeat under pressure. Something like: “I am building the capacity to carry weight.” Or: “I am becoming dependable in small things.” Or: “I am preparing for responsibility.” Make it yours.',
+          'Then align one habit to that sentence—not ten habits, one anchor habit that makes the story believable. Momentum is easier to multiply than invent.'
+        ],
+        cta: {
+          eyebrow: 'Go deeper',
+          text:
+            'Leadership From Within dives deeper into how inner conviction shapes outer rhythm—the kind of sustainable discipline that survives distraction without turning you into a robot.',
+          label: 'View Leadership From Within',
+          target: 'leadership-from-within'
+        }
+      },
+      {
+        heading: 'Leadership demands stamina that hype cannot supply',
+        paragraphs: [
+          'People are counting on you to be steady—not flashy. Teams need clarity under pressure. Families need calm initiative. Communities need someone who can keep promises when emotions swing.',
+          'That steadiness is trained in quiet repetitions: waking up on time when nobody congratulates you, keeping your word when it costs convenience, learning when nobody assigns homework.',
+          'You are not chasing perfection. You are building a baseline your character can trust when circumstances refuse to cooperate.'
+        ]
+      },
+      {
+        heading: 'Today: install one bridge between belief and behavior',
+        paragraphs: [
+          'Pick one action that makes your new sentence plausible—not giant, just undeniable. Ten focused minutes, one conversation, one module, one meal cooked at home, one outreach message.',
+          'Execute it today without debating feelings. Then tomorrow, protect the slot before your calendar fills with everyone else’s urgency.',
+          'Discipline becomes lighter when it stops being a fight against yourself and starts being evidence that your mindset upgraded.'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'your-plan-needs-a-visible-move-not-another-meeting-with-yourself',
+    slug: 'your-plan-needs-a-visible-move-not-another-meeting-with-yourself',
+    title: 'Your Plan Needs a Visible Move—Not Another Meeting With Yourself',
+    category: 'Taking Action',
+    author: 'RoyalPrince',
+    publishedAt: '2026-04-28',
+    readTime: '6 min read',
+    excerpt:
+      'Planning feels productive because it is safe. Leadership interrupts safety with motion—messy, imperfect motion that turns intentions into evidence.',
+    intro:
+      'You probably already know what you should do next. The missing ingredient is rarely information—it is contact. Contact between intention and reality. Contact between your ideas and a timestamp. Leadership rewards people who translate thinking into something outsiders can recognize: a sent document, a registered business name, a prototype, a scheduled meeting, a posted piece of work. This piece is permission to make today the day your plan stops living only in your head.',
+    sections: [
+      {
+        heading: 'Motion teaches you what maps cannot',
+        paragraphs: [
+          'Plans seduce us because they postpone rejection. Motion exposes truth: what customers actually want, what skills are weaker than you assumed, what fears show up when visibility arrives.',
+          'That exposure is not failure—it is feedback. Leaders learn faster because they accumulate real-world data instead of rehearsing imaginary obstacles.',
+          'If you want maturity, trade endless outlining for one iteration that can be corrected.'
+        ]
+      },
+      {
+        heading: 'People follow evidence, not intentions',
+        paragraphs: [
+          'Whether you lead at home, in school, at work, or online, humans drift toward momentum they can see. Confidence spreads when someone is willing to go first—to apologize first, to volunteer first, to publish first, to confront reality first.',
+          'Your credibility rises when your calendar proves that your priorities are not only philosophical. That does not mean you never rest; it means your rest is chosen, not accidental.',
+          'Leadership by example is often quieter than speeches. It looks like keeping commitments when inconvenience shows up.'
+        ]
+      },
+      {
+        heading: 'Use a twenty-four-hour rule that respects reality',
+        paragraphs: [
+          'Borrow a simple constraint: identify the next physical step—not the whole staircase—and complete it before tomorrow ends.',
+          'Make the step embarrassingly concrete. Not “work on the brand,” but draft three Instagram captions. Not “get healthy,” but schedule the doctor visit. Not “build network,” but send two thoughtful messages.',
+          'If your plan cannot survive that standard repeatedly, it is fantasy dressed as strategy.'
+        ]
+      },
+      {
+        heading: 'Perfectionism is often fear wearing a responsible mask',
+        paragraphs: [
+          'Waiting until everything feels polished is a clever way to avoid accountability. You stay safe inside potential instead of risking judgment.',
+          'Yet influence grows in drafts, beta versions, honest attempts, and repaired mistakes. The goal is not recklessness; it is proportion—ship something appropriate for the stage you are in.',
+          'Let good-enough-to-learn beat perfect-never-seen.'
+        ],
+        cta: {
+          eyebrow: 'Turn conviction into practice',
+          text:
+            'If you want more frameworks for translating conviction into repeatable execution, Leadership From Within covers the inner habits that keep you moving after the first burst of motivation fades.',
+          label: 'View Leadership From Within',
+          target: 'leadership-from-within'
+        }
+      },
+      {
+        heading: 'Close the loop today',
+        paragraphs: [
+          'Pick one visible action that signals seriousness to you—even if the crowd never notices. Pay the fee. Submit the form. Share the post privately for critique. Book the mentor session.',
+          'Then protect your word like it is currency, because in leadership it is.',
+          'Remember: you do not need unanimous confidence. You need one brave increment that proves your plan met daylight—and that you were willing to stand beside it while it was still imperfect.'
+        ]
+      }
+    ]
+  },
+  {
     id: 'becoming-a-corps-camp-director-my-nysc-experience-and-tips-to-get-you-there',
     slug: 'becoming-a-corps-camp-director-my-nysc-experience-and-tips-to-get-you-there',
     title: 'Becoming a Corps Camp Director: My NYSC Experience and Tips to Get You There',
