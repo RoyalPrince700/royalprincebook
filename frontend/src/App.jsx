@@ -23,6 +23,7 @@ import UserManagement from './components/Admin/UserManagement';
 import AdminFinance from './components/Admin/AdminFinance';
 import AdminGame from './components/Admin/AdminArticulationGame';
 import AnalyticsTracker from './components/Analytics/AnalyticsTracker';
+import GoogleTagManager from './components/Analytics/GoogleTagManager';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
@@ -50,6 +51,7 @@ const Layout = ({ children }) => {
 function App() {
   return (
     <Router>
+      <GoogleTagManager />
       <AuthProvider>
         <CartProvider>
           <ThemeProvider>
