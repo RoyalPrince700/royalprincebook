@@ -148,7 +148,7 @@ export const impactStats = [
 
 export const whatIDo = [
   {
-    title: 'Software Development',
+    title: 'Building software that solves business problems.',
     summary: 'Full-stack work with React, Node.js, and MongoDB. Built TestMancer, WifMart, and Accessible Knowledge Hub.',
     icon: 'code'
   },
@@ -158,7 +158,7 @@ export const whatIDo = [
     icon: 'chart'
   },
   {
-    title: 'Digital Marketing',
+    title: 'Growth Systems',
     summary: 'Grew Accessible Kids YouTube from 144 to 1,040+ subscribers in three days with a focused push on content and distribution.',
     icon: 'megaphone'
   },
@@ -188,7 +188,7 @@ export const whatIDo = [
     icon: 'handshake'
   },
   {
-    title: 'Operations',
+    title: 'Operational Excellence',
     summary: 'Build systems that save time and catch problems early before they blow up.',
     icon: 'settings'
   }
@@ -234,19 +234,6 @@ export const featuredProjects = [
     gradient: 'from-emerald-500/20 via-teal-400/10 to-slate-900/5'
   },
   {
-    id: 'smipay',
-    title: 'Smipay',
-    url: 'https://www.smipay.ng/',
-    logo: smipayLogo,
-    description: 'Fintech app for airtime, data, bills, and everyday payments.',
-    problem: 'People wanted one app for daily payments without jumping between services.',
-    role: 'Growth Officer & Partnership Lead',
-    technologies: ['React', 'Node.js', 'MongoDB', 'Payments'],
-    impact: 'Campus activations, trade fair partnerships, and user growth across universities.',
-    lessons: 'Fintech grows when people trust you and the product is fast.',
-    gradient: 'from-sky-500/20 via-blue-400/10 to-slate-900/5'
-  },
-  {
     id: 'royal-prince-hub',
     title: 'Royal Prince Hub',
     url: 'https://www.royalprincehub.com/',
@@ -277,7 +264,8 @@ export const clientProjects = [
     url: 'https://www.smipay.ng/',
     logo: smipayLogo,
     sector: 'Fintech',
-    summary: 'Payments and campus activations.'
+    summary:
+      'Growth & Partnership Lead driving campus adoption, trade fair activations, and university partnerships.'
   },
   {
     title: 'Facity',
@@ -408,8 +396,8 @@ export const leadershipTimeline = [
 
 export const skills = {
   'Software Engineering': ['React', 'Node.js', 'Express', 'MongoDB', 'JavaScript', 'Tailwind', 'Git'],
-  Growth: ['SEO', 'Google Analytics', 'Growth Strategy', 'Community Building', 'Digital Marketing'],
-  Leadership: ['Public Speaking', 'People Management', 'Operations'],
+  Growth: ['SEO', 'Google Analytics', 'Growth Strategy', 'Community Building', 'Growth Systems'],
+  Leadership: ['Public Speaking', 'People Management', 'Operational Excellence'],
   Photography: ['Adobe Lightroom', 'Camera Operation', 'Editing'],
   'Soft Skills': [
     'Ownership',
