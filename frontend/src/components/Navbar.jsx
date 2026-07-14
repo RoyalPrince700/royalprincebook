@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { getRedirectPath } from '../utils/authRedirect';
 import '../App.css';
+import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -82,6 +83,7 @@ const Navbar = () => {
     : '/login';
   const navLinks = [
     { to: '/', label: 'Home' },
+    { to: '/portfolio', label: 'Portfolio' },
     { to: '/all-books', label: 'Books' },
     { to: '/blog', label: 'Blog' },
     { to: '/cart', label: cartLabel },
@@ -155,6 +157,7 @@ const Navbar = () => {
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
+            <ThemeToggle />
             {user ? (
               <>
                 <div className="rounded-full border border-slate-200 bg-white/75 px-4 py-2 text-sm font-medium text-slate-500">
@@ -244,6 +247,9 @@ const Navbar = () => {
           </nav>
 
           <div className="mt-6 border-t border-slate-200 pt-5">
+            <div className="mb-4 flex justify-center">
+              <ThemeToggle />
+            </div>
             {user ? (
               <div className="space-y-3">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">

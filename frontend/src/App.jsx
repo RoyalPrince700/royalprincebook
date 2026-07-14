@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -30,19 +30,23 @@ import Navbar from './components/Navbar';
 import Cart from './pages/Cart';
 import { CartProvider } from './contexts/CartContext';
 import { BlogListPage, BlogPostPage } from './blog';
+import PageLoader from './components/PageLoader';
 import './App.css';
+
+const PortfolioPage = lazy(() => import('./portfolio/pages/PortfolioPage'));
 
 const Layout = ({ children }) => {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const isPortfolio = location.pathname === '/portfolio';
   
   return (
     <>
       <AnalyticsTracker />
-      <Navbar isHome={isHome} />
-      <div className={`App ${isHome ? 'home-mode' : ''}`}>
+      {!isPortfolio && <Navbar isHome={isHome} />}
+      <div className={`App ${isHome ? 'home-mode' : ''} ${isPortfolio ? 'portfolio-mode' : ''}`}>
         {children}
-        <Footer />
+        {!isPortfolio && <Footer />}
       </div>
     </>
   );
@@ -60,6 +64,11 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/about-author" element={<AboutAuthor />} />
+                <Route path="/portfolio" element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PortfolioPage />
+                  </Suspense>
+                } />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
                 <Route path="/all-books" element={<BookList />} />
