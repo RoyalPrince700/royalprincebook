@@ -6,13 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate:cv": "node scripts/generate-cv-pdf.mjs"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/vite": "^4.1.18",
     "@vitejs/plugin-react": "^5.1.4",
     "autoprefixer": "^10.4.24",
+    "pdfkit": "^0.19.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
@@ -27,6 +29,6 @@
     "react-dom": "^18.3.1",
     "react-quill": "^2.0.0",
     "react-router-dom": "^7.13.0",
-    "recharts": "^3.8.1"
+    "recharts": "^3.9.2"
   }
 }

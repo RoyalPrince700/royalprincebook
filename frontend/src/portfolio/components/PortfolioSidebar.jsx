@@ -22,22 +22,68 @@ const icons = {
   code: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
   mail: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
   menu: 'M4 6h16M4 12h16M4 18h16',
-  close: 'M6 18L18 6M6 6l12 12',
+  chevronLeft: 'M15 19l-7-7 7-7',
   sun: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
   moon: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z'
 };
 
-const NavIcon = ({ name }) => (
-  <svg className="pf-sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+const NavIcon = ({ name, className = 'pf-sidebar-icon' }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d={icons[name]} />
   </svg>
+);
+
+const MobileFloatingRail = ({ active, progress, onToggle, onScrollTo, theme, toggleTheme }) => (
+  <nav className="pf-rail-mini" aria-label="Portfolio sections">
+    <div className="pf-rail-mini-line" aria-hidden="true">
+      <motion.div
+        className="pf-rail-mini-line-fill"
+        style={{ height: `${progress}%` }}
+        transition={{ duration: 0.2 }}
+      />
+    </div>
+
+    <button
+      type="button"
+      className="pf-rail-mini-node pf-rail-mini-toggle"
+      onClick={onToggle}
+      aria-label="Expand navigation"
+      aria-expanded={false}
+    >
+      <NavIcon name="menu" className="pf-rail-mini-icon" />
+    </button>
+
+    {portfolioNavSections.map((section) => (
+      <button
+        key={section.id}
+        type="button"
+        className={`pf-rail-mini-node ${active === section.id ? 'pf-rail-mini-node-active' : ''}`}
+        onClick={() => onScrollTo(section.id)}
+        title={section.label}
+        aria-label={section.label}
+        aria-current={active === section.id ? 'true' : undefined}
+      >
+        <NavIcon name={section.icon} className="pf-rail-mini-icon" />
+      </button>
+    ))}
+
+    <button
+      type="button"
+      className="pf-rail-mini-node"
+      onClick={toggleTheme}
+      title={theme === 'light' ? 'Dark mode' : 'Light mode'}
+      aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+    >
+      <NavIcon name={theme === 'light' ? 'moon' : 'sun'} className="pf-rail-mini-icon" />
+    </button>
+  </nav>
 );
 
 const PortfolioSidebar = ({ progress = 0 }) => {
   const { theme, toggleTheme } = useTheme();
   const [active, setActive] = useState('hero');
   const [expanded, setExpanded] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,28 +111,35 @@ const PortfolioSidebar = ({ progress = 0 }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [mobileOpen]);
-
   const scrollTo = (id) => {
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    setMobileOpen(false);
+    setMobileExpanded(false);
   };
 
-  const sidebarContent = (
+  const renderExpandedPanel = ({ showLabels, showCollapseToggle, onCollapse }) => (
     <>
+      {showCollapseToggle && (
+        <div className="pf-sidebar-mobile-header">
+          <button
+            type="button"
+            className="pf-sidebar-expand-toggle"
+            onClick={onCollapse}
+            aria-label="Collapse navigation"
+            aria-expanded={true}
+          >
+            <NavIcon name="chevronLeft" />
+          </button>
+        </div>
+      )}
+
       <div className="pf-sidebar-brand">
-        <Link to="/" className="pf-sidebar-brand-link" onClick={() => setMobileOpen(false)}>
+        <Link to="/" className="pf-sidebar-brand-link" onClick={() => setMobileExpanded(false)}>
           <span className="pf-sidebar-brand-mark">RP</span>
           <AnimatePresence>
-            {(expanded || mobileOpen) && (
+            {showLabels && (
               <motion.span
                 className="pf-sidebar-brand-text"
                 initial={{ opacity: 0, x: -8 }}
@@ -121,7 +174,7 @@ const PortfolioSidebar = ({ progress = 0 }) => {
             <span className="pf-sidebar-link-indicator" />
             <NavIcon name={section.icon} />
             <AnimatePresence>
-              {(expanded || mobileOpen) && (
+              {showLabels && (
                 <motion.span
                   className="pf-sidebar-link-label"
                   initial={{ opacity: 0, x: -6 }}
@@ -145,7 +198,7 @@ const PortfolioSidebar = ({ progress = 0 }) => {
         >
           <NavIcon name={theme === 'light' ? 'moon' : 'sun'} />
           <AnimatePresence>
-            {(expanded || mobileOpen) && (
+            {showLabels && (
               <motion.span
                 className="pf-sidebar-link-label"
                 initial={{ opacity: 0, x: -6 }}
@@ -163,7 +216,6 @@ const PortfolioSidebar = ({ progress = 0 }) => {
 
   return (
     <>
-      {/* Desktop floating sidebar */}
       <motion.aside
         className="pf-sidebar pf-sidebar-desktop"
         onMouseEnter={() => setExpanded(true)}
@@ -172,39 +224,45 @@ const PortfolioSidebar = ({ progress = 0 }) => {
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
         aria-label="Portfolio navigation"
       >
-        {sidebarContent}
+        {renderExpandedPanel({ showLabels: expanded })}
       </motion.aside>
 
-      {/* Mobile toggle */}
-      <button
-        type="button"
-        className="pf-sidebar-mobile-toggle"
-        onClick={() => setMobileOpen((prev) => !prev)}
-        aria-label={mobileOpen ? 'Close navigation' : 'Open navigation'}
-        aria-expanded={mobileOpen}
-      >
-        <NavIcon name={mobileOpen ? 'close' : 'menu'} />
-      </button>
+      {!mobileExpanded && (
+        <MobileFloatingRail
+          active={active}
+          progress={progress}
+          onToggle={() => setMobileExpanded(true)}
+          onScrollTo={scrollTo}
+          theme={theme}
+          toggleTheme={toggleTheme}
+        />
+      )}
 
-      {/* Mobile drawer */}
       <AnimatePresence>
-        {mobileOpen && (
+        {mobileExpanded && (
           <>
-            <motion.div
-              className="pf-sidebar-backdrop"
+            <motion.button
+              type="button"
+              className="pf-sidebar-mobile-backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setMobileOpen(false)}
+              aria-label="Collapse navigation"
+              onClick={() => setMobileExpanded(false)}
             />
             <motion.aside
-              className="pf-sidebar pf-sidebar-mobile"
-              initial={{ x: -280, opacity: 0 }}
+              className="pf-sidebar pf-sidebar-mobile-panel"
+              initial={{ x: -260, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -280, opacity: 0 }}
-              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              exit={{ x: -260, opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              aria-label="Portfolio navigation"
             >
-              {sidebarContent}
+              {renderExpandedPanel({
+                showLabels: true,
+                showCollapseToggle: true,
+                onCollapse: () => setMobileExpanded(false)
+              })}
             </motion.aside>
           </>
         )}

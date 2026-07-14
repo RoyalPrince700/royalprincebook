@@ -1,43 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { caseStudies } from '../data/portfolioData';
+import GrowthBarChart from './GrowthBarChart';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
-
-const GrowthChart = ({ before, after, metric }) => {
-  const max = Math.max(before, after);
-  const beforeHeight = (before / max) * 100;
-  const afterHeight = (after / max) * 100;
-
-  return (
-    <div className="pf-growth-chart">
-      <div className="pf-growth-bars">
-        <div className="pf-growth-bar-wrap">
-          <motion.div
-            className="pf-growth-bar pf-growth-bar-before"
-            initial={{ height: 0 }}
-            whileInView={{ height: `${beforeHeight}%` }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          />
-          <span className="pf-growth-value">{before.toLocaleString()}</span>
-          <span className="pf-growth-label">Before</span>
-        </div>
-        <div className="pf-growth-bar-wrap">
-          <motion.div
-            className="pf-growth-bar pf-growth-bar-after"
-            initial={{ height: 0 }}
-            whileInView={{ height: `${afterHeight}%` }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.35 }}
-          />
-          <span className="pf-growth-value">{after.toLocaleString()}</span>
-          <span className="pf-growth-label">After</span>
-        </div>
-      </div>
-      <p className="pf-growth-metric">{metric}</p>
-    </div>
-  );
-};
 
 const CaseStudiesSection = () => (
   <SectionWrapper id="case-studies" className="pf-case-studies-section">
@@ -60,6 +25,16 @@ const CaseStudiesSection = () => (
           >
             <span className="pf-case-index">0{index + 1}</span>
             <h3 className="pf-case-title">{study.title}</h3>
+            {study.url && (
+              <a
+                href={study.url}
+                target="_blank"
+                rel="noreferrer"
+                className="pf-case-link"
+              >
+                {study.urlLabel || 'View project'}
+              </a>
+            )}
             <p className="pf-case-challenge">
               <strong>Challenge:</strong> {study.challenge}
             </p>
@@ -82,7 +57,7 @@ const CaseStudiesSection = () => (
             </p>
 
             {study.before && study.after && (
-              <GrowthChart before={study.before} after={study.after} metric={study.metric} />
+              <GrowthBarChart before={study.before} after={study.after} metric={study.metric} />
             )}
 
             {study.timeline && (

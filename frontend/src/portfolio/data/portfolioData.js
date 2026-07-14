@@ -38,10 +38,6 @@ export const trustedBy = [
     logo: accessibleLogo
   },
   {
-    name: 'Accessible Knowledge Hub',
-    url: 'https://www.accessibleknowledgehub.com/'
-  },
-  {
     name: 'Smart Edu Hub',
     url: 'https://www.smarteduhub.ng/',
     logo: smartEduHubLogo
@@ -64,22 +60,6 @@ export const trustedBy = [
     name: 'TestMancer',
     url: 'https://www.testmancer.com/',
     logo: testMancerLogo
-  },
-  {
-    name: 'University of Ilorin',
-    url: 'https://www.unilorin.edu.ng/'
-  },
-  {
-    name: 'Student Union Government',
-    url: 'https://www.unilorin.edu.ng/'
-  },
-  {
-    name: 'WifMart',
-    url: 'https://www.wifmart.com/'
-  },
-  {
-    name: 'Royal Prince Hub',
-    url: 'https://www.royalprincehub.com/'
   }
 ];
 
@@ -296,6 +276,8 @@ export const caseStudies = [
   {
     id: 'accessible-kids',
     title: 'Accessible Kids',
+    url: 'https://www.youtube.com/@AccessibleKids',
+    urlLabel: 'View YouTube Channel',
     challenge: 'Only 144 YouTube subscribers. Low reach and little engagement.',
     strategy: ['Better content', 'Community push', 'Targeted promotion', 'Consistent posting'],
     execution: 'Reworked the content plan, fixed thumbnails and titles, and pushed it through community channels.',
