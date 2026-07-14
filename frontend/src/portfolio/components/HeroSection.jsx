@@ -28,20 +28,22 @@ const HeroSection = () => (
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       >
-        <span className="pf-eyebrow pf-eyebrow-gold">Portfolio</span>
-        <h1 className="pf-hero-title">
-          {heroContent.lines.map((line, index) => (
-            <motion.span
-              key={line}
-              className="pf-hero-line"
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 + index * 0.12, duration: 0.7 }}
-            >
-              {line}
-            </motion.span>
-          ))}
-        </h1>
+        <div className="pf-hero-intro">
+          <span className="pf-eyebrow pf-eyebrow-gold">Portfolio</span>
+          <h1 className="pf-hero-title">
+            {heroContent.lines.map((line, index) => (
+              <motion.span
+                key={line}
+                className="pf-hero-line"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 + index * 0.12, duration: 0.7 }}
+              >
+                {line}
+              </motion.span>
+            ))}
+          </h1>
+        </div>
         <p className="pf-hero-subtitle">{heroContent.subheading}</p>
 
         <div className="pf-hero-actions">

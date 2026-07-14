@@ -23,6 +23,7 @@ const icons = {
   mail: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
   menu: 'M4 6h16M4 12h16M4 18h16',
   chevronLeft: 'M15 19l-7-7 7-7',
+  chevronRight: 'M9 5l7 7-7 7',
   sun: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
   moon: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z'
 };
@@ -130,7 +131,7 @@ const PortfolioSidebar = ({ progress = 0 }) => {
             aria-label="Collapse navigation"
             aria-expanded={true}
           >
-            <NavIcon name="chevronLeft" />
+            <NavIcon name="chevronRight" />
           </button>
         </div>
       )}
@@ -252,9 +253,9 @@ const PortfolioSidebar = ({ progress = 0 }) => {
             />
             <motion.aside
               className="pf-sidebar pf-sidebar-mobile-panel"
-              initial={{ x: -260, opacity: 0 }}
+              initial={{ x: 260, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -260, opacity: 0 }}
+              exit={{ x: 260, opacity: 0 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               aria-label="Portfolio navigation"
             >

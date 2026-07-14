@@ -66,6 +66,37 @@ export const trustedBy = [
 export const aboutContent = {
   portrait: royalPrinceImage,
   title: 'Ownership. Curiosity. Execution.',
+  hook: 'If something is broken or missing, I notice — then I build, grow, or fix it.',
+  highlights: [
+    {
+      id: 'growth',
+      eyebrow: 'Now',
+      title: 'Growth Officer @ APL',
+      text: 'Driving digital adoption, ambassador programmes, and partnerships across publishing, edtech, fintech, and media.',
+      icon: 'chart'
+    },
+    {
+      id: 'build',
+      eyebrow: 'Build',
+      title: 'Products shipped',
+      text: 'TestMancer (3,000+ users), WifMart, and Accessible Knowledge Hub — from idea to live product.',
+      icon: 'code'
+    },
+    {
+      id: 'lead',
+      eyebrow: 'Lead',
+      title: '40,000+ students',
+      text: 'Former Student Union President at the University of Ilorin. Fast decisions, real accountability.',
+      icon: 'flag'
+    },
+    {
+      id: 'media',
+      eyebrow: 'Media',
+      title: 'The Compass',
+      text: 'Weekly leadership show on Oxygen FM — guests, partnerships, and audience growth.',
+      icon: 'radio'
+    }
+  ],
   topics: [
     'Ownership',
     'Growth Strategy',
@@ -76,12 +107,9 @@ export const aboutContent = {
     'Education',
     'Entrepreneurship'
   ],
-  paragraphs: [
-    'I rarely stick to just my job title. If something is broken or missing, I notice and try to fix it.',
-    'As Growth Officer at Accessible Publishers Limited, I work across Accessible Publishers, Smart Edu Hub, Smipay, and Oxygen FM. That covers ambassador programmes, getting people to use our digital products, partnerships, and internal systems.',
-    'I also build. TestMancer has 3,000+ users. I built WifMart and Accessible Knowledge Hub. When there is no obvious path, I try to create one, like the Smipay trade fair deal with University of Ibadan SUG or hosting The Compass on Oxygen FM.',
-    'Before this, I was Student Union President at the University of Ilorin, representing 40,000+ students. It taught me to decide fast, work with different people, and own the outcome.',
-    'I do my best work around people who build things. Places where ideas move quickly and titles matter less than getting the work done.'
+  more: [
+    'I rarely stick to just my job title. At Accessible Publishers Limited, that has meant growth work across Accessible Publishers, Smart Edu Hub, Smipay, and Oxygen FM — plus building internal systems when the team needs them.',
+    'I do my best work with people who move fast, care about results, and treat titles as less important than getting the work done.'
   ]
 };
 
@@ -241,7 +269,8 @@ export const clientProjects = [
     url: 'https://www.smarteduhub.ng/',
     logo: smartEduHubLogo,
     sector: 'Education',
-    summary: 'School management platform with admin tools and analytics.'
+    summary:
+      'Growth Officer driving digital product adoption and managing social media growth for the edtech platform.'
   },
   {
     title: 'Smipay',
@@ -424,7 +453,7 @@ export const currentFocus = [
   {
     title: 'Smart Edu Hub',
     url: 'https://www.smarteduhub.ng/',
-    summary: 'Edtech growth and getting more schools on the platform.'
+    summary: 'Growth Officer driving product adoption and social media growth for the edtech platform.'
   },
   { title: 'Smipay', url: 'https://www.smipay.ng/', summary: 'Campus partnerships and trade fair activations.' },
   {
