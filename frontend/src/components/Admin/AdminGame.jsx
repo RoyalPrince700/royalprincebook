@@ -297,6 +297,7 @@ const AdminGame = () => {
 
   return (
     <AdminLayout
+      hero="split"
       eyebrow="Growth Officer Academy"
       title="Master Articulation & Professional Speech"
       description="Build the confidence to represent the MD, deliver compelling data-driven presentations, win stakeholders, and grow Accessible Publishers' digital products. Practice vocabulary, conciseness, and speech writing tailored to publishing, metrics, optimization, and VICAP values. Only admins access this training ground."

@@ -14,8 +14,28 @@ const {
   getSharedReport,
   heartbeat,
   goOffline,
-  getPresence
+  getPresence,
+  getTags,
+  createTag,
+  getGamificationStats
 } = require('../controllers/workboardController');
+const {
+  listProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+  addFocusTime,
+  getMission,
+  upsertMission,
+  listObjectives,
+  createObjective,
+  updateObjective,
+  deleteObjective,
+  getAchievements,
+  listVictories,
+  upsertVictory,
+  deleteVictory
+} = require('../controllers/workboardExecutionController');
 const {
   listArtboards,
   createArtboard,
@@ -45,9 +65,25 @@ router.use(authenticateToken, authorizeAdminOrSuperior);
 
 router.get('/workers', getWorkers);
 router.get('/tasks', getTasks);
+router.get('/gamification', getGamificationStats);
+router.get('/achievements', getAchievements);
+router.get('/victories', listVictories);
+router.put('/victories', upsertVictory);
+router.delete('/victories/:id', deleteVictory);
+router.get('/mission', getMission);
+router.put('/mission', upsertMission);
+router.get('/projects', listProjects);
+router.post('/projects', createProject);
+router.put('/projects/:id', updateProject);
+router.delete('/projects/:id', deleteProject);
+router.get('/objectives', listObjectives);
+router.post('/objectives', createObjective);
+router.put('/objectives/:id', updateObjective);
+router.delete('/objectives/:id', deleteObjective);
 router.post('/tasks', createTask);
 router.put('/tasks/:id', updateTask);
 router.patch('/tasks/:id/status', updateTaskStatus);
+router.patch('/tasks/:id/focus', addFocusTime);
 router.delete('/tasks/:id', deleteTask);
 router.post('/tasks/:id/comments', addComment);
 router.get('/report/docx', getReportDocx);
@@ -56,6 +92,8 @@ router.post('/report/share', createShareLink);
 router.post('/presence/heartbeat', heartbeat);
 router.post('/presence/offline', goOffline);
 router.get('/presence', getPresence);
+router.get('/tags', getTags);
+router.post('/tags', createTag);
 
 router.get('/artboards', listArtboards);
 router.post('/artboards', createArtboard);

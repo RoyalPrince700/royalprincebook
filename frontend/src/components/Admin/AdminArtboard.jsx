@@ -220,8 +220,6 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [showNewForm, setShowNewForm] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
   const [topZ, setTopZ] = useState(1);
@@ -724,21 +722,11 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     []
   );
 
-  const refreshBoardList = async () => {
-    try {
-      const listRes = await axios.get('/workboard/artboards');
-      setBoards(listRes.data.artboards || []);
-    } catch {
-      /* ignore list refresh errors */
-    }
-  };
-
   const handleSelectBoard = async (id) => {
     if (!id || String(id) === String(activeId)) return;
     persistView();
     viewRestoredForRef.current = '';
     setEditingTitle(false);
-    setShowNewForm(false);
     closeSharePopover();
     setLoading(true);
     setError('');
@@ -793,21 +781,30 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     }
   };
 
-  const handleCreateBoard = async (event) => {
-    event.preventDefault();
-    const trimmed = newTitle.trim();
-    if (!trimmed || creating) return;
+  const handleCreateBoard = async () => {
+    if (creating || isSharedMode) return;
     persistView();
     viewRestoredForRef.current = '';
     setCreating(true);
+    setEditingTitle(false);
+    closeSharePopover();
     setError('');
     try {
-      const response = await axios.post('/workboard/artboards', { title: trimmed });
+      const response = await axios.post('/workboard/artboards', { title: 'Untitled' });
       const board = response.data.artboard;
-      setShowNewForm(false);
-      setNewTitle('');
       applyBoard(board);
-      await refreshBoardList();
+      setBoards((prev) => {
+        const entry = {
+          id: board.id,
+          title: board.title,
+          createdAt: board.createdAt,
+          updatedAt: board.updatedAt
+        };
+        const without = prev.filter((b) => String(b.id) !== String(board.id));
+        return [entry, ...without];
+      });
+      setTitleDraft(board.title || 'Untitled');
+      setEditingTitle(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create artboard');
     } finally {
@@ -1031,7 +1028,9 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       {error ? <p className="ab-error">{error}</p> : null}
 
       <aside
-        className={`ab-side-rail${railOpen ? ' is-open' : ''}`}
+        className={`ab-side-rail${railOpen ? ' is-open' : ''}${
+          editingTitle ? ' has-flyout' : ''
+        }`}
         aria-label="Artboard controls"
       >
         <div className={`ab-side-top ${railOpen ? '' : 'is-compact'}`}>
@@ -1161,7 +1160,6 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
               editingTitle ? ' is-active' : ''
             }`}
             onClick={() => {
-              setShowNewForm(false);
               closeSharePopover();
               setTitleDraft(title);
               setEditingTitle(true);
@@ -1177,19 +1175,16 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
         {!isSharedMode ? (
           <button
             type="button"
-            className={`ab-side-btn${railOpen ? ' ab-side-btn--row' : ''}${
-              showNewForm ? ' is-active' : ''
-            }`}
-            onClick={() => {
-              setEditingTitle(false);
-              closeSharePopover();
-              setShowNewForm((open) => !open);
-            }}
+            className={`ab-side-btn${railOpen ? ' ab-side-btn--row' : ''}`}
+            onClick={handleCreateBoard}
+            disabled={creating}
             aria-label="New artboard"
             title="New board"
           >
             <SideIcon name="new" />
-            {railOpen ? <span className="ab-side-btn-label">New board</span> : null}
+            {railOpen ? (
+              <span className="ab-side-btn-label">{creating ? 'Creating…' : 'New board'}</span>
+            ) : null}
           </button>
         ) : null}
 
@@ -1206,7 +1201,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
 
         {editingTitle && !isSharedMode ? (
           <div className="ab-side-panel">
-            <p className="ab-side-panel-label">Rename</p>
+            <p className="ab-side-panel-label">Board title</p>
             <input
               ref={titleInputRef}
               className="ab-title-input"
@@ -1225,38 +1220,9 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
                 }
               }}
               aria-label="Artboard title"
+              placeholder="Name this board"
             />
           </div>
-        ) : null}
-
-        {showNewForm && !isSharedMode ? (
-          <form className="ab-side-panel ab-new-form" onSubmit={handleCreateBoard}>
-            <p className="ab-side-panel-label">New board</p>
-            <input
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Board title"
-              maxLength={120}
-              required
-              autoFocus
-              aria-label="New artboard title"
-            />
-            <div className="ab-side-panel-actions">
-              <button type="submit" className="ab-btn ab-btn-primary" disabled={creating}>
-                {creating ? '…' : 'Create'}
-              </button>
-              <button
-                type="button"
-                className="ab-btn ab-btn-ghost"
-                onClick={() => {
-                  setShowNewForm(false);
-                  setNewTitle('');
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
         ) : null}
       </aside>
 

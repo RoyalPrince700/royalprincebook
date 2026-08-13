@@ -49,6 +49,23 @@ const workboardTaskSchema = new mongoose.Schema({
     match: /^\d{4}-\d{2}-\d{2}$/,
     index: true
   },
+  /**
+   * First date this task was scheduled for.
+   * Frozen on create; date may change later (rollover) without rewriting this.
+   * Legacy tasks: treat missing originalDate as date.
+   */
+  originalDate: {
+    type: String,
+    match: /^\d{4}-\d{2}-\d{2}$/,
+    default: null,
+    index: true
+  },
+  /** Previous date when last moved (analytics / rollover trail). */
+  rolledFromDate: {
+    type: String,
+    match: /^\d{4}-\d{2}-\d{2}$/,
+    default: null
+  },
   startTime: {
     type: String,
     trim: true,
@@ -63,15 +80,55 @@ const workboardTaskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['started', 'in_progress', 'almost_done', 'completed', 'postponed'],
+    enum: ['started', 'in_progress', 'almost_done', 'completed', 'postponed', 'cancelled'],
     default: 'started',
     index: true
+  },
+  cancelledAt: {
+    type: Date,
+    default: null
   },
   assignedBy: {
     type: String,
     trim: true,
     maxlength: 80,
     default: ''
+  },
+  tag: {
+    type: String,
+    trim: true,
+    maxlength: 40,
+    default: ''
+  },
+  /** Priority drives XP on completion. Defaults keep legacy tasks compatible. */
+  priority: {
+    type: String,
+    enum: ['LOW', 'NORMAL', 'HIGH', 'CRITICAL'],
+    default: 'NORMAL',
+    index: true
+  },
+  /** Idempotency lock: XP already granted for this completion cycle. */
+  xpAwarded: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  completedAt: {
+    type: Date,
+    default: null
+  },
+  /** Accumulated focus-mode seconds for this task. */
+  focusTime: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  /** Optional project (Boss Battle) link. */
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'WorkboardProject',
+    default: null,
+    index: true
   },
   comments: {
     type: [commentSchema],

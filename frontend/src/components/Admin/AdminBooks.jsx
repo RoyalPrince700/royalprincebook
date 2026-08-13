@@ -50,6 +50,7 @@ const AdminBooks = () => {
 
   return (
     <AdminLayout
+      hero="split"
       eyebrow="Admin Books"
       title="Track your catalog at a glance."
       description="See how many books you have, which titles are selling, and how each book is performing inside the catalog."

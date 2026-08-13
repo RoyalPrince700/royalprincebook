@@ -54,6 +54,10 @@
   overflow: hidden;
 }
 
+.ab-side-rail.has-flyout {
+  overflow: visible;
+}
+
 .ab-side-rail.is-open {
   width: 15.5rem;
 }
@@ -594,22 +598,6 @@
 }
 
 .ab-title-input:focus {
-  outline: none;
-  border-color: rgba(120, 90, 60, 0.35);
-}
-
-.ab-new-form input {
-  border: 1px solid var(--wb-board-line);
-  background: #fff;
-  color: var(--wb-ink);
-  border-radius: 999px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.78rem;
-  width: 100%;
-  min-width: 0;
-}
-
-.ab-new-form input:focus {
   outline: none;
   border-color: rgba(120, 90, 60, 0.35);
 }

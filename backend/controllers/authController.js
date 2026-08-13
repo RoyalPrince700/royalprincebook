@@ -54,7 +54,8 @@ const getProfile = async (req, res) => {
         email: user.email,
         role: user.role,
         createdAt: user.createdAt,
-        purchasedBooks: user.purchasedBooks || []
+        purchasedBooks: user.purchasedBooks || [],
+        workboardXp: user.workboardXp || 0
       }
     });
   } catch (error) {
@@ -100,7 +101,8 @@ const updateProfile = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        purchasedBooks: user.purchasedBooks || []
+        purchasedBooks: user.purchasedBooks || [],
+        workboardXp: user.workboardXp || 0
       }
     });
   } catch (error) {

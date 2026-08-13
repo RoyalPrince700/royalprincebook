@@ -844,6 +844,7 @@ const AdminArticulationGame = () => {
 
   return (
     <AdminLayout
+      hero="split"
       eyebrow="Growth Officer Academy"
       title="Speak with precision, clarity, and authority."
       description="This is not just a game. It is a speaking practice system for your Growth Officer work: precise publishing vocabulary, concise statements, picking the tightest line, natural connectors, fluent executive framing, stakeholder speeches, data-backed presentations, and clear delivery drills."

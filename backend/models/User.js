@@ -44,7 +44,23 @@ const userSchema = new mongoose.Schema({
   purchasedBooks: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Book'
-  }]
+  }],
+  /** Cumulative Workboard XP (level derived client/server from this total). */
+  workboardXp: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  /** Unlocked Workboard achievement ids with timestamps. */
+  workboardAchievements: {
+    type: [
+      {
+        id: { type: String, required: true },
+        unlockedAt: { type: Date, default: Date.now }
+      }
+    ],
+    default: []
+  }
 }, {
   timestamps: true
 });

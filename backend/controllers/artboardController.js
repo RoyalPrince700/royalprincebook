@@ -146,10 +146,7 @@ const createArtboard = async (req, res) => {
       return res.status(403).json({ message: 'Artboard access required' });
     }
 
-    const title = String(req.body.title || '').trim();
-    if (!title) {
-      return res.status(400).json({ message: 'Title is required' });
-    }
+    const title = String(req.body.title || '').trim() || 'Untitled';
     if (title.length > 120) {
       return res.status(400).json({ message: 'Title is too long' });
     }
@@ -159,13 +156,9 @@ const createArtboard = async (req, res) => {
       title
     });
 
-    const note = await ArtboardNote.create({
-      artboard: board._id,
-      ...STARTER_NOTE
-    });
-
+    // New boards start empty — users add notes themselves.
     res.status(201).json({
-      artboard: serializeBoard(board, [note]),
+      artboard: serializeBoard(board, []),
       noteSize: DEFAULT_NOTE_SIZE
     });
   } catch (error) {

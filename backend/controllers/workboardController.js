@@ -3,17 +3,82 @@ const { Document, Packer, Paragraph, TextRun, HeadingLevel } = require('docx');
 const WorkboardTask = require('../models/WorkboardTask');
 const WorkboardPresence = require('../models/WorkboardPresence');
 const WorkboardShare = require('../models/WorkboardShare');
+const WorkboardTag = require('../models/WorkboardTag');
 const User = require('../models/User');
 const { canEditWorkboard } = require('../middleware/auth');
+const {
+  PRIORITIES,
+  DEFAULT_PRIORITY,
+  normalizePriority,
+  applyCompletionXp
+} = require('../utils/workboardXp');
+const { calculateLevel } = require('../utils/workboardAchievements');
+const { runAchievementSync } = require('./workboardExecutionController');
+const mongoose = require('mongoose');
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
-const STATUSES = ['started', 'in_progress', 'almost_done', 'completed', 'postponed'];
+const STATUSES = ['started', 'in_progress', 'almost_done', 'completed', 'postponed', 'cancelled'];
 const LEGACY_STATUS_MAP = {
   todo: 'started',
   blocked: 'postponed'
 };
 const ONLINE_THRESHOLD_MS = 45 * 1000;
+const TAG_MAX_LENGTH = 40;
+const GAMIFICATION_LOOKBACK_DAYS = 120;
+
+const adjustUserWorkboardXp = async (userId, xpDelta) => {
+  if (!xpDelta) {
+    const user = await User.findById(userId).select('workboardXp');
+    return user?.workboardXp || 0;
+  }
+
+  const user = await User.findById(userId).select('workboardXp');
+  if (!user) return 0;
+
+  const next = Math.max(0, (user.workboardXp || 0) + xpDelta);
+  user.workboardXp = next;
+  await user.save();
+  return next;
+};
+
+const normalizeTagName = (value) =>
+  String(value || '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .slice(0, TAG_MAX_LENGTH);
+
+const listTagNames = async (ownerId) => {
+  const [saved, used] = await Promise.all([
+    WorkboardTag.find({ owner: ownerId }).sort({ nameKey: 1 }).lean(),
+    WorkboardTask.distinct('tag', { owner: ownerId, tag: { $nin: [null, ''] } })
+  ]);
+  const names = new Set([
+    ...saved.map((tag) => tag.name),
+    ...used.map((tag) => String(tag || '').trim()).filter(Boolean)
+  ]);
+  return [...names].sort((a, b) => a.localeCompare(b));
+};
+
+const upsertTag = async (ownerId, value) => {
+  const name = normalizeTagName(value);
+  if (!name) return '';
+
+  const nameKey = name.toLowerCase();
+  const existing = await WorkboardTag.findOne({ owner: ownerId, nameKey });
+  if (existing) return existing.name;
+
+  try {
+    const created = await WorkboardTag.create({ owner: ownerId, name, nameKey });
+    return created.name;
+  } catch (error) {
+    if (error.code === 11000) {
+      const raced = await WorkboardTag.findOne({ owner: ownerId, nameKey });
+      return raced?.name || name;
+    }
+    throw error;
+  }
+};
 
 const normalizeTaskStatus = (status) => {
   if (!status) return 'started';
@@ -153,7 +218,8 @@ const summarizeTasks = (tasks) => {
     in_progress: 0,
     almost_done: 0,
     completed: 0,
-    postponed: 0
+    postponed: 0,
+    cancelled: 0
   };
 
   tasks.forEach((task) => {
@@ -181,6 +247,7 @@ const buildReportMarkdown = ({ ownerName, period, startDate, endDate, tasks, sum
     `- In progress: ${summary.in_progress}`,
     `- Started: ${summary.started}`,
     `- Postponed: ${summary.postponed}`,
+    `- Cancelled: ${summary.cancelled || 0}`,
     ``,
     `## Tasks`
   ];
@@ -199,6 +266,9 @@ const buildReportMarkdown = ({ ownerName, period, startDate, endDate, tasks, sum
         `- Time: ${timeLabel}`,
         `- Status: ${task.status}`
       );
+      if (task.tag) {
+        lines.push(`- Tag: ${task.tag}`);
+      }
       if (task.description) {
         lines.push(`- Notes: ${task.description}`);
       }
@@ -350,6 +420,8 @@ const getTasks = async (req, res) => {
         tasksByDate[key] = sortTasks(tasksByDate[key]);
       });
 
+      const tagNames = await listTagNames(ownerId);
+
       return res.json({
         startDate,
         endDate,
@@ -358,11 +430,13 @@ const getTasks = async (req, res) => {
         presence: presencePayload,
         tasksByDate,
         tasks: sortTasks(normalized),
+        tags: tagNames,
         summary: summarizeTasks(normalized)
       });
     }
 
     const tasks = await WorkboardTask.find({ owner: ownerId, date }).lean();
+    const tagNames = await listTagNames(ownerId);
 
     res.json({
       date,
@@ -373,6 +447,7 @@ const getTasks = async (req, res) => {
         ...task,
         status: normalizeTaskStatus(task.status)
       })),
+      tags: tagNames,
       summary: summarizeTasks(tasks)
     });
   } catch (error) {
@@ -394,7 +469,10 @@ const createTask = async (req, res) => {
       startTime = '',
       endTime = '',
       status = 'started',
-      assignedBy = ''
+      assignedBy = '',
+      tag = '',
+      priority = DEFAULT_PRIORITY,
+      project = null
     } = req.body;
 
     if (!title?.trim()) {
@@ -413,18 +491,61 @@ const createTask = async (req, res) => {
       return res.status(400).json({ message: 'Invalid status' });
     }
 
-    const task = await WorkboardTask.create({
+    const normalizedPriority = normalizePriority(priority);
+    if (priority && !PRIORITIES.includes(String(priority).toUpperCase())) {
+      return res.status(400).json({ message: 'Invalid priority' });
+    }
+
+    let projectId = null;
+    if (project) {
+      if (!mongoose.Types.ObjectId.isValid(project)) {
+        return res.status(400).json({ message: 'Invalid project' });
+      }
+      projectId = project;
+    }
+
+    const previousLevel = calculateLevel(
+      (await User.findById(req.user._id).select('workboardXp'))?.workboardXp || 0
+    );
+
+    const savedTag = await upsertTag(req.user._id, tag);
+
+    const task = new WorkboardTask({
       owner: req.user._id,
       title: title.trim(),
       description: String(description || '').trim(),
       date,
+      originalDate: date,
+      rolledFromDate: null,
       startTime: startTime || '',
       endTime: endTime || '',
       status,
-      assignedBy: String(assignedBy || '').trim()
+      assignedBy: String(assignedBy || '').trim(),
+      tag: savedTag,
+      priority: normalizedPriority,
+      project: projectId,
+      xpAwarded: 0,
+      completedAt: null,
+      cancelledAt: status === 'cancelled' ? new Date() : null,
+      focusTime: 0
     });
 
-    res.status(201).json({ task });
+    const xpResult = applyCompletionXp(task, 'started', status);
+    await task.save();
+    const totalXp = await adjustUserWorkboardXp(req.user._id, xpResult.xpDelta);
+    const nextLevel = calculateLevel(totalXp);
+    const achievementSync = await runAchievementSync(req.user._id);
+
+    res.status(201).json({
+      task,
+      tags: await listTagNames(req.user._id),
+      xpAwarded: xpResult.awarded,
+      xpDelta: xpResult.xpDelta,
+      totalXp,
+      leveledUp: nextLevel > previousLevel,
+      newLevel: nextLevel,
+      newlyUnlocked: achievementSync.newlyUnlocked
+    });
   } catch (error) {
     console.error('Workboard create task error:', error);
     res.status(500).json({ message: 'Failed to create task' });
@@ -445,7 +566,15 @@ const updateTask = async (req, res) => {
       return res.status(403).json({ message: 'You can only edit your own tasks' });
     }
 
-    const { title, description, date, startTime, endTime, status, assignedBy } = req.body;
+    const previousStatus = normalizeTaskStatus(task.status);
+    const previousLevel = calculateLevel(
+      (await User.findById(req.user._id).select('workboardXp'))?.workboardXp || 0
+    );
+    if (!task.originalDate) {
+      task.originalDate = task.date;
+    }
+    const { title, description, date, startTime, endTime, status, assignedBy, tag, priority, project } =
+      req.body;
 
     if (title !== undefined) {
       if (!String(title).trim()) {
@@ -460,7 +589,14 @@ const updateTask = async (req, res) => {
       if (!DATE_RE.test(date)) {
         return res.status(400).json({ message: 'Valid date (YYYY-MM-DD) is required' });
       }
-      task.date = date;
+      // Freeze original plan day; record rollover trail when the schedule moves.
+      if (!task.originalDate) {
+        task.originalDate = task.date;
+      }
+      if (date !== task.date) {
+        task.rolledFromDate = task.date;
+        task.date = date;
+      }
     }
     if (startTime !== undefined) {
       if (startTime && !TIME_RE.test(startTime)) {
@@ -474,20 +610,58 @@ const updateTask = async (req, res) => {
       }
       task.endTime = endTime || '';
     }
+    if (priority !== undefined) {
+      if (!PRIORITIES.includes(String(priority).toUpperCase())) {
+        return res.status(400).json({ message: 'Invalid priority' });
+      }
+      task.priority = normalizePriority(priority);
+    }
+    if (project !== undefined) {
+      if (project === null || project === '') {
+        task.project = null;
+      } else if (!mongoose.Types.ObjectId.isValid(project)) {
+        return res.status(400).json({ message: 'Invalid project' });
+      } else {
+        task.project = project;
+      }
+    }
     if (status !== undefined) {
       if (!STATUSES.includes(status)) {
         return res.status(400).json({ message: 'Invalid status' });
       }
       task.status = status;
+      if (status === 'cancelled') {
+        task.cancelledAt = task.cancelledAt || new Date();
+      } else if (previousStatus === 'cancelled') {
+        task.cancelledAt = null;
+      }
     } else {
       task.status = normalizeTaskStatus(task.status);
     }
     if (assignedBy !== undefined) {
       task.assignedBy = String(assignedBy || '').trim();
     }
+    if (tag !== undefined) {
+      task.tag = await upsertTag(req.user._id, tag);
+    }
 
+    const nextStatus = normalizeTaskStatus(task.status);
+    const xpResult = applyCompletionXp(task, previousStatus, nextStatus);
     await task.save();
-    res.json({ task });
+    const totalXp = await adjustUserWorkboardXp(req.user._id, xpResult.xpDelta);
+    const nextLevel = calculateLevel(totalXp);
+    const achievementSync = await runAchievementSync(req.user._id);
+
+    res.json({
+      task,
+      tags: await listTagNames(req.user._id),
+      xpAwarded: xpResult.awarded,
+      xpDelta: xpResult.xpDelta,
+      totalXp,
+      leveledUp: nextLevel > previousLevel,
+      newLevel: nextLevel,
+      newlyUnlocked: achievementSync.newlyUnlocked
+    });
   } catch (error) {
     console.error('Workboard update task error:', error);
     res.status(500).json({ message: 'Failed to update task' });
@@ -513,9 +687,34 @@ const updateTaskStatus = async (req, res) => {
       return res.status(403).json({ message: 'You can only update your own tasks' });
     }
 
+    const previousStatus = normalizeTaskStatus(task.status);
+    const previousLevel = calculateLevel(
+      (await User.findById(req.user._id).select('workboardXp'))?.workboardXp || 0
+    );
+    if (!task.originalDate) {
+      task.originalDate = task.date;
+    }
     task.status = status;
+    if (status === 'cancelled') {
+      task.cancelledAt = task.cancelledAt || new Date();
+    } else if (previousStatus === 'cancelled') {
+      task.cancelledAt = null;
+    }
+    const xpResult = applyCompletionXp(task, previousStatus, status);
     await task.save();
-    res.json({ task: { ...task.toObject(), status: normalizeTaskStatus(task.status) } });
+    const totalXp = await adjustUserWorkboardXp(req.user._id, xpResult.xpDelta);
+    const nextLevel = calculateLevel(totalXp);
+    const achievementSync = await runAchievementSync(req.user._id);
+
+    res.json({
+      task: { ...task.toObject(), status: normalizeTaskStatus(task.status) },
+      xpAwarded: xpResult.awarded,
+      xpDelta: xpResult.xpDelta,
+      totalXp,
+      leveledUp: nextLevel > previousLevel,
+      newLevel: nextLevel,
+      newlyUnlocked: achievementSync.newlyUnlocked
+    });
   } catch (error) {
     console.error('Workboard status update error:', error);
     res.status(500).json({ message: 'Failed to update status' });
@@ -536,8 +735,13 @@ const deleteTask = async (req, res) => {
       return res.status(403).json({ message: 'You can only delete your own tasks' });
     }
 
+    const clawback =
+      normalizeTaskStatus(task.status) === 'completed' ? Number(task.xpAwarded) || 0 : 0;
+
     await task.deleteOne();
-    res.json({ message: 'Task deleted' });
+    const totalXp = await adjustUserWorkboardXp(req.user._id, clawback ? -clawback : 0);
+
+    res.json({ message: 'Task deleted', xpDelta: clawback ? -clawback : 0, totalXp });
   } catch (error) {
     console.error('Workboard delete task error:', error);
     res.status(500).json({ message: 'Failed to delete task' });
@@ -710,6 +914,18 @@ const buildReportDocx = ({ ownerName, period, startDate, endDate, tasks, summary
                 children: [
                   new TextRun({ text: 'Assigned by: ', bold: true }),
                   new TextRun(task.assignedBy)
+                ],
+                spacing: { after: 20 }
+              })
+            );
+          }
+
+          if (task.tag) {
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ text: 'Tag: ', bold: true }),
+                  new TextRun(task.tag)
                 ],
                 spacing: { after: 20 }
               })
@@ -1010,6 +1226,92 @@ const getPresence = async (req, res) => {
   }
 };
 
+const getTags = async (req, res) => {
+  try {
+    const ownerId = await resolveOwnerId(req);
+    if (!ownerId) {
+      return res.status(400).json({ message: 'Valid worker ownerId is required' });
+    }
+
+    res.json({ tags: await listTagNames(ownerId) });
+  } catch (error) {
+    console.error('Workboard get tags error:', error);
+    res.status(500).json({ message: 'Failed to load tags' });
+  }
+};
+
+const createTag = async (req, res) => {
+  try {
+    if (!canEditWorkboard(req.user)) {
+      return res.status(403).json({ message: 'Only admins can create workboard tags' });
+    }
+
+    const name = normalizeTagName(req.body.name);
+    if (!name) {
+      return res.status(400).json({ message: 'Tag name is required' });
+    }
+
+    const savedName = await upsertTag(req.user._id, name);
+    res.status(201).json({
+      tag: savedName,
+      tags: await listTagNames(req.user._id)
+    });
+  } catch (error) {
+    console.error('Workboard create tag error:', error);
+    res.status(500).json({ message: 'Failed to create tag' });
+  }
+};
+
+/**
+ * Lightweight history payload for streaks / royal score.
+ * Returns lean task fields + owner's workboardXp — formulas stay on the client.
+ */
+const getGamificationStats = async (req, res) => {
+  try {
+    const ownerId = await resolveOwnerId(req);
+    if (!ownerId) {
+      return res.status(400).json({ message: 'Valid worker ownerId is required' });
+    }
+
+    const endDate = toDateKey(new Date());
+    const startDate = addDays(endDate, -(GAMIFICATION_LOOKBACK_DAYS - 1));
+
+    const [owner, tasks] = await Promise.all([
+      User.findById(ownerId).select('workboardXp username workboardAchievements'),
+      WorkboardTask.find({
+        owner: ownerId,
+        $or: [
+          { date: { $gte: startDate, $lte: endDate } },
+          { originalDate: { $gte: startDate, $lte: endDate } }
+        ]
+      })
+        .select(
+          'date originalDate rolledFromDate status priority xpAwarded completedAt cancelledAt title focusTime project tag startTime endTime createdAt updatedAt'
+        )
+        .lean()
+    ]);
+
+    const normalized = tasks.map((task) => ({
+      ...task,
+      status: normalizeTaskStatus(task.status),
+      priority: normalizePriority(task.priority),
+      originalDate: task.originalDate || task.date || null
+    }));
+
+    res.json({
+      ownerId,
+      totalXp: owner?.workboardXp || 0,
+      startDate,
+      endDate,
+      tasks: normalized,
+      achievements: owner?.workboardAchievements || []
+    });
+  } catch (error) {
+    console.error('Workboard gamification stats error:', error);
+    res.status(500).json({ message: 'Failed to load gamification stats' });
+  }
+};
+
 module.exports = {
   getWorkers,
   getTasks,
@@ -1024,5 +1326,8 @@ module.exports = {
   getSharedReport,
   heartbeat,
   goOffline,
-  getPresence
+  getPresence,
+  getTags,
+  createTag,
+  getGamificationStats
 };

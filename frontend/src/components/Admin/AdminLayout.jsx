@@ -125,7 +125,8 @@ const AdminLayout = ({
   stats = [],
   actions,
   children,
-  chrome = 'default'
+  chrome = 'default',
+  hero = 'default'
 }) => {
   const { user } = useAuth();
   const navItems = allNavItems.filter((item) => item.roles.includes(user?.role));
@@ -134,6 +135,7 @@ const AdminLayout = ({
   const isMinimal = chrome === 'minimal';
   const isImmersive = chrome === 'immersive';
   const hideNav = isImmersive;
+  const isSplitHero = hero === 'split' && stats.length > 0;
 
   return (
     <div
@@ -254,26 +256,62 @@ const AdminLayout = ({
           <main className={isImmersive ? 'h-full min-w-0' : 'min-w-0'}>
             {!isMinimal && !isImmersive ? (
               <div className="rounded-[1.75rem] border border-white/70 bg-white/80 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:rounded-4xl sm:p-6 lg:p-8">
-                <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                  <div className="flex-1">
+                <div
+                  className={
+                    isSplitHero
+                      ? 'grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:items-center lg:gap-10'
+                      : 'flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between'
+                  }
+                >
+                  <div className="min-w-0">
                     <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
                       {eyebrow}
                     </p>
-                    <h1 className="mt-3 text-2xl font-semibold leading-tight tracking-[-0.04em] text-slate-950 sm:text-3xl lg:text-5xl">
+                    <h1
+                      className={`mt-3 font-semibold leading-[1.12] tracking-[-0.04em] text-balance text-slate-950 ${
+                        isSplitHero
+                          ? 'max-w-xl text-3xl sm:text-4xl lg:text-[2.75rem]'
+                          : 'text-2xl sm:text-3xl lg:text-5xl'
+                      }`}
+                    >
                       {title}
                     </h1>
-                    <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-600 sm:text-base">
+                    <p
+                      className={`mt-4 text-sm leading-relaxed text-slate-600 sm:text-base ${
+                        isSplitHero ? 'max-w-lg' : 'max-w-3xl'
+                      }`}
+                    >
                       {description}
                     </p>
+                    {isSplitHero && actions ? (
+                      <div className="mt-5 flex flex-wrap gap-3">{actions}</div>
+                    ) : null}
                   </div>
-                  {actions ? (
-                    <div className="flex w-full flex-col gap-3 pt-2 sm:w-auto sm:flex-row sm:flex-wrap lg:pt-0">
+
+                  {isSplitHero ? (
+                    <div className="grid grid-cols-2 gap-3 rounded-[1.5rem] bg-slate-950 p-3 text-white sm:gap-4 sm:p-4">
+                      {stats.map((stat) => (
+                        <div key={stat.label} className="min-w-0 rounded-2xl bg-white/10 px-3.5 py-4 sm:px-4 sm:py-5">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50 sm:text-[11px]">
+                            {stat.label}
+                          </p>
+                          <p className="mt-2 wrap-break-word text-xl font-semibold tracking-tight sm:text-2xl lg:text-[1.7rem]">
+                            {stat.value}
+                          </p>
+                          {stat.helper ? (
+                            <p className="mt-2 text-xs leading-tight text-white/55">{stat.helper}</p>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : actions ? (
+                    <div className="flex w-full shrink-0 flex-col gap-3 pt-2 sm:w-auto sm:flex-row sm:flex-wrap lg:pt-0">
                       {actions}
                     </div>
                   ) : null}
                 </div>
 
-                {stats.length > 0 ? (
+                {!isSplitHero && stats.length > 0 ? (
                   <div className="mt-6 grid grid-cols-1 gap-3 sm:mt-8 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
                     {stats.map((stat) => (
                       <div

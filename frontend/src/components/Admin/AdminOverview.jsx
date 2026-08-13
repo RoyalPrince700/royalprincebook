@@ -41,6 +41,7 @@ const AdminOverview = () => {
 
   return (
     <AdminLayout
+      hero="split"
       eyebrow="Admin Overview"
       title="A clearer view of your store."
       description="See how your catalog is growing, how many readers are active, and what verified revenue is coming in."
