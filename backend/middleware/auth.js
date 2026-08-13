@@ -34,7 +34,19 @@ const authorizeAdmin = (req, res, next) => {
   }
 };
 
+const authorizeAdminOrSuperior = (req, res, next) => {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'superior')) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Access denied: Workboard access required' });
+  }
+};
+
+const canEditWorkboard = (user) => user && user.role === 'admin';
+
 module.exports = {
   authenticateToken,
-  authorizeAdmin
+  authorizeAdmin,
+  authorizeAdminOrSuperior,
+  canEditWorkboard
 };

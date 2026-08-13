@@ -90,17 +90,42 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(() => {
+    const existingToken = localStorage.getItem('token');
+    const base = axios.defaults.baseURL || '';
+
+    if (existingToken && user?.role === 'admin') {
+      fetch(`${base}/workboard/presence/offline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${existingToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: '{}',
+        keepalive: true
+      }).catch(() => {});
+    }
+
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
     navigate('/login');
-  }, [navigate]);
+  }, [navigate, user?.role]);
 
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
+        const requestUrl = String(error.config?.url || '');
+        const onArtboardShare =
+          requestUrl.includes('/workboard/artboards/share/') ||
+          window.location.pathname.includes('/admin/workboard/artboard/share/');
+
+        // Collaborative share links are public; don't force logout on their errors.
+        if (onArtboardShare) {
+          return Promise.reject(error);
+        }
+
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
           // Check if we are already on the login page to avoid loops
           if (!window.location.pathname.includes('/login')) {
@@ -114,7 +139,7 @@ export const AuthProvider = ({ children }) => {
     return () => {
       axios.interceptors.response.eject(interceptor);
     };
-  }, [navigate]);
+  }, [logout]);
 
   const updateProfile = useCallback(async (profileData) => {
     try {

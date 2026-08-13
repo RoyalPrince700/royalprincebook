@@ -3,15 +3,15 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import PageLoader from '../PageLoader';
 
-const AdminRoute = ({ children }) => {
+const WorkboardRoute = ({ children }) => {
   const { user, loading, isAuthenticated } = useAuth();
   const location = useLocation();
 
   if (loading) {
     return (
       <PageLoader
-        title="Verifying admin access"
-        message="Confirming permissions before opening this admin page."
+        title="Verifying workboard access"
+        message="Confirming permissions before opening Workboard."
       />
     );
   }
@@ -20,15 +20,11 @@ const AdminRoute = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (user.role === 'superior') {
-    return <Navigate to="/admin/workboard" replace />;
-  }
-
-  if (user.role !== 'admin') {
+  if (user.role !== 'admin' && user.role !== 'superior') {
     return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 };
 
-export default AdminRoute;
+export default WorkboardRoute;

@@ -22,6 +22,10 @@ import AdminBooks from './components/Admin/AdminBooks';
 import UserManagement from './components/Admin/UserManagement';
 import AdminFinance from './components/Admin/AdminFinance';
 import AdminGame from './components/Admin/AdminArticulationGame';
+import AdminWorkboard from './components/Admin/AdminWorkboard';
+import AdminWorkboardShare from './components/Admin/AdminWorkboardShare';
+import AdminArtboardShare from './components/Admin/AdminArtboardShare';
+import WorkboardRoute from './components/Auth/WorkboardRoute';
 import AnalyticsTracker from './components/Analytics/AnalyticsTracker';
 import GoogleTagManager from './components/Analytics/GoogleTagManager';
 import Footer from './components/Footer';
@@ -39,14 +43,23 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const isHome = location.pathname === '/';
   const isPortfolio = location.pathname === '/portfolio';
-  
+  const isAdmin = location.pathname.startsWith('/admin');
+  const isArtboard =
+    (location.pathname === '/admin/workboard' &&
+      new URLSearchParams(location.search).get('mode') === 'artboard') ||
+    location.pathname.startsWith('/admin/workboard/artboard/share/');
+
   return (
     <>
       <AnalyticsTracker />
-      {!isPortfolio && <Navbar isHome={isHome} />}
-      <div className={`App ${isHome ? 'home-mode' : ''} ${isPortfolio ? 'portfolio-mode' : ''}`}>
+      {!isPortfolio && !isAdmin && !isArtboard && <Navbar isHome={isHome} />}
+      <div
+        className={`App ${isHome ? 'home-mode' : ''} ${isPortfolio ? 'portfolio-mode' : ''} ${
+          isAdmin ? 'admin-mode' : ''
+        } ${isArtboard ? 'artboard-mode' : ''}`}
+      >
         {children}
-        {!isPortfolio && <Footer />}
+        {!isPortfolio && !isAdmin && <Footer />}
       </div>
     </>
   );
@@ -134,6 +147,22 @@ function App() {
                       <AdminGame />
                     </AdminRoute>
                   }
+                />
+                <Route
+                  path="/admin/workboard"
+                  element={
+                    <WorkboardRoute>
+                      <AdminWorkboard />
+                    </WorkboardRoute>
+                  }
+                />
+                <Route
+                  path="/admin/workboard/share/:token"
+                  element={<AdminWorkboardShare />}
+                />
+                <Route
+                  path="/admin/workboard/artboard/share/:token"
+                  element={<AdminArtboardShare />}
                 />
                 <Route
                   path="/books/:bookId"

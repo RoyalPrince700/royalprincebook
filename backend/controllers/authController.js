@@ -116,6 +116,10 @@ const updateUserRole = async (req, res) => {
     const { id } = req.params;
     const adminId = req.user._id;
 
+    if (!['user', 'admin', 'superior'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role' });
+    }
+
     // Check if requester is admin (double check, though middleware should handle this)
     const admin = await User.findById(adminId);
     if (admin.role !== 'admin') {

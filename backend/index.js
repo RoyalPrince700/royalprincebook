@@ -1,14 +1,18 @@
 const express = require('express');
+const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const passport = require('passport');
+const { Server } = require('socket.io');
 const configurePassport = require('./config/passport');
+const { initArtboardSocket } = require('./realtime/artboardSocket');
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 configurePassport();
 
 const buildAllowedOrigins = () => {
@@ -51,8 +55,7 @@ const buildAllowedOrigins = () => {
 
 const allowedOrigins = buildAllowedOrigins();
 
-// Middleware
-app.use(cors({
+const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -62,7 +65,10 @@ app.use(cors({
     callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true
-}));
+};
+
+// Middleware
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
@@ -75,6 +81,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bookwrite
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/workboard', require('./routes/workboard'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/books', require('./routes/books'));
 app.use('/api/payment', require('./routes/payment'));
@@ -90,10 +97,20 @@ app.get('/api/config/flutterwave-public-key', (req, res) => {
   res.json({ publicKey: process.env.FLUTTERWAVE_PUBLIC_KEY });
 });
 
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true
+  },
+  path: '/socket.io'
+});
+
+initArtboardSocket(io);
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-module.exports = app;
+module.exports = { app, server, io };

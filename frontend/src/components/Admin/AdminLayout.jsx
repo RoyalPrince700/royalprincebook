@@ -1,94 +1,258 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-const navItems = [
-  { to: '/admin', label: 'Overview', shortLabel: 'Home', icon: '⌂', helper: 'Performance snapshot' },
-  { to: '/admin/traffic', label: 'Traffic', shortLabel: 'Traffic', icon: '↗', helper: 'Visitors and site speed' },
-  { to: '/admin/books', label: 'Books', shortLabel: 'Books', icon: 'B', helper: 'Catalog and sales' },
-  { to: '/admin/users', label: 'Users', shortLabel: 'Users', icon: 'U', helper: 'Roles and access' },
-  { to: '/admin/finance', label: 'Finance', shortLabel: 'Finance', icon: '₦', helper: 'Revenue and payments' },
-  { to: '/admin/game', label: 'Game', shortLabel: 'Game', icon: 'G', helper: 'English & speech mastery' }
+const NavIcon = ({ name, className = 'h-5 w-5' }) => {
+  const props = {
+    className,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: '1.8',
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    'aria-hidden': true
+  };
+
+  switch (name) {
+    case 'overview':
+      return (
+        <svg {...props}>
+          <rect x="3" y="3" width="7" height="9" rx="1.5" />
+          <rect x="14" y="3" width="7" height="5" rx="1.5" />
+          <rect x="14" y="12" width="7" height="9" rx="1.5" />
+          <rect x="3" y="16" width="7" height="5" rx="1.5" />
+        </svg>
+      );
+    case 'traffic':
+      return (
+        <svg {...props}>
+          <path d="M3 17l6-6 4 4 7-8" />
+          <path d="M14 7h6v6" />
+        </svg>
+      );
+    case 'books':
+      return (
+        <svg {...props}>
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      );
+    case 'users':
+      return (
+        <svg {...props}>
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      );
+    case 'finance':
+      return (
+        <svg {...props}>
+          <line x1="12" y1="1" x2="12" y2="23" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg>
+      );
+    case 'game':
+      return (
+        <svg {...props}>
+          <path d="M6 12h4" />
+          <path d="M8 10v4" />
+          <circle cx="15.5" cy="10.5" r="0.8" fill="currentColor" stroke="none" />
+          <circle cx="17.5" cy="13.5" r="0.8" fill="currentColor" stroke="none" />
+          <path d="M2 14a5 5 0 0 0 5 5h1.5l1.5-3h5l1.5 3H18a5 5 0 0 0 5-5v-1a6 6 0 0 0-6-6H8a6 6 0 0 0-6 6z" />
+        </svg>
+      );
+    case 'workboard':
+      return (
+        <svg {...props}>
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M3 10h18" />
+          <path d="M9 4v16" />
+        </svg>
+      );
+    case 'dashboard':
+      return (
+        <svg {...props}>
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+      );
+    case 'browse':
+      return (
+        <svg {...props}>
+          <circle cx="11" cy="11" r="7" />
+          <path d="M21 21l-4.3-4.3" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+};
+
+const allNavItems = [
+  { to: '/admin', label: 'Overview', shortLabel: 'Home', icon: 'overview', roles: ['admin'] },
+  { to: '/admin/traffic', label: 'Traffic', shortLabel: 'Traffic', icon: 'traffic', roles: ['admin'] },
+  { to: '/admin/books', label: 'Books', shortLabel: 'Books', icon: 'books', roles: ['admin'] },
+  { to: '/admin/users', label: 'Users', shortLabel: 'Users', icon: 'users', roles: ['admin'] },
+  { to: '/admin/finance', label: 'Finance', shortLabel: 'Finance', icon: 'finance', roles: ['admin'] },
+  { to: '/admin/game', label: 'Game', shortLabel: 'Game', icon: 'game', roles: ['admin'] },
+  { to: '/admin/workboard', label: 'Workboard', shortLabel: 'Board', icon: 'workboard', roles: ['admin', 'superior'] }
 ];
 
-const AdminLayout = ({ eyebrow = 'Admin', title, description, stats = [], actions, children }) => {
+const PanelIcon = ({ open }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {open ? (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M9 4v16" />
+        <polyline points="15 9 12 12 15 15" />
+      </>
+    ) : (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M9 4v16" />
+        <polyline points="12 9 15 12 12 15" />
+      </>
+    )}
+  </svg>
+);
+
+const AdminLayout = ({
+  eyebrow = 'Admin',
+  title,
+  description,
+  stats = [],
+  actions,
+  children,
+  chrome = 'default'
+}) => {
   const { user } = useAuth();
+  const navItems = allNavItems.filter((item) => item.roles.includes(user?.role));
+  const mobileCols = Math.min(Math.max(navItems.length, 1), 7);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const isMinimal = chrome === 'minimal';
+  const isImmersive = chrome === 'immersive';
+  const hideNav = isImmersive;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-slate-50 pb-28 text-slate-900 lg:pb-0">
-      <section className="relative px-3 pb-10 pt-14 sm:px-6 sm:pb-16 sm:pt-20 md:pt-28 lg:px-8">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(241,245,249,0.92)_45%,rgba(226,232,240,0.7)_100%)]" />
-        <div className="absolute inset-x-0 top-0 h-64 sm:h-80 bg-linear-to-b from-white via-white/80 to-transparent" />
-        <div className="absolute left-1/2 top-20 sm:top-28 h-64 w-64 sm:h-80 sm:w-80 -translate-x-1/2 rounded-full bg-blue-200/25 blur-3xl" />
+    <div
+      className={`text-slate-900 ${
+        isImmersive
+          ? 'h-[100dvh] min-h-0 overflow-hidden bg-[var(--wb-board,#f7f1e8)]'
+          : `min-h-screen pb-28 lg:pb-0 ${isMinimal ? 'bg-[var(--wb-board,#f7f1e8)]' : 'bg-slate-50'}`
+      }`}
+    >
+      {!hideNav ? (
+      <aside
+        className={`fixed bottom-4 left-4 top-4 z-40 hidden flex-col overflow-hidden rounded-4xl border border-white/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur transition-[width,padding] duration-300 ease-out lg:flex ${
+          sidebarOpen ? 'w-[280px] p-5' : 'w-[76px] p-3'
+        }`}
+      >
+        <div className={`mb-4 flex ${sidebarOpen ? 'justify-end' : 'justify-center'}`}>
+          <button
+            type="button"
+            onClick={() => setSidebarOpen((open) => !open)}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-95"
+            title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-expanded={sidebarOpen}
+          >
+            <PanelIcon open={sidebarOpen} />
+          </button>
+        </div>
 
-        <div className="relative mx-auto max-w-7xl">
-          <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-            <aside className="hidden h-fit rounded-4xl border border-white/70 bg-white/82 p-5 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur lg:sticky lg:top-28 lg:block max-w-full">
-              <div className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/90 p-4 sm:p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  RoyalPrince Hub
-                </p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950">
-                  Admin Panel
-                </h2>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                  Track visitors, books, revenue, and recent purchase activity from one place.
-                </p>
-                <div className="mt-4 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                    Signed in
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-slate-900">{user?.username}</p>
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{user?.role}</p>
-                </div>
-              </div>
+        <nav className="flex flex-1 flex-col gap-2 overflow-y-auto">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/admin'}
+              title={item.label}
+              className={({ isActive }) =>
+                `rounded-3xl border transition-all active:scale-[0.985] lg:active:scale-100 ${
+                  sidebarOpen ? 'px-3.5 py-3' : 'flex h-12 w-12 items-center justify-center self-center p-0'
+                } ${
+                  isActive
+                    ? 'border-slate-950 bg-slate-950 text-white shadow-lg'
+                    : 'border-white/70 bg-white/70 text-slate-700 hover:border-slate-200 hover:bg-white'
+                }`
+              }
+            >
+              {({ isActive }) =>
+                sidebarOpen ? (
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl ${
+                        isActive ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      <NavIcon name={item.icon} />
+                    </span>
+                    <p className={`text-sm font-semibold ${isActive ? 'text-white' : 'text-slate-900'}`}>
+                      {item.label}
+                    </p>
+                  </div>
+                ) : (
+                  <NavIcon name={item.icon} className="h-5 w-5" />
+                )
+              }
+            </NavLink>
+          ))}
+        </nav>
 
-              <nav className="mt-5 flex flex-col gap-2">
-                {navItems.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.to === '/admin'}
-                    className={({ isActive }) =>
-                    `rounded-3xl border px-3.5 py-3 transition-all active:scale-[0.985] lg:active:scale-100 ${
-                        isActive
-                          ? 'border-slate-950 bg-slate-950 text-white shadow-lg'
-                          : 'border-white/70 bg-white/70 text-slate-700 hover:border-slate-200 hover:bg-white'
-                      }`
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <p className={`text-sm font-semibold ${isActive ? 'text-white' : 'text-slate-900'}`}>
-                          {item.label}
-                        </p>
-                        <p className={`mt-1 text-xs ${isActive ? 'text-white/70' : 'text-slate-500'}`}>
-                          {item.helper}
-                        </p>
-                      </>
-                    )}
-                  </NavLink>
-                ))}
-              </nav>
+        <div className={`mt-6 flex flex-col gap-3 ${sidebarOpen ? '' : 'items-center'}`}>
+          <Link
+            to="/dashboard"
+            title="Dashboard"
+            className={`inline-flex items-center justify-center rounded-3xl border border-slate-300 bg-white text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 ${
+              sidebarOpen ? 'px-5 py-3' : 'h-12 w-12'
+            }`}
+          >
+            {sidebarOpen ? '← Dashboard' : <NavIcon name="dashboard" />}
+          </Link>
+          <Link
+            to="/all-books"
+            title="Browse Books"
+            className={`inline-flex items-center justify-center rounded-3xl bg-slate-950 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-95 ${
+              sidebarOpen ? 'px-5 py-3' : 'h-12 w-12'
+            }`}
+            style={{ color: 'white' }}
+          >
+            {sidebarOpen ? 'Browse Books' : <NavIcon name="browse" />}
+          </Link>
+        </div>
+      </aside>
+      ) : null}
 
-              <div className="mt-6 flex flex-col gap-3">
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center justify-center rounded-3xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 active:scale-95"
-                >
-                  ← Dashboard
-                </Link>
-                <Link
-                  to="/all-books"
-                  className="inline-flex items-center justify-center rounded-3xl bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-95"
-                  style={{ color: 'white' }}
-                >
-                  Browse Books
-                </Link>
-              </div>
-            </aside>
+      <section
+        className={
+          isImmersive
+            ? 'relative h-full min-h-0 overflow-hidden p-0'
+            : `relative transition-[padding] duration-300 ease-out lg:pr-8 ${
+                isMinimal
+                  ? 'px-3 pb-8 pt-4 sm:px-5 sm:pb-10 sm:pt-4'
+                  : 'px-3 pb-10 pt-4 sm:px-6 sm:pb-16 sm:pt-6'
+              } ${sidebarOpen ? 'lg:pl-[312px]' : 'lg:pl-[108px]'}`
+        }
+      >
+        {isImmersive ? null : !isMinimal ? (
+          <>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(241,245,249,0.92)_45%,rgba(226,232,240,0.7)_100%)]" />
+            <div className="absolute inset-x-0 top-0 h-64 sm:h-80 bg-linear-to-b from-white via-white/80 to-transparent" />
+            <div className="absolute left-1/2 top-20 sm:top-28 h-64 w-64 sm:h-80 sm:w-80 -translate-x-1/2 rounded-full bg-blue-200/25 blur-3xl" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,252,245,0.9),rgba(247,241,232,0.95)_50%,rgba(240,230,214,0.85)_100%)]" />
+        )}
 
-            <main className="min-w-0">
+        <div
+          className={`relative ${
+            isImmersive ? 'mx-0 h-full max-w-none' : `mx-auto ${isMinimal ? 'max-w-[90rem]' : 'max-w-7xl'}`
+          }`}
+        >
+          <main className={isImmersive ? 'h-full min-w-0' : 'min-w-0'}>
+            {!isMinimal && !isImmersive ? (
               <div className="rounded-[1.75rem] border border-white/70 bg-white/80 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:rounded-4xl sm:p-6 lg:p-8">
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                   <div className="flex-1">
@@ -130,14 +294,29 @@ const AdminLayout = ({ eyebrow = 'Admin', title, description, stats = [], action
                   </div>
                 ) : null}
               </div>
+            ) : null}
 
-              <div className="mt-5 space-y-5 sm:mt-6 sm:space-y-6">{children}</div>
-            </main>
-          </div>
+            <div
+              className={
+                isImmersive
+                  ? 'h-full'
+                  : isMinimal
+                    ? 'space-y-3'
+                    : 'mt-5 space-y-5 sm:mt-6 sm:space-y-6'
+              }
+            >
+              {children}
+            </div>
+          </main>
         </div>
       </section>
+
+      {!hideNav ? (
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-14px_30px_rgba(15,23,42,0.12)] backdrop-blur lg:hidden">
-        <div className="mx-auto grid max-w-lg grid-cols-6 gap-1">
+        <div
+          className="mx-auto grid max-w-lg gap-1"
+          style={{ gridTemplateColumns: `repeat(${mobileCols}, minmax(0, 1fr))` }}
+        >
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -152,13 +331,14 @@ const AdminLayout = ({ eyebrow = 'Admin', title, description, stats = [], action
               }
             >
               <span className="mb-0.5 flex h-6 w-6 items-center justify-center rounded-full text-sm leading-none">
-                {item.icon}
+                <NavIcon name={item.icon} className="h-4 w-4" />
               </span>
               <span className="max-w-full truncate">{item.shortLabel}</span>
             </NavLink>
           ))}
         </div>
       </nav>
+      ) : null}
     </div>
   );
 };

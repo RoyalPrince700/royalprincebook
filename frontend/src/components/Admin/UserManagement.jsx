@@ -140,7 +140,9 @@ const UserManagement = () => {
                         <span className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
                           user.role === 'admin'
                             ? 'border-blue-200 bg-blue-50 text-blue-700'
-                            : 'border-slate-200 bg-white text-slate-600'
+                            : user.role === 'superior'
+                              ? 'border-sky-200 bg-sky-50 text-sky-700'
+                              : 'border-slate-200 bg-white text-slate-600'
                         }`}>
                           {user.role}
                         </span>
@@ -176,6 +178,7 @@ const UserManagement = () => {
                           >
                             <option value="user">User</option>
                             <option value="admin">Admin</option>
+                            <option value="superior">Superior</option>
                           </select>
                         )}
                       </td>

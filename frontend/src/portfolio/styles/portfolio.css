@@ -43,7 +43,8 @@
 }
 
 .pf-container {
-  width: min(100% - 2rem, 76rem);
+  width: calc(100% - 2rem);
+  max-width: none;
   margin-inline: auto;
 }
 
