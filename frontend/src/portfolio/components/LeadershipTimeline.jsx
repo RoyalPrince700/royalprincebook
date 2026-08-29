@@ -6,7 +6,7 @@ import SectionWrapper, { SectionHeader } from './SectionWrapper';
 const LeadershipTimeline = () => (
   <SectionWrapper id="leadership">
     <div className="pf-container">
-      <SectionHeader eyebrow="Leadership Journey" title="Jobs I've held and work I've done." />
+      <SectionHeader eyebrow="Project Timeline" title="Projects I've built and shipped." />
       <div className="pf-timeline">
         {leadershipTimeline.map((item, index) => (
           <motion.div

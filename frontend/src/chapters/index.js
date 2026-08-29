@@ -13,6 +13,7 @@ export const bookData = {
   genre: "Leadership / Self-Development",
   price: 1000,
   status: "published",
+  isLocal: true,
   coverImage: "https://placehold.co/300x450/e9ecef/333333?text=Leading+from+Within",
   pages: [
     chapter1,

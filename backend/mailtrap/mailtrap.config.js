@@ -1,44 +1,47 @@
 const nodemailer = require('nodemailer');
 const { MailtrapClient } = require('mailtrap');
 
-const MAIL_FROM_EMAIL =
+let smtpTransporter;
+let mailtrapClient;
+
+const getMailFromEmail = () =>
   process.env.EMAIL_FROM ||
   process.env.MAILTRAP_FROM ||
   'noreply@royalprincehub.com';
 
-const MAIL_FROM_NAME = process.env.MAILTRAP_FROM_NAME || 'RoyalPrinceHub';
+const getMailFromName = () => process.env.MAILTRAP_FROM_NAME || 'RoyalPrinceHub';
 
-const smtpConfig = {
+const getSmtpConfig = () => ({
   host: process.env.MAILTRAP_HOST,
   port: Number(process.env.MAILTRAP_PORT || 2525),
   user: process.env.MAILTRAP_USER,
   pass: process.env.MAILTRAP_PASS
-};
+});
 
-const productionToken =
+const getProductionToken = () =>
   process.env.MAILTRAP_API_TOKEN ||
   process.env.MAILTRAP_PROD_TOKEN ||
   process.env.MAILTRAP_PROD_PASS ||
   process.env.mailtraptoken;
 
-const shouldUseProductionMail =
+const shouldUseProductionMail = () =>
   process.env.NODE_ENV === 'production' ||
-  process.env.MAILTRAP_USE_PRODUCTION === 'true';
+  process.env.MAILTRAP_USE_PRODUCTION === 'true' ||
+  process.env.EMAIL_SERVICE === 'mailtrap-production';
 
-let smtpTransporter;
-let mailtrapClient;
-
-const hasSmtpConfig = () =>
-  Boolean(
+const hasSmtpConfig = () => {
+  const smtpConfig = getSmtpConfig();
+  return Boolean(
     smtpConfig.host &&
       smtpConfig.port &&
       smtpConfig.user &&
       smtpConfig.pass
   );
+};
 
 const getFromAddress = () => ({
-  email: MAIL_FROM_EMAIL,
-  name: MAIL_FROM_NAME
+  email: getMailFromEmail(),
+  name: getMailFromName()
 });
 
 const normalizeRecipients = (recipients) => {
@@ -60,6 +63,7 @@ const normalizeRecipients = (recipients) => {
 
 const getSmtpTransporter = () => {
   if (!smtpTransporter) {
+    const smtpConfig = getSmtpConfig();
     smtpTransporter = nodemailer.createTransport({
       host: smtpConfig.host,
       port: smtpConfig.port,
@@ -77,7 +81,7 @@ const getSmtpTransporter = () => {
 const getMailtrapClient = () => {
   if (!mailtrapClient) {
     mailtrapClient = new MailtrapClient({
-      token: productionToken
+      token: getProductionToken()
     });
   }
 
@@ -112,7 +116,9 @@ const sendWithSandboxSmtp = async ({ to, subject, text, html, category }) => {
 };
 
 const getConfiguredMode = () => {
-  if (shouldUseProductionMail && productionToken) {
+  const productionToken = getProductionToken();
+
+  if (shouldUseProductionMail() && productionToken) {
     return 'production-api';
   }
 

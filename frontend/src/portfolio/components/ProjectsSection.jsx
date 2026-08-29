@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { featuredProjects, clientProjects } from '../data/portfolioData';
+import { featuredProjects } from '../data/portfolioData';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
 
 const ProjectVisual = ({ project }) => {
@@ -22,9 +22,15 @@ const ProjectVisual = ({ project }) => {
   }
 
   if (project.logo) {
+    const logoClass = project.logoScale === 'bold' ? 'pf-project-logo pf-project-logo-bold' : 'pf-project-logo';
+    const visualLogoClass =
+      project.logoScale === 'bold'
+        ? `${visualClass} pf-project-visual-logo pf-project-visual-logo-bold`
+        : `${visualClass} pf-project-visual-logo`;
+
     return (
-      <div className={`${visualClass} pf-project-visual-logo`}>
-        <img src={project.logo} alt={project.title} className="pf-project-logo" loading="lazy" />
+      <div className={visualLogoClass}>
+        <img src={project.logo} alt={project.title} className={logoClass} loading="lazy" />
       </div>
     );
   }
@@ -125,45 +131,6 @@ const ProjectsSection = () => (
         {featuredProjects.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}
-      </div>
-
-      <div className="pf-client-projects">
-        <h3 className="pf-client-projects-title">Other Client Projects</h3>
-        <div className="pf-client-grid">
-          {clientProjects.map((project) => {
-            const cardContent = (
-              <>
-                {project.logo && (
-                  <img src={project.logo} alt={project.title} className="pf-client-logo" loading="lazy" />
-                )}
-                <span className="pf-client-sector">{project.sector}</span>
-                <h4 className="pf-client-title">{project.title}</h4>
-                <p className="pf-client-summary">{project.summary}</p>
-              </>
-            );
-
-            if (project.url) {
-              return (
-                <motion.a
-                  key={project.title}
-                  href={project.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="pf-client-card"
-                  whileHover={{ y: -4 }}
-                >
-                  {cardContent}
-                </motion.a>
-              );
-            }
-
-            return (
-              <motion.article key={project.title} className="pf-client-card" whileHover={{ y: -4 }}>
-                {cardContent}
-              </motion.article>
-            );
-          })}
-        </div>
       </div>
     </div>
   </SectionWrapper>

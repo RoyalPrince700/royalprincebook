@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../contexts/ThemeContext';
+import { usePortfolioNav } from '../context/PortfolioNavContext';
 import { portfolioNavSections } from '../data/portfolioData';
+import DesktopSectionNav from './DesktopSectionNav';
 
 const icons = {
   home: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
@@ -80,13 +82,18 @@ const MobileFloatingRail = ({ active, progress, onToggle, onScrollTo, theme, tog
   </nav>
 );
 
+const SCROLL_THRESHOLD = 80;
+
 const PortfolioSidebar = ({ progress = 0 }) => {
   const { theme, toggleTheme } = useTheme();
+  const { setSectionNavActive } = usePortfolioNav();
   const [active, setActive] = useState('hero');
-  const [expanded, setExpanded] = useState(false);
   const [mobileExpanded, setMobileExpanded] = useState(false);
+  const [showDesktopSectionNav, setShowDesktopSectionNav] = useState(false);
 
   useEffect(() => {
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+
     const handleScroll = () => {
       const sections = portfolioNavSections
         .map((section) => ({
@@ -105,12 +112,33 @@ const PortfolioSidebar = ({ progress = 0 }) => {
       }, 'hero');
 
       setActive(current);
+
+      if (mediaQuery.matches) {
+        const shouldShowSectionNav = window.scrollY > SCROLL_THRESHOLD;
+        setShowDesktopSectionNav(shouldShowSectionNav);
+        setSectionNavActive(shouldShowSectionNav);
+      }
+    };
+
+    const handleViewportChange = () => {
+      if (!mediaQuery.matches) {
+        setShowDesktopSectionNav(false);
+        setSectionNavActive(false);
+      } else {
+        handleScroll();
+      }
     };
 
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    mediaQuery.addEventListener('change', handleViewportChange);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      mediaQuery.removeEventListener('change', handleViewportChange);
+      setSectionNavActive(false);
+    };
+  }, [setSectionNavActive]);
 
   const scrollTo = (id) => {
     const element = document.getElementById(id);
@@ -217,16 +245,14 @@ const PortfolioSidebar = ({ progress = 0 }) => {
 
   return (
     <>
-      <motion.aside
-        className="pf-sidebar pf-sidebar-desktop"
-        onMouseEnter={() => setExpanded(true)}
-        onMouseLeave={() => setExpanded(false)}
-        animate={{ width: expanded ? 240 : 72 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        aria-label="Portfolio navigation"
-      >
-        {renderExpandedPanel({ showLabels: expanded })}
-      </motion.aside>
+      <DesktopSectionNav
+        active={active}
+        progress={progress}
+        onScrollTo={scrollTo}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        visible={showDesktopSectionNav}
+      />
 
       {!mobileExpanded && (
         <MobileFloatingRail

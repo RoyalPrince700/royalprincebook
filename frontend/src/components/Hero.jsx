@@ -110,12 +110,6 @@ const Hero = ({ currentPrice, launchPrice }) => {
                       </p>
                       <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                         <Link
-                          to="/about-author"
-                          className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/10 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/20"
-                        >
-                          About Author
-                        </Link>
-                        <Link
                           to="/all-books"
                           className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-slate-950 transition hover:bg-slate-100"
                         >

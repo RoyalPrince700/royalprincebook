@@ -17,7 +17,8 @@ const {
   getPresence,
   getTags,
   createTag,
-  getGamificationStats
+  getGamificationStats,
+  restoreVisitStreak
 } = require('../controllers/workboardController');
 const {
   listProjects,
@@ -51,9 +52,26 @@ const {
   updateSharedNote,
   deleteSharedNote
 } = require('../controllers/artboardController');
-const { authenticateToken, authorizeAdminOrSuperior } = require('../middleware/auth');
+const {
+  createAccessRequest,
+  listAccessRequests,
+  resolveAccessRequest,
+  listCollaborators,
+  revokeCollaborator
+} = require('../controllers/workboardAccessController');
+const {
+  listLeaderboards,
+  createLeaderboard,
+  getLeaderboard,
+  deleteLeaderboard,
+  inviteToLeaderboard,
+  respondToInvite,
+  listAvatars,
+  updateWorkboardAvatar
+} = require('../controllers/workboardLeaderboardController');
+const { authenticateToken, optionalAuthenticateToken } = require('../middleware/auth');
 
-router.get('/share/:token', getSharedReport);
+router.get('/share/:token', optionalAuthenticateToken, getSharedReport);
 
 // Public artboard share (token grants collaborative edit)
 router.get('/artboards/share/:token', getSharedArtboard);
@@ -61,11 +79,18 @@ router.post('/artboards/share/:token/notes', createSharedNote);
 router.patch('/artboards/share/:token/notes/:noteId', updateSharedNote);
 router.delete('/artboards/share/:token/notes/:noteId', deleteSharedNote);
 
-router.use(authenticateToken, authorizeAdminOrSuperior);
+router.use(authenticateToken);
+
+router.post('/access-requests', createAccessRequest);
+router.get('/access-requests', listAccessRequests);
+router.patch('/access-requests/:id', resolveAccessRequest);
+router.get('/collaborators', listCollaborators);
+router.delete('/collaborators/:id', revokeCollaborator);
 
 router.get('/workers', getWorkers);
 router.get('/tasks', getTasks);
 router.get('/gamification', getGamificationStats);
+router.post('/streak/restore', restoreVisitStreak);
 router.get('/achievements', getAchievements);
 router.get('/victories', listVictories);
 router.put('/victories', upsertVictory);
@@ -94,6 +119,14 @@ router.post('/presence/offline', goOffline);
 router.get('/presence', getPresence);
 router.get('/tags', getTags);
 router.post('/tags', createTag);
+router.get('/leaderboards', listLeaderboards);
+router.post('/leaderboards', createLeaderboard);
+router.get('/leaderboards/avatars', listAvatars);
+router.put('/leaderboards/avatar', updateWorkboardAvatar);
+router.patch('/leaderboards/invites/:id', respondToInvite);
+router.get('/leaderboards/:id', getLeaderboard);
+router.delete('/leaderboards/:id', deleteLeaderboard);
+router.post('/leaderboards/:id/invite', inviteToLeaderboard);
 
 router.get('/artboards', listArtboards);
 router.post('/artboards', createArtboard);

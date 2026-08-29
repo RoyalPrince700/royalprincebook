@@ -4,8 +4,17 @@ const ThemeContext = createContext();
 
 export const useTheme = () => useContext(ThemeContext);
 
+const getStoredTheme = () => {
+  if (typeof window === 'undefined') return 'light';
+  return localStorage.getItem('theme') || 'light';
+};
+
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+  const [theme, setTheme] = useState(() => {
+    const initialTheme = getStoredTheme();
+    document.documentElement.setAttribute('data-theme', initialTheme);
+    return initialTheme;
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

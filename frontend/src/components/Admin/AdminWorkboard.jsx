@@ -1,24 +1,28 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import AdminLayout from './AdminLayout';
-import AdminArtboard from './AdminArtboard';
 import BoardLoader from './BoardLoader';
+import BoardShell from './BoardShell';
+import BoardWebsiteLink from '../BoardWebsiteLink';
 import WorkboardFocusMode from './WorkboardFocusMode';
 import WorkboardDashboard from './WorkboardDashboard';
 import WorkboardAchievements from './WorkboardAchievements';
 import WorkboardProjectsPanel from './WorkboardProjectsPanel';
 import WorkboardAnalytics from './WorkboardAnalytics';
 import WorkboardVictoryJournal from './WorkboardVictoryJournal';
+import WorkboardLeaderboard from './WorkboardLeaderboard';
+import WorkboardAccessGrantModal, {
+  WORKBOARD_PERMISSION_OPTIONS
+} from './WorkboardAccessGrantModal';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSignInPrompt } from '../Auth/SignInPromptModal';
 import {
   PRIORITY_OPTIONS,
   DEFAULT_PRIORITY,
   calculateDailyScore,
   calculateLevelProgress,
   calculateRoyalScore,
-  calculateCurrentStreak,
-  calculateLongestStreak,
   calculateWeeklySummary,
   flattenTasksByDate,
   buildTodaysMission,
@@ -36,12 +40,43 @@ const STATUS_OPTIONS = [
   { value: 'cancelled', label: 'Cancelled' }
 ];
 
-const WEEKDAY_LABELS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-const WEEKDAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const WEEKDAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const WORK_WEEK_END_OFFSET = 6;
 const NOTE_COLORS = ['yellow', 'mint', 'peach', 'sky', 'lilac'];
 const EMPTY_SLOT_COUNT = 4;
 const DEFAULT_START_TIME = '08:00';
 const DEFAULT_END_TIME = '17:00';
+
+const EMPTY_STREAK_META = {
+  current: 0,
+  longest: 0,
+  streakBeforeBreak: 0,
+  canRestore: false,
+  restoreXpCost: 50,
+  restoresRemainingThisMonth: 5,
+  restoreMonthlyLimit: 5,
+  lastVisitDate: null
+};
+
+const formatCollaboratorPermissions = (permissions = []) =>
+  permissions
+    .map(
+      (value) =>
+        WORKBOARD_PERMISSION_OPTIONS.find((option) => option.value === value)?.label || value
+    )
+    .join(' · ');
+
+const formatAccessGrantedAt = (value) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
 const YEAR_OPTION_PAST = 5;
 const YEAR_OPTION_FUTURE = 1;
 
@@ -118,79 +153,79 @@ const buildYearOptions = (anchorYear = new Date().getFullYear()) => {
   return years;
 };
 
-/** First Monday on or after the 1st of the given month. */
-const firstMondayOfMonth = (year, monthIndex) => {
-  const date = new Date(year, monthIndex, 1);
-  const day = date.getDay(); // 0 Sun … 6 Sat
-  const add = day === 1 ? 0 : day === 0 ? 1 : 8 - day;
-  date.setDate(1 + add);
+/** Sunday on or before the given date (start of that Sun–Sat week). */
+const sundayOnOrBefore = (dateKey) => {
+  const date = parseDateKey(dateKey);
+  date.setDate(date.getDate() - date.getDay());
   return toDateKey(date);
 };
 
-/** Week 1–4 Mon–Fri ranges for the given month. */
+/** Sunday on or before the 1st of the given month. */
+const firstSundayOfMonth = (year, monthIndex) =>
+  sundayOnOrBefore(toDateKey(new Date(year, monthIndex, 1)));
+
+const weekOverlapsMonth = (weekStart, weekEnd, monthStart, monthEnd) =>
+  weekStart <= monthEnd && weekEnd >= monthStart;
+
+/** All Sun–Sat weeks that touch the selected month (4–6 weeks, labeled Week 1…n). */
 const buildMonthWeeks = (monthKey) => {
   const { year, monthIndex } = parseMonthKey(monthKey);
-  const week1 = firstMondayOfMonth(year, monthIndex);
+  const monthStart = toDateKey(new Date(year, monthIndex, 1));
+  const monthEnd = toDateKey(new Date(year, monthIndex + 1, 0));
+  const lastWeekStart = sundayOnOrBefore(monthEnd);
 
-  return [0, 1, 2, 3].map((offset) => {
-    const start = shiftDateKey(week1, offset * 7);
-    const end = shiftDateKey(start, 4);
-    return {
-      index: offset,
-      label: `Week ${offset + 1}`,
-      start,
-      end
-    };
-  });
-};
+  const weeks = [];
+  let cursor = firstSundayOfMonth(year, monthIndex);
 
-/** Mon–Fri dates that fall inside the selected calendar month. */
-const buildMonthWeekdayDates = (monthKey) => {
-  const { year, monthIndex } = parseMonthKey(monthKey);
-  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-  const dates = [];
-
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    const date = new Date(year, monthIndex, day);
-    const dow = date.getDay();
-    if (dow >= 1 && dow <= 5) {
-      dates.push({
-        label: WEEKDAY_LABELS[dow - 1],
-        dateKey: toDateKey(date),
-        day
+  while (cursor <= lastWeekStart) {
+    const end = shiftDateKey(cursor, WORK_WEEK_END_OFFSET);
+    if (weekOverlapsMonth(cursor, end, monthStart, monthEnd)) {
+      weeks.push({
+        index: weeks.length,
+        label: `Week ${weeks.length + 1}`,
+        start: cursor,
+        end
       });
     }
+    cursor = shiftDateKey(cursor, 7);
   }
 
-  return dates;
+  return weeks;
 };
 
-/**
- * Full-month Mon–Fri grid rows (period-tracker style).
- * Leading/trailing cells may be null when the month starts/ends mid-week.
- */
-const buildMonthGrid = (monthKey) => {
+const isDateInMonth = (dateKey, monthKey) => {
   const { year, monthIndex } = parseMonthKey(monthKey);
-  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const date = parseDateKey(dateKey);
+  return date.getFullYear() === year && date.getMonth() === monthIndex;
+};
+
+/** Full Sun–Sat calendar grid for the month, including spillover days from adjacent months. */
+const buildMonthGrid = (monthKey) => {
+  const weeks = buildMonthWeeks(monthKey);
+  if (!weeks.length) return [];
+
+  const gridStart = parseDateKey(weeks[0].start);
+  const gridEnd = parseDateKey(weeks[weeks.length - 1].end);
   const rows = [];
-  let row = [null, null, null, null, null];
+  let row = Array(7).fill(null);
+  const cursor = new Date(gridStart);
 
-  for (let day = 1; day <= daysInMonth; day += 1) {
-    const date = new Date(year, monthIndex, day);
-    const dow = date.getDay();
-    if (dow === 0 || dow === 6) continue;
+  while (cursor <= gridEnd) {
+    const col = cursor.getDay();
+    const dateKey = toDateKey(cursor);
 
-    const col = dow - 1;
-    if (col === 0 && row.some((cell) => cell !== null)) {
+    row[col] = {
+      dateKey,
+      day: cursor.getDate(),
+      inMonth: isDateInMonth(dateKey, monthKey)
+    };
+
+    if (col === 6) {
       rows.push(row);
-      row = [null, null, null, null, null];
+      row = Array(7).fill(null);
     }
 
-    row[col] = { dateKey: toDateKey(date), day };
-    if (col === 4) {
-      rows.push(row);
-      row = [null, null, null, null, null];
-    }
+    cursor.setDate(cursor.getDate() + 1);
   }
 
   if (row.some((cell) => cell !== null)) {
@@ -207,11 +242,15 @@ const monthBounds = (monthKey) => {
   return { start, end };
 };
 
-const workWeekDays = (weekStartMonday) =>
-  WEEKDAY_LABELS.map((label, index) => ({
-    label,
-    dateKey: shiftDateKey(weekStartMonday, index)
-  }));
+const workWeekDays = (weekStartSunday, monthKey) =>
+  WEEKDAY_LABELS.map((label, index) => {
+    const dateKey = shiftDateKey(weekStartSunday, index);
+    return {
+      label,
+      dateKey,
+      inSelectedMonth: isDateInMonth(dateKey, monthKey)
+    };
+  });
 
 const formatShortDate = (dateKey) =>
   new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(
@@ -225,34 +264,33 @@ const formatReportDayLabel = (dateKey) =>
     year: 'numeric'
   }).format(parseDateKey(dateKey));
 
-const formatWeekRange = (weekStartMonday) => {
-  const weekEndFriday = shiftDateKey(weekStartMonday, 4);
-  const start = parseDateKey(weekStartMonday);
-  const end = parseDateKey(weekEndFriday);
+const formatWeekRange = (weekStartSunday) => {
+  const weekEndSaturday = shiftDateKey(weekStartSunday, WORK_WEEK_END_OFFSET);
+  const start = parseDateKey(weekStartSunday);
+  const end = parseDateKey(weekEndSaturday);
   const sameMonth = start.getMonth() === end.getMonth();
   if (sameMonth) {
     const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(start);
     return `${month} ${start.getDate()}–${end.getDate()}`;
   }
-  return `${formatShortDate(weekStartMonday)}–${formatShortDate(weekEndFriday)}`;
+  return `${formatShortDate(weekStartSunday)}–${formatShortDate(weekEndSaturday)}`;
 };
 
-const formatReportWeekLabel = (weekStartMonday) => {
-  const weekEndFriday = shiftDateKey(weekStartMonday, 4);
-  const start = parseDateKey(weekStartMonday);
-  const end = parseDateKey(weekEndFriday);
+const formatReportWeekLabel = (weekStartSunday) => {
+  const weekEndSaturday = shiftDateKey(weekStartSunday, WORK_WEEK_END_OFFSET);
+  const start = parseDateKey(weekStartSunday);
+  const end = parseDateKey(weekEndSaturday);
   const year = start.getFullYear();
   if (start.getMonth() === end.getMonth()) {
     const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(start);
     return `${month} ${start.getDate()}–${end.getDate()}, ${year}`;
   }
-  return `${formatReportDayLabel(weekStartMonday)} – ${formatReportDayLabel(weekEndFriday)}`;
+  return `${formatReportDayLabel(weekStartSunday)} – ${formatReportDayLabel(weekEndSaturday)}`;
 };
 
 const weekdayLabelFor = (dateKey) => {
   const day = parseDateKey(dateKey).getDay();
-  if (day >= 1 && day <= 5) return WEEKDAY_LABELS[day - 1];
-  return null;
+  return WEEKDAY_LABELS[day] || null;
 };
 
 const statusLabel = (value) =>
@@ -304,16 +342,20 @@ const weekIndexForDate = (monthWeeks, dateKey) => {
   return match >= 0 ? match : 0;
 };
 
-const AdminWorkboard = () => {
-  const { user, refreshProfile } = useAuth();
+const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
+  const { user, refreshProfile, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const isSharedView = Boolean(shareToken);
+  const isGuest = !isAuthenticated && !isSharedView;
+  const layoutStandalone = standalone || isSharedView;
   const [searchParams, setSearchParams] = useSearchParams();
   const boardMode = searchParams.get('mode') || 'board';
-  const isArtboardMode = boardMode === 'artboard';
   const isDashboardMode = boardMode === 'dashboard';
   const isAchievementsMode = boardMode === 'achievements';
   const isProjectsMode = boardMode === 'projects';
   const isAnalyticsMode = boardMode === 'analytics';
   const isVictoriesMode = boardMode === 'victories';
+  const isLeaderboardMode = boardMode === 'leaderboard';
   const isSuperior = user?.role === 'superior';
   const myId = String(user?.id || user?._id || '');
 
@@ -325,6 +367,12 @@ const AdminWorkboard = () => {
     setSearchParams({ mode });
   };
 
+  useEffect(() => {
+    if (boardMode === 'artboard') {
+      navigate('/noteboard', { replace: true });
+    }
+  }, [boardMode, navigate]);
+
   const yearOptions = useMemo(() => buildYearOptions(new Date().getFullYear()), []);
   const currentMonthKey = useMemo(() => monthKeyFromDate(new Date()), []);
 
@@ -334,12 +382,24 @@ const AdminWorkboard = () => {
     weekIndexForDate(buildMonthWeeks(currentMonthKey), toDateKey())
   );
   const [ownerId, setOwnerId] = useState(myId);
+  const isBoardOwner = !isSharedView && !isGuest && Boolean(ownerId) && ownerId === myId;
   const [tasksByDate, setTasksByDate] = useState({});
   const [taskTags, setTaskTags] = useState([]);
   const [addingTag, setAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [savingTag, setSavingTag] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
+  const [myPermissions, setMyPermissions] = useState([]);
+  const canShowAddUi = isSharedView
+    ? myPermissions.includes('add_task')
+    : isGuest || canEdit;
+  const canEditTasks = isSharedView ? myPermissions.includes('edit_task') : canEdit;
+  const canDeleteTasks = isSharedView ? myPermissions.includes('delete_task') : canEdit;
+  const canChangeStatus =
+    isSharedView
+      ? myPermissions.includes('update_status') || myPermissions.includes('edit_task')
+      : canEdit;
+  const { requireSignIn, signInPrompt } = useSignInPrompt(isSharedView ? 'share_edit' : 'task');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [form, setForm] = useState(emptyForm);
@@ -353,9 +413,28 @@ const AdminWorkboard = () => {
   const [reportPeriod, setReportPeriod] = useState('week'); // 'day' | 'week' | 'month'
   const [reportDownloading, setReportDownloading] = useState(false);
   const [reportError, setReportError] = useState('');
+  const [shareCreating, setShareCreating] = useState(false);
+  const [shareError, setShareError] = useState('');
+  const [shareCopyNote, setShareCopyNote] = useState('');
+  const [shareMeta, setShareMeta] = useState(null);
+  const [accessRequest, setAccessRequest] = useState(null);
+  const [accessRequestSubmitting, setAccessRequestSubmitting] = useState(false);
+  const [accessRequestMessage, setAccessRequestMessage] = useState('');
+  const [accessRequests, setAccessRequests] = useState([]);
+  const [accessRequestsOpen, setAccessRequestsOpen] = useState(false);
+  const [collaborators, setCollaborators] = useState([]);
+  const [collaboratorsLoading, setCollaboratorsLoading] = useState(false);
+  const [revokeTarget, setRevokeTarget] = useState(null);
+  const [revokeSaving, setRevokeSaving] = useState(false);
+  const [grantTarget, setGrantTarget] = useState(null);
+  const [accessRequestsLoading, setAccessRequestsLoading] = useState(false);
+  const [accessResolveSaving, setAccessResolveSaving] = useState(false);
   const [totalXp, setTotalXp] = useState(() => Number(user?.workboardXp) || 0);
   const [displayedXp, setDisplayedXp] = useState(() => Number(user?.workboardXp) || 0);
   const [historyTasks, setHistoryTasks] = useState([]);
+  const [streakMeta, setStreakMeta] = useState(EMPTY_STREAK_META);
+  const [streakRestoring, setStreakRestoring] = useState(false);
+  const [streakError, setStreakError] = useState('');
   const [xpToast, setXpToast] = useState(null);
   const xpToastTimerRef = useRef(null);
   const [focusTask, setFocusTask] = useState(null);
@@ -393,48 +472,96 @@ const AdminWorkboard = () => {
 
   const monthWeeks = useMemo(() => buildMonthWeeks(selectedMonthKey), [selectedMonthKey]);
   const monthGrid = useMemo(() => buildMonthGrid(selectedMonthKey), [selectedMonthKey]);
-  const monthWeekdayDates = useMemo(
-    () => buildMonthWeekdayDates(selectedMonthKey),
-    [selectedMonthKey]
-  );
+  const monthWeekdayDates = useMemo(() => {
+    const { year, monthIndex } = parseMonthKey(selectedMonthKey);
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+    const dates = [];
+
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const date = new Date(year, monthIndex, day);
+      const dow = date.getDay();
+      dates.push({
+        label: WEEKDAY_LABELS[dow],
+        dateKey: toDateKey(date),
+        day
+      });
+    }
+
+    return dates;
+  }, [selectedMonthKey]);
   const { start: monthStart, end: monthEnd } = useMemo(
     () => monthBounds(selectedMonthKey),
     [selectedMonthKey]
   );
+  const calendarRange = useMemo(() => {
+    if (!monthWeeks.length) {
+      return { start: monthStart, end: monthEnd };
+    }
+    return {
+      start: monthWeeks[0].start,
+      end: monthWeeks[monthWeeks.length - 1].end
+    };
+  }, [monthWeeks, monthStart, monthEnd]);
 
   const activeWeek = monthWeeks[activeWeekIndex] || monthWeeks[0];
-  const weekStart = activeWeek.start;
-  const days = useMemo(() => workWeekDays(weekStart), [weekStart]);
+  const weekStart = activeWeek?.start;
+  const days = useMemo(() => {
+    if (isSharedView && shareMeta?.period === 'day') {
+      const dateKey = shareMeta.anchorDate || shareMeta.startDate;
+      const dow = parseDateKey(dateKey).getDay();
+      return [
+        {
+          label: WEEKDAY_LABELS[dow],
+          dateKey,
+          inSelectedMonth: isDateInMonth(dateKey, selectedMonthKey)
+        }
+      ];
+    }
+    return weekStart ? workWeekDays(weekStart, selectedMonthKey) : [];
+  }, [isSharedView, shareMeta, weekStart, selectedMonthKey]);
   const todayKey = toDateKey();
 
   const reportAnchorDate = useMemo(() => {
     if (reportPeriod === 'week') return weekStart;
     if (reportPeriod === 'month') return monthStart;
-    return todayKey;
-  }, [reportPeriod, weekStart, monthStart, todayKey]);
+    if (viewMode === 'month') {
+      if (isDateInMonth(todayKey, selectedMonthKey)) return todayKey;
+      return monthStart;
+    }
+    const weekEnd = shiftDateKey(weekStart, WORK_WEEK_END_OFFSET);
+    if (todayKey >= weekStart && todayKey <= weekEnd) return todayKey;
+    return weekStart;
+  }, [reportPeriod, weekStart, monthStart, todayKey, viewMode, selectedMonthKey]);
+
+  const sharedRangeLabel = useMemo(() => {
+    if (!shareMeta) return '';
+    if (shareMeta.period === 'week') return formatReportWeekLabel(shareMeta.startDate);
+    if (shareMeta.period === 'month') {
+      return formatMonthLabel(monthKeyFromDate(parseDateKey(shareMeta.startDate)));
+    }
+    return formatReportDayLabel(shareMeta.anchorDate || shareMeta.startDate);
+  }, [shareMeta]);
 
   const reportRangeLabel = useMemo(() => {
     if (reportPeriod === 'week') return formatReportWeekLabel(weekStart);
     if (reportPeriod === 'month') return formatMonthLabel(selectedMonthKey);
-    return formatReportDayLabel(todayKey);
-  }, [reportPeriod, weekStart, selectedMonthKey, todayKey]);
+    return formatReportDayLabel(reportAnchorDate);
+  }, [reportPeriod, weekStart, selectedMonthKey, reportAnchorDate]);
 
   const formDayOptions = viewMode === 'month' ? monthWeekdayDates : days;
 
-  // When month changes, pick a sensible week (today if in month, else Week 1)
+  // When month changes, jump to the week that contains today (including spillover weeks).
   useEffect(() => {
     const today = toDateKey();
-    const { year, monthIndex } = parseMonthKey(selectedMonthKey);
-    const todayDate = parseDateKey(today);
-    const inSelectedMonth =
-      todayDate.getFullYear() === year && todayDate.getMonth() === monthIndex;
-
-    if (inSelectedMonth) {
-      setActiveWeekIndex(weekIndexForDate(monthWeeks, today));
-    } else {
-      setActiveWeekIndex(0);
-    }
+    const idx = weekIndexForDate(monthWeeks, today);
+    setActiveWeekIndex(idx >= 0 ? idx : 0);
   }, [selectedMonthKey, monthWeeks]);
+
+  useEffect(() => {
+    if (activeWeekIndex >= monthWeeks.length && monthWeeks.length > 0) {
+      setActiveWeekIndex(monthWeeks.length - 1);
+    }
+  }, [activeWeekIndex, monthWeeks.length]);
 
   const loadTasks = useCallback(
     async ({ quiet = false } = {}) => {
@@ -444,50 +571,56 @@ const AdminWorkboard = () => {
         let endDate;
 
         if (viewMode === 'month') {
-          startDate = monthStart;
-          endDate = monthEnd;
+          startDate = calendarRange.start;
+          endDate = calendarRange.end;
         } else {
           startDate = weekStart;
-          endDate = shiftDateKey(weekStart, 4);
+          endDate = shiftDateKey(weekStart, WORK_WEEK_END_OFFSET);
         }
 
-        const response = await axios.get('/workboard/tasks', {
+        const response = await axios.get('/taskboard/tasks', {
           params: { startDate, endDate, ownerId }
         });
 
         setTasksByDate(response.data.tasksByDate || {});
         setTaskTags(response.data.tags || []);
         setCanEdit(Boolean(response.data.canEdit));
+        if (response.data.myPermissions) {
+          setMyPermissions(response.data.myPermissions);
+        }
         setError('');
       } catch (fetchError) {
-        console.error('Failed to load workboard tasks:', fetchError);
+        console.error('Failed to load taskboard tasks:', fetchError);
         if (!quiet) {
-          setError(fetchError.response?.data?.message || 'Failed to load workboard.');
+          setError(fetchError.response?.data?.message || 'Failed to load taskboard.');
         }
       }
     },
-    [ownerId, viewMode, monthStart, monthEnd, weekStart]
+    [ownerId, viewMode, calendarRange.start, calendarRange.end, weekStart]
   );
 
   const loadGamification = useCallback(async () => {
     if (!ownerId) return;
     try {
-      const response = await axios.get('/workboard/gamification', {
+      const response = await axios.get('/taskboard/gamification', {
         params: { ownerId }
       });
       setHistoryTasks(response.data.tasks || []);
       if (typeof response.data.totalXp === 'number') {
         setTotalXp(response.data.totalXp);
       }
+      if (response.data.streak) {
+        setStreakMeta(response.data.streak);
+      }
     } catch (statsError) {
-      console.error('Failed to load workboard gamification:', statsError);
+      console.error('Failed to load taskboard gamification:', statsError);
     }
   }, [ownerId]);
 
   const loadMission = useCallback(async () => {
     if (!ownerId) return;
     try {
-      const response = await axios.get('/workboard/mission', {
+      const response = await axios.get('/taskboard/mission', {
         params: { ownerId, date: toDateKey() }
       });
       setCustomMissionTitle(response.data.customTitle || '');
@@ -499,7 +632,7 @@ const AdminWorkboard = () => {
   const loadProjects = useCallback(async () => {
     if (!ownerId) return;
     try {
-      const response = await axios.get('/workboard/projects', { params: { ownerId } });
+      const response = await axios.get('/taskboard/projects', { params: { ownerId } });
       setProjects(response.data.projects || []);
     } catch (projectError) {
       console.error('Failed to load projects:', projectError);
@@ -509,7 +642,7 @@ const AdminWorkboard = () => {
   const loadObjectives = useCallback(async () => {
     if (!ownerId) return;
     try {
-      const response = await axios.get('/workboard/objectives', {
+      const response = await axios.get('/taskboard/objectives', {
         params: { ownerId, weekStart }
       });
       setObjectives(response.data.objectives || []);
@@ -521,7 +654,7 @@ const AdminWorkboard = () => {
   const loadAchievements = useCallback(async () => {
     if (!ownerId) return;
     try {
-      const response = await axios.get('/workboard/achievements', { params: { ownerId } });
+      const response = await axios.get('/taskboard/achievements', { params: { ownerId } });
       setAchievements(response.data.achievements || []);
       return response.data;
     } catch (achievementError) {
@@ -535,7 +668,7 @@ const AdminWorkboard = () => {
     setVictoriesLoading(true);
     setVictoriesError('');
     try {
-      const response = await axios.get('/workboard/victories', { params: { ownerId } });
+      const response = await axios.get('/taskboard/victories', { params: { ownerId } });
       setVictories(response.data.victories || []);
     } catch (victoryError) {
       console.error('Failed to load victories:', victoryError);
@@ -555,6 +688,44 @@ const AdminWorkboard = () => {
       xpToastTimerRef.current = null;
     }, 3200);
   }, []);
+
+  const handleRestoreStreak = useCallback(async () => {
+    if (!streakMeta.canRestore || streakRestoring || !canEdit) return;
+    setStreakRestoring(true);
+    setStreakError('');
+    try {
+      const response = await axios.post('/taskboard/streak/restore');
+      if (typeof response.data.totalXp === 'number') {
+        setTotalXp(response.data.totalXp);
+        setDisplayedXp(response.data.totalXp);
+      }
+      if (response.data.streak) {
+        setStreakMeta(response.data.streak);
+      }
+      if (response.data.newlyUnlocked?.length) {
+        response.data.newlyUnlocked.forEach((achievement) => {
+          showFeedbackToast({ achievement, awarded: 0 });
+        });
+      } else {
+        showFeedbackToast({
+          awarded: 0,
+          streakRestored: true,
+          restoredStreak: response.data.streak?.current
+        });
+      }
+      refreshProfile();
+    } catch (restoreError) {
+      setStreakError(restoreError.response?.data?.message || 'Failed to restore streak.');
+    } finally {
+      setStreakRestoring(false);
+    }
+  }, [
+    streakMeta.canRestore,
+    streakRestoring,
+    canEdit,
+    refreshProfile,
+    showFeedbackToast
+  ]);
 
   const showXpToast = useCallback(
     (awarded, extras = {}) => {
@@ -608,7 +779,7 @@ const AdminWorkboard = () => {
     const weeks = buildMonthWeeks(monthKey);
     setSelectedMonthKey(monthKey);
     setViewMode('week');
-    setActiveWeekIndex(weekIndexForDate(weeks, today));
+    setActiveWeekIndex(Math.max(0, weekIndexForDate(weeks, today)));
     setBoardMode('board');
     requestAnimationFrame(() => {
       const node = calendarRef.current?.querySelector('.wb-day-row.is-today');
@@ -616,13 +787,177 @@ const AdminWorkboard = () => {
     });
   }, []);
 
+  const loadSharedView = useCallback(async () => {
+    if (!shareToken) return;
+    setLoading(true);
+    setError('');
+    try {
+      const response = await axios.get(`/taskboard/share/${shareToken}`);
+      const data = response.data;
+      setShareMeta(data);
+      setTasksByDate(data.tasksByDate || {});
+      setMyPermissions(data.myPermissions || []);
+      setAccessRequest(data.accessRequest || null);
+      setCanEdit(Boolean(data.myPermissions?.length));
+      setOwnerId(data.owner?.id ? String(data.owner.id) : '');
+
+      const anchor = data.anchorDate || data.startDate;
+      const monthKey = monthKeyFromDate(parseDateKey(anchor));
+
+      if (data.period === 'month') {
+        setViewMode('month');
+        setSelectedMonthKey(monthKeyFromDate(parseDateKey(data.startDate)));
+      } else if (data.period === 'week') {
+        setViewMode('week');
+        setSelectedMonthKey(monthKey);
+        const weeks = buildMonthWeeks(monthKey);
+        const idx = weekIndexForDate(weeks, data.startDate);
+        setActiveWeekIndex(idx >= 0 ? idx : 0);
+      } else {
+        setViewMode('day');
+        setSelectedMonthKey(monthKey);
+        const weeks = buildMonthWeeks(monthKey);
+        const idx = weekIndexForDate(weeks, anchor);
+        setActiveWeekIndex(idx >= 0 ? idx : 0);
+      }
+    } catch (fetchError) {
+      console.error('Failed to load shared taskboard:', fetchError);
+      setError(fetchError.response?.data?.message || 'Share link is unavailable.');
+    } finally {
+      setLoading(false);
+    }
+  }, [shareToken]);
+
+  const loadAccessRequests = useCallback(async () => {
+    if (!isBoardOwner) return;
+    setAccessRequestsLoading(true);
+    try {
+      const response = await axios.get('/taskboard/access-requests', {
+        params: { status: 'pending' }
+      });
+      setAccessRequests(response.data.requests || []);
+    } catch (requestError) {
+      console.error('Failed to load access requests:', requestError);
+    } finally {
+      setAccessRequestsLoading(false);
+    }
+  }, [isBoardOwner]);
+
+  const loadCollaborators = useCallback(async () => {
+    if (!isBoardOwner) return;
+    setCollaboratorsLoading(true);
+    try {
+      const response = await axios.get('/taskboard/collaborators');
+      setCollaborators(response.data.collaborators || []);
+    } catch (collaboratorError) {
+      console.error('Failed to load collaborators:', collaboratorError);
+    } finally {
+      setCollaboratorsLoading(false);
+    }
+  }, [isBoardOwner]);
+
+  const loadAccessPanel = useCallback(async () => {
+    await Promise.all([loadAccessRequests(), loadCollaborators()]);
+  }, [loadAccessRequests, loadCollaborators]);
+
+  const requestEditAccess = async () => {
+    if (!shareToken || accessRequestSubmitting) return;
+    if (!isAuthenticated) {
+      requireSignIn();
+      return;
+    }
+    setAccessRequestSubmitting(true);
+    setError('');
+    try {
+      await axios.post('/taskboard/access-requests', {
+        shareToken,
+        message: accessRequestMessage.trim()
+      });
+      setAccessRequest({ status: 'pending' });
+      setAccessRequestMessage('');
+    } catch (requestError) {
+      console.error('Failed to request edit access:', requestError);
+      setError(requestError.response?.data?.message || 'Failed to send access request.');
+    } finally {
+      setAccessRequestSubmitting(false);
+    }
+  };
+
+  const resolveAccessRequest = async (action, grantedPermissions = [], ownerNote = '') => {
+    if (!grantTarget || accessResolveSaving) return;
+    setAccessResolveSaving(true);
+    try {
+      await axios.patch(`/taskboard/access-requests/${grantTarget.id}`, {
+        action,
+        grantedPermissions,
+        ownerNote
+      });
+      setGrantTarget(null);
+      await loadAccessPanel();
+    } catch (resolveError) {
+      console.error('Failed to resolve access request:', resolveError);
+      setError(resolveError.response?.data?.message || 'Failed to update access request.');
+    } finally {
+      setAccessResolveSaving(false);
+    }
+  };
+
+  const confirmRevokeAccess = async () => {
+    if (!revokeTarget || revokeSaving) return;
+    setRevokeSaving(true);
+    setError('');
+    try {
+      await axios.delete(`/taskboard/collaborators/${revokeTarget.id}`);
+      setRevokeTarget(null);
+      await loadCollaborators();
+    } catch (revokeError) {
+      console.error('Failed to revoke collaborator access:', revokeError);
+      setError(revokeError.response?.data?.message || 'Failed to revoke access.');
+    } finally {
+      setRevokeSaving(false);
+    }
+  };
+
   useEffect(() => {
+    if (!isSharedView) return undefined;
+
+    loadSharedView();
+    return undefined;
+  }, [isSharedView, loadSharedView]);
+
+  useEffect(() => {
+    if (!isSharedView || !ownerId || myPermissions.length === 0) return undefined;
+    loadTasks({ quiet: true });
+    return undefined;
+  }, [
+    isSharedView,
+    ownerId,
+    myPermissions.length,
+    loadTasks,
+    viewMode,
+    calendarRange.start,
+    calendarRange.end,
+    weekStart
+  ]);
+
+  useEffect(() => {
+    if (!isBoardOwner) return undefined;
+    loadAccessPanel();
+    return undefined;
+  }, [isBoardOwner, loadAccessPanel]);
+
+  useEffect(() => {
+    if (isSharedView) return undefined;
     let cancelled = false;
 
     const bootstrap = async () => {
       try {
+        if (isGuest) {
+          setOwnerId('');
+          return;
+        }
         if (isSuperior) {
-          const response = await axios.get('/workboard/workers');
+          const response = await axios.get('/taskboard/workers');
           if (cancelled) return;
           const first = response.data.workers?.[0];
           setOwnerId(first ? String(first.id) : '');
@@ -630,9 +965,9 @@ const AdminWorkboard = () => {
           setOwnerId(myId);
         }
       } catch (bootError) {
-        console.error('Failed to bootstrap workboard:', bootError);
+        console.error('Failed to bootstrap taskboard:', bootError);
         if (!cancelled) {
-          setError('Failed to load workboard access.');
+          setError('Failed to load taskboard access.');
           setLoading(false);
         }
       }
@@ -642,9 +977,10 @@ const AdminWorkboard = () => {
     return () => {
       cancelled = true;
     };
-  }, [isSuperior, myId]);
+  }, [isSharedView, isGuest, isSuperior, myId]);
 
   useEffect(() => {
+    if (isSharedView) return undefined;
     if (!ownerId) {
       setLoading(false);
       return undefined;
@@ -671,6 +1007,7 @@ const AdminWorkboard = () => {
       cancelled = true;
     };
   }, [
+    isSharedView,
     ownerId,
     loadTasks,
     loadGamification,
@@ -714,7 +1051,7 @@ const AdminWorkboard = () => {
     if (user?.role !== 'admin') return undefined;
 
     const beat = () => {
-      axios.post('/workboard/presence/heartbeat').catch(() => {});
+      axios.post('/taskboard/presence/heartbeat').catch(() => {});
     };
 
     beat();
@@ -724,7 +1061,7 @@ const AdminWorkboard = () => {
       const token = localStorage.getItem('token');
       const base = axios.defaults.baseURL || '';
       if (token) {
-        fetch(`${base}/workboard/presence/offline`, {
+        fetch(`${base}/taskboard/presence/offline`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -765,7 +1102,12 @@ const AdminWorkboard = () => {
   };
 
   const openCreate = (dateKey) => {
-    if (!canEdit || !dateKey) return;
+    if (!dateKey) return;
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
+    if (!canEdit) return;
     setViewTask(null);
     setEditingId(null);
     setAddingTag(false);
@@ -801,8 +1143,10 @@ const AdminWorkboard = () => {
 
   const saveTask = async (event) => {
     event.preventDefault();
-    if (!canEdit || saving) return;
+    if (saving) return;
     if (modalMode !== 'create' && modalMode !== 'edit') return;
+    if (modalMode === 'create' && !canShowAddUi) return;
+    if (modalMode === 'edit' && !canEditTasks) return;
 
     setSaving(true);
     try {
@@ -818,9 +1162,12 @@ const AdminWorkboard = () => {
         priority: form.priority || DEFAULT_PRIORITY,
         project: form.project || null
       };
+      if (isSharedView && ownerId) {
+        payload.ownerId = ownerId;
+      }
 
       if (editingId) {
-        const response = await axios.put(`/workboard/tasks/${editingId}`, payload);
+        const response = await axios.put(`/taskboard/tasks/${editingId}`, payload);
         const updated = response.data.task;
         if (response.data.tags) setTaskTags(response.data.tags);
         setViewTask(updated);
@@ -829,13 +1176,16 @@ const AdminWorkboard = () => {
         setEditingId(null);
         await applyXpResponse(response.data);
       } else {
-        const response = await axios.post('/workboard/tasks', payload);
+        const response = await axios.post('/taskboard/tasks', payload);
         if (response.data.tags) setTaskTags(response.data.tags);
         closeModal();
         await applyXpResponse(response.data);
       }
 
       await loadTasks({ quiet: true });
+      if (isSharedView) {
+        await loadSharedView();
+      }
     } catch (saveError) {
       console.error('Failed to save task:', saveError);
       setError(saveError.response?.data?.message || 'Failed to save task.');
@@ -859,7 +1209,7 @@ const AdminWorkboard = () => {
 
     setSavingTag(true);
     try {
-      const response = await axios.post('/workboard/tags', { name });
+      const response = await axios.post('/taskboard/tags', { name });
       const savedName = response.data.tag || name;
       setTaskTags(response.data.tags || []);
       setForm((prev) => ({ ...prev, tag: savedName }));
@@ -875,9 +1225,9 @@ const AdminWorkboard = () => {
   };
 
   const changeStatus = async (taskId, status) => {
-    if (!canEdit) return;
+    if (!canChangeStatus) return;
     try {
-      const response = await axios.patch(`/workboard/tasks/${taskId}/status`, { status });
+      const response = await axios.patch(`/taskboard/tasks/${taskId}/status`, { status });
       await loadTasks({ quiet: true });
       if (viewTask && String(viewTask._id) === String(taskId)) {
         setViewTask((prev) =>
@@ -903,19 +1253,24 @@ const AdminWorkboard = () => {
 
   const submitQuickCapture = async (event) => {
     event?.preventDefault?.();
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
     if (!canEdit || quickSaving) return;
     const title = quickCapture.trim();
     if (!title) return;
 
     setQuickSaving(true);
     try {
-      const response = await axios.post('/workboard/tasks', {
+      const response = await axios.post('/taskboard/tasks', {
         title: title.slice(0, 160),
         date: toDateKey(),
         status: 'started',
         priority: DEFAULT_PRIORITY,
         startTime: DEFAULT_START_TIME,
-        endTime: DEFAULT_END_TIME
+        endTime: DEFAULT_END_TIME,
+        ...(isSharedView && ownerId ? { ownerId } : {})
       });
       setQuickCapture('');
       setQuickCaptureOpen(false);
@@ -932,7 +1287,7 @@ const AdminWorkboard = () => {
   const saveCustomMission = async () => {
     if (!canEdit) return;
     try {
-      const response = await axios.put('/workboard/mission', {
+      const response = await axios.put('/taskboard/mission', {
         date: toDateKey(),
         customTitle: missionDraft.trim()
       });
@@ -955,7 +1310,7 @@ const AdminWorkboard = () => {
         const token = localStorage.getItem('token');
         const base = axios.defaults.baseURL || '';
         if (token) {
-          fetch(`${base}/workboard/tasks/${taskId}/focus`, {
+          fetch(`${base}/taskboard/tasks/${taskId}/focus`, {
             method: 'PATCH',
             headers: {
               Authorization: `Bearer ${token}`,
@@ -974,7 +1329,7 @@ const AdminWorkboard = () => {
         return;
       }
 
-      const response = await axios.patch(`/workboard/tasks/${taskId}/focus`, payload);
+      const response = await axios.patch(`/taskboard/tasks/${taskId}/focus`, payload);
       const updated = response.data.task;
       setFocusTask((prev) => (prev ? { ...prev, focusTime: updated.focusTime } : prev));
       if (viewTask && String(viewTask._id) === String(taskId)) {
@@ -1052,7 +1407,12 @@ const AdminWorkboard = () => {
       }
 
       if (isMod && key === 'k') {
-        if (!canEdit || isArtboardMode) return;
+        if (isGuest) {
+          event.preventDefault();
+          requireSignIn();
+          return;
+        }
+        if (!canEdit) return;
         if (typing && !quickCaptureOpen) return;
         event.preventDefault();
         setSearchOpen(false);
@@ -1062,7 +1422,6 @@ const AdminWorkboard = () => {
       }
 
       if (typing || isMod || event.altKey) return;
-      if (isArtboardMode) return;
 
       if (key === '/' ) {
         event.preventDefault();
@@ -1072,9 +1431,15 @@ const AdminWorkboard = () => {
         return;
       }
 
-      if (key === 'n' && canEdit) {
+      if (key === 'n') {
         event.preventDefault();
-        openCreate(todayKey);
+        if (isGuest) {
+          requireSignIn();
+          return;
+        }
+        if (canEdit) {
+          openCreate(todayKey);
+        }
         return;
       }
       if (key === 't') {
@@ -1098,8 +1463,9 @@ const AdminWorkboard = () => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [
     canEdit,
-    isArtboardMode,
+    isGuest,
     quickCaptureOpen,
+    requireSignIn,
     searchOpen,
     deleteTarget,
     modalMode,
@@ -1117,7 +1483,7 @@ const AdminWorkboard = () => {
     setVictorySaving(true);
     setVictoriesError('');
     try {
-      const response = await axios.put('/workboard/victories', payload);
+      const response = await axios.put('/taskboard/victories', payload);
       const saved = response.data.victory;
       setVictories((prev) => {
         const rest = prev.filter((entry) => entry.date !== saved.date);
@@ -1134,7 +1500,7 @@ const AdminWorkboard = () => {
   const removeVictory = async (entry) => {
     if (!canEdit || !entry?._id) return;
     try {
-      await axios.delete(`/workboard/victories/${entry._id}`);
+      await axios.delete(`/taskboard/victories/${entry._id}`);
       setVictories((prev) => prev.filter((row) => String(row._id) !== String(entry._id)));
     } catch (deleteError) {
       console.error('Failed to delete victory:', deleteError);
@@ -1153,10 +1519,10 @@ const AdminWorkboard = () => {
   };
 
   const confirmDelete = async () => {
-    if (!canEdit || !deleteTarget || deleting) return;
+    if (!canDeleteTasks || !deleteTarget || deleting) return;
     setDeleting(true);
     try {
-      const response = await axios.delete(`/workboard/tasks/${deleteTarget._id}`);
+      const response = await axios.delete(`/taskboard/tasks/${deleteTarget._id}`);
       if (viewTask && String(viewTask._id) === String(deleteTarget._id)) {
         closeModal();
       }
@@ -1176,7 +1542,7 @@ const AdminWorkboard = () => {
     setReportDownloading(true);
     setReportError('');
     try {
-      const response = await axios.get('/workboard/report/docx', {
+      const response = await axios.get('/taskboard/report/docx', {
         params: {
           period: reportPeriod,
           date: reportAnchorDate,
@@ -1196,10 +1562,10 @@ const AdminWorkboard = () => {
       const filenameMatch = disposition.match(/filename="?([^"]+)"?/i);
       const fallbackName =
         reportPeriod === 'day'
-          ? `workboard-daily-${reportAnchorDate}.docx`
+          ? `taskboard-daily-${reportAnchorDate}.docx`
           : reportPeriod === 'week'
-            ? `workboard-weekly-${weekStart}-to-${shiftDateKey(weekStart, 4)}.docx`
-            : `workboard-monthly-${selectedMonthKey}.docx`;
+            ? `taskboard-weekly-${weekStart}-to-${shiftDateKey(weekStart, WORK_WEEK_END_OFFSET)}.docx`
+            : `taskboard-monthly-${selectedMonthKey}.docx`;
       const filename = filenameMatch?.[1] || fallbackName;
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -1211,17 +1577,9 @@ const AdminWorkboard = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (downloadErr) {
-      console.error('Failed to download workboard report:', downloadErr);
+      console.error('Failed to download taskboard report:', downloadErr);
       let message = 'Failed to download report.';
-      if (downloadErr.response?.data instanceof Blob) {
-        try {
-          const text = await downloadErr.response.data.text();
-          const payload = JSON.parse(text);
-          if (payload.message) message = payload.message;
-        } catch {
-          /* keep default */
-        }
-      } else if (downloadErr.response?.data?.message) {
+      if (downloadErr.response?.data?.message) {
         message = downloadErr.response.data.message;
       } else if (downloadErr.message) {
         message = downloadErr.message;
@@ -1229,6 +1587,29 @@ const AdminWorkboard = () => {
       setReportError(message);
     } finally {
       setReportDownloading(false);
+    }
+  };
+
+  const createCalendarShareLink = async () => {
+    if (!ownerId || shareCreating || !canEdit) return;
+    setShareCreating(true);
+    setShareError('');
+    setShareCopyNote('');
+    try {
+      const response = await axios.post('/taskboard/report/share', {
+        period: reportPeriod,
+        date: reportAnchorDate,
+        ownerId
+      });
+      const sharePath = response.data.path || `/taskboard/share/${response.data.token}`;
+      const shareUrl = `${window.location.origin}${sharePath}`;
+      await navigator.clipboard.writeText(shareUrl);
+      setShareCopyNote('View link copied — friends can open the calendar read-only.');
+    } catch (shareErr) {
+      console.error('Failed to create taskboard share link:', shareErr);
+      setShareError(shareErr.response?.data?.message || 'Failed to create share link.');
+    } finally {
+      setShareCreating(false);
     }
   };
 
@@ -1252,11 +1633,8 @@ const AdminWorkboard = () => {
   }, [historyTasks, visibleTasks]);
 
   const levelProgress = useMemo(() => calculateLevelProgress(displayedXp), [displayedXp]);
-  const currentStreak = useMemo(
-    () => calculateCurrentStreak(statsTasks, todayKey),
-    [statsTasks, todayKey]
-  );
-  const longestStreak = useMemo(() => calculateLongestStreak(statsTasks), [statsTasks]);
+  const currentStreak = streakMeta.current;
+  const longestStreak = streakMeta.longest;
   const royalToday = useMemo(
     () => calculateRoyalScore({ tasks: statsTasks, currentStreak, todayKey }),
     [statsTasks, currentStreak, todayKey]
@@ -1264,13 +1642,13 @@ const AdminWorkboard = () => {
   const royalYesterday = useMemo(() => {
     const yesterdayKey = shiftDateKey(todayKey, -1);
     const tasksThroughYesterday = statsTasks.filter((task) => task.date <= yesterdayKey);
-    const yesterdayStreak = calculateCurrentStreak(tasksThroughYesterday, yesterdayKey);
+    const yesterdayStreak = currentStreak > 1 ? currentStreak - 1 : 0;
     return calculateRoyalScore({
       tasks: tasksThroughYesterday,
       currentStreak: yesterdayStreak,
       todayKey: yesterdayKey
     });
-  }, [statsTasks, todayKey]);
+  }, [statsTasks, todayKey, currentStreak]);
   const royalDelta = royalToday.score - royalYesterday.score;
   const weeklySummary = useMemo(
     () => calculateWeeklySummary(weekStart, statsTasks, activeWeekIndex),
@@ -1300,26 +1678,27 @@ const AdminWorkboard = () => {
     [viewTask]
   );
 
-  if (isArtboardMode) {
-    return (
-      <AdminLayout chrome="immersive">
-        <AdminArtboard onExit={() => setBoardMode('board')} />
-      </AdminLayout>
-    );
-  }
+  const withSignInPrompt = (content) => (
+    <>
+      {signInPrompt}
+      {content}
+    </>
+  );
 
   if (loading) {
-    return (
-      <AdminLayout chrome="minimal">
-        <BoardLoader label="Opening workboard…" />
+    return withSignInPrompt(
+      <AdminLayout chrome="minimal" standalone={layoutStandalone}>
+        <BoardShell>
+          <BoardLoader label={isSharedView ? 'Opening shared calendar…' : 'Opening taskboard…'} />
+        </BoardShell>
       </AdminLayout>
     );
   }
 
   if (isDashboardMode) {
-    return (
-      <AdminLayout chrome="minimal">
-        <div className="wb-board">
+    return withSignInPrompt(
+      <AdminLayout chrome="minimal" standalone={layoutStandalone}>
+        <BoardShell>
           <WorkboardDashboard
             todayKey={todayKey}
             weekStart={weekStart}
@@ -1342,6 +1721,7 @@ const AdminWorkboard = () => {
             onGoAchievements={() => setBoardMode('achievements')}
             onGoProjects={() => setBoardMode('projects')}
             onGoAnalytics={() => setBoardMode('analytics')}
+            onGoLeaderboard={() => setBoardMode('leaderboard')}
           />
           {xpToast ? (
             <div className="wb-xp-toast" key={xpToast.id} role="status" aria-live="polite">
@@ -1349,6 +1729,11 @@ const AdminWorkboard = () => {
                 <>
                   <p className="wb-xp-toast-title">Level Up</p>
                   <p className="wb-xp-toast-xp">LEVEL {xpToast.newLevel}</p>
+                </>
+              ) : xpToast.streakRestored ? (
+                <>
+                  <p className="wb-xp-toast-title">🔥 Streak restored</p>
+                  <p className="wb-xp-toast-xp">{xpToast.restoredStreak} days</p>
                 </>
               ) : xpToast.achievement ? (
                 <>
@@ -1363,28 +1748,28 @@ const AdminWorkboard = () => {
               )}
             </div>
           ) : null}
-        </div>
+        </BoardShell>
       </AdminLayout>
     );
   }
 
   if (isAchievementsMode) {
-    return (
-      <AdminLayout chrome="minimal">
-        <div className="wb-board">
+    return withSignInPrompt(
+      <AdminLayout chrome="minimal" standalone={layoutStandalone}>
+        <BoardShell>
           <WorkboardAchievements
             achievements={achievements}
             onBack={() => setBoardMode('board')}
           />
-        </div>
+        </BoardShell>
       </AdminLayout>
     );
   }
 
   if (isProjectsMode) {
-    return (
-      <AdminLayout chrome="minimal">
-        <div className="wb-board">
+    return withSignInPrompt(
+      <AdminLayout chrome="minimal" standalone={layoutStandalone}>
+        <BoardShell>
           <WorkboardProjectsPanel
             projects={projects}
             objectives={objectives}
@@ -1396,31 +1781,31 @@ const AdminWorkboard = () => {
               openView(task, notePaperColorFor(0));
             }}
             onCreateProject={async (title) => {
-              await axios.post('/workboard/projects', { title });
+              await axios.post('/taskboard/projects', { title });
               await loadProjects();
             }}
             onCompleteProject={async (project) => {
-              await axios.put(`/workboard/projects/${project._id}`, { status: 'completed' });
+              await axios.put(`/taskboard/projects/${project._id}`, { status: 'completed' });
               await loadProjects();
             }}
             onCreateObjective={async (payload) => {
-              await axios.post('/workboard/objectives', payload);
+              await axios.post('/taskboard/objectives', payload);
               await loadObjectives();
             }}
             onUpdateObjective={async (id, patch) => {
-              await axios.put(`/workboard/objectives/${id}`, patch);
+              await axios.put(`/taskboard/objectives/${id}`, patch);
               await loadObjectives();
             }}
           />
-        </div>
+        </BoardShell>
       </AdminLayout>
     );
   }
 
   if (isAnalyticsMode) {
-    return (
-      <AdminLayout chrome="minimal">
-        <div className="wb-board">
+    return withSignInPrompt(
+      <AdminLayout chrome="minimal" standalone={layoutStandalone}>
+        <BoardShell>
           <WorkboardAnalytics
             todayKey={todayKey}
             weekStart={weekStart}
@@ -1436,15 +1821,33 @@ const AdminWorkboard = () => {
             onBack={() => setBoardMode('board')}
             onGoVictories={() => setBoardMode('victories')}
           />
-        </div>
+        </BoardShell>
+      </AdminLayout>
+    );
+  }
+
+  if (isLeaderboardMode) {
+    return withSignInPrompt(
+      <AdminLayout chrome="minimal" standalone={layoutStandalone}>
+        <BoardShell>
+          <WorkboardLeaderboard
+            user={user}
+            isGuest={isGuest}
+            onRequireSignIn={requireSignIn}
+            onAvatarUpdated={(nextUser) => {
+              if (nextUser) refreshProfile();
+            }}
+            onBack={() => setBoardMode('board')}
+          />
+        </BoardShell>
       </AdminLayout>
     );
   }
 
   if (isVictoriesMode) {
-    return (
-      <AdminLayout chrome="minimal">
-        <div className="wb-board">
+    return withSignInPrompt(
+      <AdminLayout chrome="minimal" standalone={layoutStandalone}>
+        <BoardShell>
           <WorkboardVictoryJournal
             todayKey={todayKey}
             statsTasks={statsTasks}
@@ -1459,7 +1862,7 @@ const AdminWorkboard = () => {
             onRetry={loadVictories}
             onBack={() => setBoardMode('board')}
           />
-        </div>
+        </BoardShell>
       </AdminLayout>
     );
   }
@@ -1471,14 +1874,91 @@ const AdminWorkboard = () => {
     : null;
   const formTimeHint = formatTimeRange12h(form.startTime, form.endTime);
 
-  return (
-    <AdminLayout chrome="minimal">
-      <div className="wb-board">
+  return withSignInPrompt(
+    <AdminLayout chrome="minimal" standalone={layoutStandalone}>
+      <BoardShell>
         {error ? <div className="wb-error">{error}</div> : null}
 
         <div className="wb-topbar">
-          <div className="wb-toolbar">
-            <div className="wb-mode-toggle" role="group" aria-label="Board mode">
+          {isSharedView ? (
+            <div className="wb-shared-header">
+              <div className="wb-shared-header-main">
+                <BoardWebsiteLink className="wb-website-link--toolbar" />
+                {myPermissions.length > 0 ? (
+                  <span className="wb-shared-badge is-collaborator">Can edit</span>
+                ) : (
+                  <span className="wb-shared-badge">View only</span>
+                )}
+              </div>
+              <div className="wb-shared-header-copy">
+                <h1 className="wb-shared-title">
+                  {shareMeta?.owner?.username || 'Taskboard'} calendar
+                </h1>
+                <p className="wb-shared-range">{sharedRangeLabel}</p>
+                <p className="wb-shared-hint">
+                  {shareMeta?.period === 'day'
+                    ? 'Daily calendar'
+                    : shareMeta?.period === 'week'
+                      ? 'Weekly calendar'
+                      : 'Monthly calendar'}
+                  {' · '}
+                  {myPermissions.length > 0 ? 'shared edit access' : 'read-only'}
+                </p>
+              </div>
+              {myPermissions.length === 0 ? (
+                <div className="wb-shared-access-actions">
+                  {accessRequest?.status === 'pending' ? (
+                    <p className="wb-shared-access-status">
+                      Edit request sent — waiting for {shareMeta?.owner?.username || 'the owner'} to
+                      approve. Refresh this page after they grant access.
+                    </p>
+                  ) : accessRequest?.status === 'denied' ? (
+                    <>
+                      <p className="wb-shared-access-status is-denied">
+                        Edit access was denied
+                        {accessRequest.ownerNote ? `: ${accessRequest.ownerNote}` : '.'}
+                      </p>
+                      <button
+                        type="button"
+                        className="wb-shared-access-btn"
+                        onClick={requestEditAccess}
+                        disabled={accessRequestSubmitting}
+                      >
+                        {accessRequestSubmitting ? 'Sending…' : 'Request again'}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <label className="wb-modal-label" htmlFor="wb-access-request-message">
+                        Message to owner (optional)
+                      </label>
+                      <textarea
+                        id="wb-access-request-message"
+                        className="wb-access-note-input"
+                        value={accessRequestMessage}
+                        onChange={(event) => setAccessRequestMessage(event.target.value)}
+                        rows={2}
+                        maxLength={500}
+                        placeholder="Tell them why you need access"
+                      />
+                      <button
+                        type="button"
+                        className="wb-shared-access-btn"
+                        onClick={requestEditAccess}
+                        disabled={accessRequestSubmitting}
+                      >
+                        {accessRequestSubmitting ? 'Sending…' : 'Request edit access'}
+                      </button>
+                    </>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <>
+              <div className="wb-toolbar">
+                <BoardWebsiteLink className="wb-website-link--toolbar" />
+                <div className="wb-mode-toggle" role="group" aria-label="Board mode">
               <button
                 type="button"
                 className="wb-mode-btn"
@@ -1492,15 +1972,15 @@ const AdminWorkboard = () => {
                 className="wb-mode-btn is-active"
                 aria-pressed="true"
               >
-                Workboard
+                Taskboard
               </button>
               <button
                 type="button"
                 className="wb-mode-btn"
                 aria-pressed="false"
-                onClick={() => setBoardMode('artboard')}
+                onClick={() => navigate('/noteboard')}
               >
-                Artboard
+                Noteboard
               </button>
               <button
                 type="button"
@@ -1531,6 +2011,15 @@ const AdminWorkboard = () => {
                 type="button"
                 className="wb-mode-btn"
                 aria-pressed="false"
+                onClick={() => setBoardMode('leaderboard')}
+                title="Leaderboard"
+              >
+                Leaderboard
+              </button>
+              <button
+                type="button"
+                className="wb-mode-btn"
+                aria-pressed="false"
                 onClick={() => setBoardMode('victories')}
                 title="Victory Journal"
               >
@@ -1555,7 +2044,7 @@ const AdminWorkboard = () => {
                 requestAnimationFrame(() => searchInputRef.current?.focus());
               }}
               title="Search (/)"
-              aria-label="Search workboard"
+              aria-label="Search taskboard"
             >
               Search
             </button>
@@ -1622,10 +2111,13 @@ const AdminWorkboard = () => {
           {viewMode === 'week' ? (
             <p className="wb-week-range">{formatWeekRange(weekStart)}</p>
           ) : (
-            <p className="wb-week-range">{formatMonthLabel(selectedMonthKey)} · Mon–Fri</p>
+            <p className="wb-week-range">{formatMonthLabel(selectedMonthKey)} · Sun–Sat</p>
+          )}
+            </>
           )}
         </div>
 
+        {!isSharedView ? (
         <div
           className={`wb-game-strip${viewMode === 'week' ? ' has-week' : ''}`}
           aria-label="Productivity summary"
@@ -1663,6 +2155,28 @@ const AdminWorkboard = () => {
               {currentStreak === 1 ? '' : 's'}
             </p>
             <p className="wb-streak-best">Best {longestStreak}</p>
+            {streakMeta.canRestore && canEdit ? (
+              <button
+                type="button"
+                className="wb-streak-restore"
+                onClick={handleRestoreStreak}
+                disabled={streakRestoring}
+              >
+                {streakRestoring
+                  ? 'Restoring…'
+                  : `Restore ${streakMeta.streakBeforeBreak}-day streak · ${streakMeta.restoreXpCost} XP`}
+              </button>
+            ) : null}
+            {streakMeta.streakBeforeBreak > 1 && !streakMeta.canRestore && canEdit ? (
+              <p className="wb-streak-restore-hint">
+                {streakMeta.restoresRemainingThisMonth <= 0
+                  ? 'No streak restores left this month.'
+                  : totalXp < streakMeta.restoreXpCost
+                    ? `Need ${streakMeta.restoreXpCost} XP to restore your ${streakMeta.streakBeforeBreak}-day streak.`
+                    : null}
+              </p>
+            ) : null}
+            {streakError ? <p className="wb-streak-error">{streakError}</p> : null}
           </div>
 
           {viewMode === 'week' ? (
@@ -1688,8 +2202,9 @@ const AdminWorkboard = () => {
             </div>
           ) : null}
         </div>
+        ) : null}
 
-        {viewMode === 'week' && objectives.some((row) => row.weekStart === weekStart) ? (
+        {!isSharedView && viewMode === 'week' && objectives.some((row) => row.weekStart === weekStart) ? (
           <div className="wb-week-objectives" aria-label="Weekly objectives">
             {objectives
               .filter((row) => row.weekStart === weekStart)
@@ -1714,6 +2229,38 @@ const AdminWorkboard = () => {
           </div>
         ) : null}
 
+        {!isSharedView || canShowAddUi ? (
+        <div className="wb-mission-quick-row">
+        {canShowAddUi ? (
+          <form className="wb-quick-capture" onSubmit={submitQuickCapture}>
+            <label className="wb-game-kicker" htmlFor="wb-quick-capture">
+              Quick Capture
+            </label>
+            <div className="wb-quick-capture-row">
+              <input
+                id="wb-quick-capture"
+                ref={quickCaptureRef}
+                value={quickCapture}
+                onChange={(event) => setQuickCapture(event.target.value)}
+                onFocus={() => {
+                  if (isGuest) {
+                    requireSignIn();
+                    return;
+                  }
+                  setQuickCaptureOpen(true);
+                }}
+                placeholder="Add a task…"
+                maxLength={160}
+              />
+              <button type="submit" disabled={quickSaving || !quickCapture.trim()}>
+                {quickSaving ? '…' : 'Add'}
+              </button>
+            </div>
+            <p className="wb-quick-hint">Ctrl/Cmd + K · / search · N new · F focus · T today · Esc close</p>
+          </form>
+        ) : null}
+
+        {!isSharedView ? (
         <section className="wb-mission-card" aria-label="Today's mission">
           <div className="wb-mission-head">
             <p className="wb-game-kicker">Today&apos;s Mission</p>
@@ -1764,35 +2311,15 @@ const AdminWorkboard = () => {
             </>
           )}
         </section>
-
-        {canEdit ? (
-          <form className="wb-quick-capture" onSubmit={submitQuickCapture}>
-            <label className="wb-game-kicker" htmlFor="wb-quick-capture">
-              Quick Capture
-            </label>
-            <div className="wb-quick-capture-row">
-              <input
-                id="wb-quick-capture"
-                ref={quickCaptureRef}
-                value={quickCapture}
-                onChange={(event) => setQuickCapture(event.target.value)}
-                onFocus={() => setQuickCaptureOpen(true)}
-                placeholder='Call Tosin about Oxygen FM proposal'
-                maxLength={160}
-              />
-              <button type="submit" disabled={quickSaving || !quickCapture.trim()}>
-                {quickSaving ? '…' : 'Add'}
-              </button>
-            </div>
-            <p className="wb-quick-hint">Ctrl/Cmd + K · / search · N new · F focus · T today · Esc close</p>
-          </form>
+        ) : null}
+        </div>
         ) : null}
 
-        {viewMode === 'week' ? (
+        {viewMode === 'week' || viewMode === 'day' ? (
           <div className="wb-calendar" ref={calendarRef}>
             {days.map((day) => {
               const dayTasks = tasksByDate[day.dateKey] || [];
-              const emptyCount = canEdit
+              const emptyCount = canShowAddUi
                 ? Math.max(1, EMPTY_SLOT_COUNT - dayTasks.length)
                 : Math.max(0, EMPTY_SLOT_COUNT - dayTasks.length);
               const isToday = day.dateKey === todayKey;
@@ -1800,7 +2327,9 @@ const AdminWorkboard = () => {
               return (
                 <div
                   key={day.dateKey}
-                  className={`wb-day-row${isToday ? ' is-today' : ''}`}
+                  className={`wb-day-row${isToday ? ' is-today' : ''}${
+                    day.inSelectedMonth === false ? ' is-outside-month' : ''
+                  }`}
                 >
                   <div className="wb-day-label">
                     <p className="wb-day-name">{day.label}</p>
@@ -1855,19 +2384,22 @@ const AdminWorkboard = () => {
                             </p>
                           ) : null}
 
-                          {canEdit ? (
+                          {canChangeStatus || canDeleteTasks ? (
                             <div
                               className="wb-note-actions"
                               onClick={(event) => event.stopPropagation()}
                               onKeyDown={(event) => event.stopPropagation()}
                             >
-                              <button
-                                type="button"
-                                className="wb-focus-chip"
-                                onClick={() => openFocusMode(task)}
-                              >
-                                Focus
-                              </button>
+                              {canEdit ? (
+                                <button
+                                  type="button"
+                                  className="wb-focus-chip"
+                                  onClick={() => openFocusMode(task)}
+                                >
+                                  Focus
+                                </button>
+                              ) : null}
+                              {canChangeStatus ? (
                               <select
                                 value={task.status || 'started'}
                                 onChange={(event) => changeStatus(task._id, event.target.value)}
@@ -1880,6 +2412,8 @@ const AdminWorkboard = () => {
                                   </option>
                                 ))}
                               </select>
+                              ) : null}
+                              {canDeleteTasks ? (
                               <button
                                 type="button"
                                 aria-label="Delete task"
@@ -1887,6 +2421,7 @@ const AdminWorkboard = () => {
                               >
                                 ×
                               </button>
+                              ) : null}
                             </div>
                           ) : null}
                         </div>
@@ -1897,14 +2432,14 @@ const AdminWorkboard = () => {
                       <button
                         key={`empty-${day.dateKey}-${index}`}
                         type="button"
-                        className={`wb-slot-empty${canEdit ? ' is-addable' : ''}`}
-                        aria-label={canEdit ? `Add task on ${day.label}` : undefined}
-                        disabled={!canEdit}
+                        className={`wb-slot-empty${canShowAddUi ? ' is-addable' : ''}`}
+                        aria-label={canShowAddUi ? `Add task on ${day.label}` : undefined}
+                        disabled={!canShowAddUi}
                         onClick={() => {
-                          if (canEdit) openCreate(day.dateKey);
+                          openCreate(day.dateKey);
                         }}
                       >
-                        {canEdit ? <span className="wb-slot-plus" aria-hidden="true">+</span> : null}
+                        {canShowAddUi ? <span className="wb-slot-plus" aria-hidden="true">+</span> : null}
                       </button>
                     ))}
                   </div>
@@ -1943,12 +2478,12 @@ const AdminWorkboard = () => {
                       <div
                         key={cell.dateKey}
                         className={`wb-month-cell${isToday ? ' is-today' : ''}${
-                          canEdit ? ' is-editable' : ''
-                        }`}
+                          cell.inMonth === false ? ' is-outside-month' : ''
+                        }${canShowAddUi ? ' is-editable' : ''}`}
                       >
                         <div className="wb-month-cell-top">
                           <span className="wb-month-day-num">{cell.day}</span>
-                          {canEdit ? (
+                          {canShowAddUi ? (
                             <button
                               type="button"
                               className="wb-month-add"
@@ -1961,7 +2496,7 @@ const AdminWorkboard = () => {
                         </div>
 
                         <div className="wb-month-chips">
-                          {dayTasks.length === 0 && canEdit ? (
+                          {dayTasks.length === 0 && canShowAddUi ? (
                             <button
                               type="button"
                               className="wb-month-empty-hit"
@@ -2002,14 +2537,15 @@ const AdminWorkboard = () => {
           </div>
         )}
 
+        {!isSharedView ? (
         <div className="wb-report-bar">
           <div className="wb-report-bar-main">
-            <span className="wb-report-label">Report</span>
-            <div className="wb-report-periods" role="group" aria-label="Report period">
+            <span className="wb-report-label">Share &amp; report</span>
+            <div className="wb-report-periods" role="group" aria-label="Share period">
               {[
-                { value: 'day', label: 'Daily' },
-                { value: 'week', label: 'Weekly' },
-                { value: 'month', label: 'Monthly' }
+                { value: 'day', label: 'Day' },
+                { value: 'week', label: 'Week' },
+                { value: 'month', label: 'Month' }
               ].map((option) => (
                 <button
                   key={option.value}
@@ -2020,6 +2556,8 @@ const AdminWorkboard = () => {
                   onClick={() => {
                     setReportPeriod(option.value);
                     setReportError('');
+                    setShareError('');
+                    setShareCopyNote('');
                   }}
                 >
                   {option.label}
@@ -2029,6 +2567,37 @@ const AdminWorkboard = () => {
             <p className="wb-report-range">{reportRangeLabel}</p>
             <button
               type="button"
+              className="wb-report-share"
+              onClick={() => {
+                setAccessRequestsOpen((open) => {
+                  const next = !open;
+                  if (next) loadAccessPanel();
+                  return next;
+                });
+              }}
+              disabled={!isBoardOwner}
+            >
+              Manage access
+              {accessRequests.length || collaborators.length
+                ? ` (${[
+                    accessRequests.length ? `${accessRequests.length} pending` : '',
+                    collaborators.length ? `${collaborators.length} shared` : ''
+                  ]
+                    .filter(Boolean)
+                    .join(', ')})`
+                : ''}
+            </button>
+            <button
+              type="button"
+              className="wb-report-share"
+              onClick={createCalendarShareLink}
+              disabled={shareCreating || !ownerId || !canEdit}
+              title="Create a read-only calendar link"
+            >
+              {shareCreating ? 'Creating…' : 'Share view'}
+            </button>
+            <button
+              type="button"
               className="wb-report-download"
               onClick={downloadReport}
               disabled={reportDownloading || !ownerId}
@@ -2036,8 +2605,139 @@ const AdminWorkboard = () => {
               {reportDownloading ? 'Preparing…' : 'Download report (.docx)'}
             </button>
           </div>
+          {shareCopyNote ? <p className="wb-report-success">{shareCopyNote}</p> : null}
+          {shareError ? <p className="wb-report-error">{shareError}</p> : null}
           {reportError ? <p className="wb-report-error">{reportError}</p> : null}
+          {accessRequestsOpen ? (
+            <div className="wb-access-requests-panel">
+              <section className="wb-access-panel-section">
+                <h3 className="wb-access-section-title">Pending requests</h3>
+                {accessRequestsLoading ? (
+                  <p className="wb-shared-access-status">Loading requests…</p>
+                ) : accessRequests.length === 0 ? (
+                  <p className="wb-shared-access-status">No pending access requests.</p>
+                ) : (
+                  <ul className="wb-access-requests-list">
+                    {accessRequests.map((request) => (
+                      <li key={request.id} className="wb-access-request-item">
+                        <div>
+                          <p className="wb-access-request-name">
+                            {request.requester?.username || 'User'}
+                          </p>
+                          <p className="wb-access-email">{request.requester?.email}</p>
+                          {request.message ? (
+                            <p className="wb-access-request-message">“{request.message}”</p>
+                          ) : null}
+                        </div>
+                        <button
+                          type="button"
+                          className="wb-shared-access-btn"
+                          onClick={() => setGrantTarget(request)}
+                        >
+                          Review
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+
+              <section className="wb-access-collaborators-section">
+                <h3 className="wb-access-section-title">People with access</h3>
+                {collaboratorsLoading ? (
+                  <p className="wb-shared-access-status">Loading shared access…</p>
+                ) : collaborators.length === 0 ? (
+                  <p className="wb-shared-access-status">
+                    No one has edit access yet. Approved requests will appear here.
+                  </p>
+                ) : (
+                  <ul className="wb-access-requests-list">
+                    {collaborators.map((grant) => (
+                      <li key={grant.id} className="wb-access-request-item">
+                        <div>
+                          <p className="wb-access-request-name">
+                            {grant.collaborator?.username || 'User'}
+                          </p>
+                          <p className="wb-access-email">{grant.collaborator?.email}</p>
+                          <p className="wb-access-permission-tags">
+                            {formatCollaboratorPermissions(grant.permissions)}
+                          </p>
+                          {grant.grantedAt ? (
+                            <p className="wb-access-granted-at">
+                              Access granted {formatAccessGrantedAt(grant.grantedAt)}
+                            </p>
+                          ) : null}
+                        </div>
+                        <button
+                          type="button"
+                          className="wb-access-revoke-btn"
+                          onClick={() => setRevokeTarget(grant)}
+                        >
+                          Revoke
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </div>
+          ) : null}
         </div>
+        ) : null}
+
+        <WorkboardAccessGrantModal
+          open={Boolean(grantTarget)}
+          request={grantTarget}
+          resolving={accessResolveSaving}
+          onClose={() => setGrantTarget(null)}
+          onApprove={(permissions, ownerNote) =>
+            resolveAccessRequest('approve', permissions, ownerNote)
+          }
+          onDeny={(ownerNote) => resolveAccessRequest('deny', [], ownerNote)}
+        />
+
+        {revokeTarget ? (
+          <div className="wb-confirm-backdrop" onClick={() => !revokeSaving && setRevokeTarget(null)}>
+            <div
+              className="wb-confirm"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="taskboard-revoke-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <p className="wb-note-meta">Shared access</p>
+              <h2 id="taskboard-revoke-title">Revoke taskboard access?</h2>
+              <p className="wb-confirm-copy">
+                <strong>{revokeTarget.collaborator?.username || 'This user'}</strong>
+                {revokeTarget.collaborator?.email ? (
+                  <>
+                    {' '}
+                    <span className="wb-access-email">({revokeTarget.collaborator.email})</span>
+                  </>
+                ) : null}{' '}
+                will lose edit access to your taskboard. They can request access again later if
+                needed.
+              </p>
+              <div className="wb-modal-actions">
+                <button
+                  type="button"
+                  onClick={() => setRevokeTarget(null)}
+                  disabled={revokeSaving}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="wb-modal-danger is-solid"
+                  onClick={confirmRevokeAccess}
+                  disabled={revokeSaving}
+                >
+                  {revokeSaving ? 'Revoking…' : 'Revoke access'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {xpToast ? (
           <div className="wb-xp-toast" key={xpToast.id} role="status" aria-live="polite">
@@ -2045,6 +2745,11 @@ const AdminWorkboard = () => {
               <>
                 <p className="wb-xp-toast-title">Level Up</p>
                 <p className="wb-xp-toast-xp">LEVEL {xpToast.newLevel}</p>
+              </>
+            ) : xpToast.streakRestored ? (
+              <>
+                <p className="wb-xp-toast-title">🔥 Streak restored</p>
+                <p className="wb-xp-toast-xp">{xpToast.restoredStreak} days</p>
               </>
             ) : xpToast.achievement && !(xpToast.awarded > 0) ? (
               <>
@@ -2086,7 +2791,7 @@ const AdminWorkboard = () => {
               className="wb-search-panel"
               role="dialog"
               aria-modal="true"
-              aria-label="Search workboard"
+              aria-label="Search taskboard"
               onClick={(event) => event.stopPropagation()}
             >
               <label className="wb-modal-label" htmlFor="wb-unified-search">
@@ -2202,13 +2907,13 @@ const AdminWorkboard = () => {
               className="wb-confirm"
               role="dialog"
               aria-modal="true"
-              aria-labelledby="workboard-delete-title"
+              aria-labelledby="taskboard-delete-title"
               onClick={(event) => event.stopPropagation()}
             >
               <p className="wb-note-meta">Delete task</p>
-              <h2 id="workboard-delete-title">Remove this sticky note?</h2>
+              <h2 id="taskboard-delete-title">Remove this sticky note?</h2>
               <p className="wb-confirm-copy">
-                “{deleteTarget.title || 'Untitled task'}” will be removed from the workboard.
+                “{deleteTarget.title || 'Untitled task'}” will be removed from the taskboard.
                 This cannot be undone.
               </p>
               <div className="wb-modal-actions">
@@ -2235,14 +2940,14 @@ const AdminWorkboard = () => {
                 className={`wb-sticky-modal wb-note--${viewColor} wb-note-status--${viewTask.status || 'started'}`}
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby="workboard-view-title"
+                aria-labelledby="taskboard-view-title"
                 onClick={(event) => event.stopPropagation()}
               >
                 <p className="wb-sticky-meta">
                   {dayLabelForDate(viewTask.date)}
                   {viewTimeLabel ? ` · ${viewTimeLabel}` : ''}
                 </p>
-                <h2 id="workboard-view-title" className="wb-sticky-title">
+                <h2 id="taskboard-view-title" className="wb-sticky-title">
                   {viewTask.title}
                 </h2>
 
@@ -2320,11 +3025,14 @@ const AdminWorkboard = () => {
                   <button type="button" onClick={closeModal}>
                     Close
                   </button>
-                  {canEdit ? (
+                  {canEditTasks || canDeleteTasks || (!isSharedView && canEdit) ? (
                     <>
+                      {!isSharedView && canEdit ? (
                       <button type="button" className="wb-focus-chip" onClick={() => openFocusMode(viewTask)} title="Focus mode (F)">
                         Focus
                       </button>
+                      ) : null}
+                      {canDeleteTasks ? (
                       <button
                         type="button"
                         className="wb-modal-danger"
@@ -2332,25 +3040,28 @@ const AdminWorkboard = () => {
                       >
                         Delete
                       </button>
+                      ) : null}
+                      {canEditTasks ? (
                       <button type="button" className="wb-modal-primary" onClick={switchToEdit}>
                         Edit
                       </button>
+                      ) : null}
                     </>
                   ) : null}
                 </div>
               </div>
             ) : null}
 
-            {isFormMode && canEdit ? (
+            {isFormMode && (canShowAddUi || canEditTasks) ? (
               <div
                 className="wb-modal"
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby="workboard-task-title"
+                aria-labelledby="taskboard-task-title"
                 onClick={(event) => event.stopPropagation()}
               >
                 <p className="wb-note-meta">{modalMode === 'edit' ? 'Edit task' : 'New task'}</p>
-                <h2 id="workboard-task-title">
+                <h2 id="taskboard-task-title">
                   {modalMode === 'edit' ? 'Update sticky note' : 'Add a sticky note'}
                 </h2>
 
@@ -2592,7 +3303,7 @@ const AdminWorkboard = () => {
             ) : null}
           </div>
         ) : null}
-      </div>
+      </BoardShell>
     </AdminLayout>
   );
 };

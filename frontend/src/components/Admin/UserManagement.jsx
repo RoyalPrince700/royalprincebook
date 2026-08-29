@@ -5,6 +5,18 @@ import AdminLayout from './AdminLayout';
 import PageLoader from '../PageLoader';
 import { formatCurrency, formatDate } from './adminUtils';
 
+const roleLabels = {
+  user: 'User',
+  admin: 'Admin',
+  superior: 'Superior'
+};
+
+const roleBadgeClass = (role) => {
+  if (role === 'admin') return 'border-blue-200 bg-blue-50 text-blue-700';
+  if (role === 'superior') return 'border-sky-200 bg-sky-50 text-sky-700';
+  return 'border-slate-200 bg-white text-slate-600';
+};
+
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -137,14 +149,8 @@ const UserManagement = () => {
                         <p className="text-xs text-slate-500">{user.email}</p>
                       </td>
                       <td className="border border-l-0 border-r-0 border-slate-200 px-4 py-4">
-                        <span className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
-                          user.role === 'admin'
-                            ? 'border-blue-200 bg-blue-50 text-blue-700'
-                            : user.role === 'superior'
-                              ? 'border-sky-200 bg-sky-50 text-sky-700'
-                              : 'border-slate-200 bg-white text-slate-600'
-                        }`}>
-                          {user.role}
+                        <span className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${roleBadgeClass(user.role)}`}>
+                          {roleLabels[user.role] || user.role}
                         </span>
                       </td>
                       <td className="border border-l-0 border-r-0 border-slate-200 px-4 py-4">

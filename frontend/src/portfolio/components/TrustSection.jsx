@@ -42,20 +42,30 @@ const TrustSection = () => {
     []
   );
 
+  const renderGroup = (groupId, ariaHidden = false) => (
+    <div className="pf-trust-marquee-group" aria-hidden={ariaHidden || undefined}>
+      {[0, 1].map((repeatIndex) =>
+        logoPartners.map((company) => (
+          <TrustMarqueeItem
+            key={`${groupId}-${repeatIndex}-${company.name}`}
+            company={company}
+            ariaHidden={ariaHidden}
+          />
+        ))
+      )}
+    </div>
+  );
+
   return (
     <SectionWrapper id="trust" className="pf-trust-section">
       <div className="pf-container">
-        <SectionHeader eyebrow="Trusted By" title="Organizations I've worked with." />
+        <SectionHeader eyebrow="Trusted By" title="Organizations I work with." />
       </div>
 
       <div className="pf-trust-marquee" aria-label="Partner organizations">
         <div className="pf-trust-marquee-track">
-          {logoPartners.map((company) => (
-            <TrustMarqueeItem key={company.name} company={company} />
-          ))}
-          {logoPartners.map((company) => (
-            <TrustMarqueeItem key={`${company.name}-loop`} company={company} ariaHidden />
-          ))}
+          {renderGroup('set-a')}
+          {renderGroup('set-b', true)}
         </div>
       </div>
     </SectionWrapper>

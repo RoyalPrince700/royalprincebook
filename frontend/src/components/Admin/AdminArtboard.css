@@ -1,4 +1,20 @@
-/* Artboard — immersive sticky canvas (extends Workboard color bank) */
+/* Noteboard — immersive sticky canvas (extends Taskboard color bank) */
+
+.ab-top-chrome {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  left: 0.75rem;
+  z-index: 45;
+}
+
+@media (min-width: 641px) {
+  .ab-top-chrome {
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+}
 
 .ab-shell {
   --wb-board: #f7f1e8;
@@ -703,7 +719,8 @@
   background: transparent;
   resize: none;
   outline: none;
-  color: var(--wb-ink);
+  color: #3d342c;
+  caret-color: #3d342c;
   font-family: inherit;
   font-size: 1.15rem;
   font-weight: 700;
@@ -723,8 +740,8 @@
 }
 
 .ab-note-text::placeholder {
-  color: var(--wb-ink-soft);
-  opacity: 0.55;
+  color: rgba(61, 52, 44, 0.55);
+  opacity: 1;
   font-weight: 650;
 }
 

@@ -8,9 +8,9 @@ const CaseStudiesSection = () => (
   <SectionWrapper id="case-studies" className="pf-case-studies-section">
     <div className="pf-container">
       <SectionHeader
-        eyebrow="Growth Case Studies"
-        title="Work that moved the needle."
-        description="What I did and what changed."
+        eyebrow="Project Deep Dives"
+        title="Projects I've shipped."
+        description="What each one is, how it works, and who it's for."
       />
       <div className="pf-case-studies-grid">
         {caseStudies.map((study, index) => (
@@ -36,11 +36,11 @@ const CaseStudiesSection = () => (
               </a>
             )}
             <p className="pf-case-challenge">
-              <strong>Challenge:</strong> {study.challenge}
+              <strong>{study.challengeLabel || 'Problem'}:</strong> {study.challenge}
             </p>
 
             <div className="pf-case-block">
-              <span className="pf-case-label">Strategy</span>
+              <span className="pf-case-label">{study.strategyLabel || 'Approach'}</span>
               <ul className="pf-case-list">
                 {study.strategy.map((item) => (
                   <li key={item}>{item}</li>
@@ -49,11 +49,11 @@ const CaseStudiesSection = () => (
             </div>
 
             <p className="pf-case-execution">
-              <strong>Execution:</strong> {study.execution}
+              <strong>{study.executionLabel || 'How it works'}:</strong> {study.execution}
             </p>
 
             <p className="pf-case-result">
-              <strong>Result:</strong> {study.result}
+              <strong>{study.resultLabel || 'Outcome'}:</strong> {study.result}
             </p>
 
             {study.before && study.after && (

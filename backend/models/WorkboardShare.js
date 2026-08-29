@@ -33,6 +33,10 @@ const workboardShareSchema = new mongoose.Schema({
     required: true,
     match: /^\d{4}-\d{2}-\d{2}$/
   },
+  anchorDate: {
+    type: String,
+    match: /^\d{4}-\d{2}-\d{2}$/
+  },
   expiresAt: {
     type: Date,
     default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)

@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
     const base = axios.defaults.baseURL || '';
 
     if (existingToken && user?.role === 'admin') {
-      fetch(`${base}/workboard/presence/offline`, {
+      fetch(`${base}/taskboard/presence/offline`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${existingToken}`,
@@ -118,7 +118,13 @@ export const AuthProvider = ({ children }) => {
       (error) => {
         const requestUrl = String(error.config?.url || '');
         const onArtboardShare =
+          requestUrl.includes('/taskboard/artboards/share/') ||
           requestUrl.includes('/workboard/artboards/share/') ||
+          window.location.pathname.includes('/noteboard/share/') ||
+          window.location.pathname.includes('/taskboard/share/') ||
+          window.location.pathname.includes('/workboard/share/') ||
+          window.location.pathname.includes('/taskboard/artboard/share/') ||
+          window.location.pathname.includes('/workboard/artboard/share/') ||
           window.location.pathname.includes('/admin/workboard/artboard/share/');
 
         // Collaborative share links are public; don't force logout on their errors.
@@ -126,9 +132,10 @@ export const AuthProvider = ({ children }) => {
           return Promise.reject(error);
         }
 
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          // Check if we are already on the login page to avoid loops
-          if (!window.location.pathname.includes('/login')) {
+        // Only sign out on auth failures (expired/invalid token), not permission denials (403).
+        if (error.response?.status === 401) {
+          const hadToken = Boolean(localStorage.getItem('token'));
+          if (hadToken && !window.location.pathname.includes('/login')) {
             logout();
           }
         }

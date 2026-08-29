@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePortfolioSEO } from '../hooks/usePortfolioSEO';
+import { usePortfolioNav } from '../context/PortfolioNavContext';
 import { useScrollProgress, useShowBackToTop } from '../hooks/useScrollProgress';
 import ScrollProgress from '../components/ScrollProgress';
 import BackToTop from '../components/BackToTop';
@@ -27,12 +28,17 @@ import '../styles/portfolio.css';
 
 const PortfolioPage = () => {
   const { theme } = useTheme();
+  const { sectionNavActive } = usePortfolioNav();
   const progress = useScrollProgress();
   const showBackToTop = useShowBackToTop();
   usePortfolioSEO();
 
   return (
-    <div className={`portfolio-page ${theme === 'dark' ? 'portfolio-page-dark' : ''}`}>
+    <div
+      className={`portfolio-page ${theme === 'dark' ? 'portfolio-page-dark' : ''} ${
+        sectionNavActive ? 'pf-section-nav-active' : ''
+      }`}
+    >
       <ScrollProgress progress={progress} />
       <PortfolioSidebar progress={progress} />
       <Suspense fallback={<PageLoader />}>

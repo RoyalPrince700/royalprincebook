@@ -1,181 +1,48 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { contactLinks, footerNavLinks } from '../portfolio/data/portfolioData';
+import '../portfolio/styles/portfolio.css';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer style={{
-      backgroundColor: 'var(--card-bg)',
-      borderTop: '1px solid var(--border-color)',
-      padding: '2rem 0 1rem 0',
-      marginTop: 'auto',
-      color: 'var(--text-secondary)',
-      fontSize: '0.9rem'
-    }}>
-      <div className="container">
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '2rem',
-          marginBottom: '2rem'
-        }}>
-          {/* Brand Section */}
-          <div>
-            <Link
-              to="/dashboard"
-              style={{
-                textDecoration: 'none',
-                color: 'inherit'
-              }}
-            >
-              <h3 style={{
-                margin: '0 0 1rem 0',
-                color: 'var(--text-primary)',
-                fontSize: '1.2rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'color 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--text-primary)'}
+    <footer className="pf-footer">
+      <div className="pf-container pf-footer-inner">
+        <blockquote className="pf-footer-quote">
+          "Ideas are good. Getting them done is what counts."
+        </blockquote>
+
+        <div className="pf-footer-menus">
+          <nav className="pf-footer-nav" aria-label="Site navigation">
+            {footerNavLinks.map((link) =>
+              link.to ? (
+                <Link key={link.label} to={link.to}>
+                  {link.label}
+                </Link>
+              ) : (
+                <a key={link.label} href={link.href} target="_blank" rel="noreferrer">
+                  {link.label}
+                </a>
+              )
+            )}
+          </nav>
+
+          <div className="pf-footer-links" aria-label="Contact links">
+            {contactLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                target={link.href.startsWith('http') ? '_blank' : undefined}
+                rel={link.href.startsWith('http') ? 'noreferrer' : undefined}
               >
-                RoyalPrinceHub
-              </h3>
-            </Link>
-            <p style={{
-              margin: '0 0 1rem 0',
-              lineHeight: '1.6',
-              color: 'var(--text-secondary)'
-            }}>
-              Books created to guide, inspire, and challenge your mindset.
-For readers committed to growth, clarity, and meaningful progress.
-            </p>
-          </div>
-
-          {/* Features Section */}
-          <div>
-            <h4 style={{
-              margin: '0 0 1rem 0',
-              color: 'var(--text-primary)',
-              fontSize: '1rem',
-              fontWeight: '500'
-            }}>
-              Features
-            </h4>
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem'
-            }}>
-              <li>Chapter-Based Organization</li>
-              <li>Real-Time Preview</li>
-              <li>Multiple Export Formats</li>
-            </ul>
-          </div>
-
-         
-
-          {/* Contact Section */}
-          <div>
-            <h4 style={{
-              margin: '0 0 1rem 0',
-              color: 'var(--text-primary)',
-              fontSize: '1rem',
-              fontWeight: '500'
-            }}>
-              Connect
-            </h4>
-            <ul style={{
-              listStyle: 'none',
-              padding: 0,
-              margin: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem'
-            }}>
-              <li>
-                <a
-                  href="mailto:contact@royalprincehub.com"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                >
-                  contact@royalprincehub.com
-                </a>
-              </li>
-             
-              <li>
-                <a
-                  href="https://twitter.com/royalprincecube"
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    color: 'var(--text-secondary)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-                  onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-                >
-                  Twitter
-                </a>
-              </li>
-            </ul>
+                {link.label}
+              </a>
+            ))}
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div style={{
-          borderTop: '1px solid var(--border-color)',
-          paddingTop: '1rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem'
-        }}>
-          <div style={{ color: 'var(--text-secondary)' }}>
-            © {currentYear} RoyalPrinceHub. All rights reserved.
-          </div>
-          <div style={{
-            display: 'flex',
-            gap: '1rem',
-            fontSize: '0.85rem'
-          }}>
-            <Link
-              to="/privacy-policy"
-              style={{
-                color: 'var(--text-secondary)',
-                textDecoration: 'none',
-                transition: 'color 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              to="/terms-of-service"
-              style={{
-                color: 'var(--text-secondary)',
-                textDecoration: 'none',
-                transition: 'color 0.2s'
-              }}
-              onMouseEnter={(e) => e.target.style.color = 'var(--primary-color)'}
-              onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
-            >
-              Terms of Service
-            </Link>
-          </div>
-        </div>
+        <p className="pf-footer-copy">© {currentYear} Royal Prince. All rights reserved.</p>
       </div>
     </footer>
   );

@@ -1,13 +1,8 @@
-const jwt = require('jsonwebtoken');
 const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const User = require('../models/User');
 const { sendWelcomeEmail } = require('../mailtrap/emails');
-
-const generateToken = (userId) =>
-  jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: '7d'
-  });
+const { generateToken } = require('../utils/jwt');
 
 const getBackendUrl = () =>
   process.env.BACKEND_URL ||

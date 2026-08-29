@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from './AdminLayout';
+import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
 
 const AdminGame = () => {
+  const { notify } = usePlatformDialog();
   const [activeTab, setActiveTab] = useState('progress');
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -132,7 +134,11 @@ const AdminGame = () => {
       utterance.volume = 0.9;
       window.speechSynthesis.speak(utterance);
     } else {
-      alert('Text-to-speech not supported in your browser. Practice reading aloud!');
+      notify({
+        title: 'Text-to-speech unavailable',
+        message: 'Text-to-speech is not supported in your browser. Practice reading aloud!',
+        variant: 'warning'
+      });
     }
   };
 

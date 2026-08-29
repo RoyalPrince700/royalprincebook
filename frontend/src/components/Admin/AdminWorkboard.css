@@ -1,4 +1,4 @@
-/* Workboard sticky-note color bank — distinct from main admin slate theme */
+/* Taskboard sticky-note color bank — distinct from main admin slate theme */
 .wb-board {
   --wb-board: #f7f1e8;
   --wb-board-line: rgba(120, 90, 60, 0.12);
@@ -17,6 +17,8 @@
   --wb-note-peach: #ffd0b8;
   --wb-note-sky: #c9e4ff;
   --wb-note-lilac: #e4d4ff;
+  --wb-note-ink: #3d342c;
+  --wb-note-ink-soft: #6b5e52;
 
   --wb-status-started: #b7d9f5;
   --wb-status-started-ink: #1f4f73;
@@ -44,6 +46,7 @@
   align-items: stretch;
   gap: 0.35rem;
   min-height: 2.5rem;
+  padding-right: 2.75rem;
 }
 
 .wb-mode-toggle {
@@ -88,6 +91,10 @@
   align-items: center;
   gap: 0.4rem 0.55rem;
   min-width: 0;
+}
+
+.wb-website-link--toolbar {
+  flex-shrink: 0;
 }
 
 .wb-month-select,
@@ -302,6 +309,262 @@
   color: #8a3a28;
 }
 
+.wb-report-share {
+  border: 1px solid var(--wb-board-line);
+  border-radius: 8px;
+  background: var(--wb-tab);
+  color: var(--wb-ink);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 650;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.wb-report-share:hover:not(:disabled) {
+  border-color: rgba(120, 90, 60, 0.28);
+  color: var(--wb-ink);
+}
+
+.wb-report-share:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.wb-report-success {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #2f6b4a;
+}
+
+.wb-shared-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.wb-shared-header-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.wb-shared-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(70, 120, 150, 0.28);
+  background: rgba(70, 120, 150, 0.12);
+  color: #2f5f78;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.65rem;
+}
+
+.wb-shared-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--wb-ink);
+}
+
+.wb-shared-range {
+  margin: 0.2rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--wb-ink);
+}
+
+.wb-shared-hint {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  color: var(--wb-ink-soft);
+}
+
+.wb-shared-badge.is-collaborator {
+  border-color: rgba(70, 120, 70, 0.28);
+  background: rgba(70, 120, 70, 0.12);
+  color: #2f6b4a;
+}
+
+.wb-shared-access-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  max-width: 28rem;
+}
+
+.wb-shared-access-btn {
+  align-self: flex-start;
+  border: none;
+  border-radius: 999px;
+  background: var(--wb-add);
+  color: #fffaf3;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  padding: 0.5rem 0.95rem;
+  cursor: pointer;
+}
+
+.wb-shared-access-btn:hover:not(:disabled) {
+  background: var(--wb-add-hover);
+}
+
+.wb-shared-access-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.wb-shared-access-status {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--wb-ink-soft);
+}
+
+.wb-shared-access-status.is-denied {
+  color: #8a3a28;
+}
+
+.wb-access-note-input {
+  width: 100%;
+  min-height: 4.5rem;
+  border: 1px solid var(--wb-board-line);
+  border-radius: 0.65rem;
+  background: rgba(255, 250, 243, 0.9);
+  color: var(--wb-ink);
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.65rem;
+  resize: vertical;
+}
+
+.wb-access-requests-panel {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--wb-board-line);
+}
+
+.wb-access-panel-section {
+  margin: 0;
+}
+
+.wb-access-section-title {
+  margin: 0 0 0.55rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--wb-ink-soft);
+}
+
+.wb-access-collaborators-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--wb-board-line);
+}
+
+.wb-access-permission-tags {
+  margin: 0.3rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--wb-ink-soft);
+}
+
+.wb-access-granted-at {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: var(--wb-ink-soft);
+}
+
+.wb-access-revoke-btn {
+  align-self: flex-start;
+  flex-shrink: 0;
+  border: 1px solid rgba(138, 58, 40, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 250, 243, 0.95);
+  color: #8a3a28;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 650;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+}
+
+.wb-access-revoke-btn:hover:not(:disabled) {
+  background: rgba(138, 58, 40, 0.08);
+}
+
+.wb-access-revoke-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.wb-access-requests-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.wb-access-request-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--wb-board-line);
+  border-radius: 0.75rem;
+  background: rgba(255, 250, 243, 0.7);
+}
+
+.wb-access-request-name {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--wb-ink);
+}
+
+.wb-access-email {
+  margin: 0.1rem 0 0;
+  font-size: 0.78rem;
+  color: var(--wb-ink-soft);
+}
+
+.wb-access-request-message {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--wb-ink-soft);
+  font-style: italic;
+}
+
+.wb-access-grant-modal {
+  max-width: 28rem;
+}
+
+.wb-access-permissions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0.85rem 0;
+}
+
+.wb-access-permission {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.84rem;
+  color: var(--wb-ink);
+}
+
 .wb-calendar {
   margin-top: 0.65rem;
   border: 1px solid var(--wb-board-line);
@@ -311,7 +574,7 @@
   overflow: hidden;
 }
 
-/* —— Month grid (Mon–Fri columns) —— */
+/* —— Month grid (Sun–Sat columns) —— */
 .wb-month-calendar {
   margin-top: 0.65rem;
   border: 1px solid var(--wb-board-line);
@@ -325,8 +588,8 @@
 .wb-month-head,
 .wb-month-row {
   display: grid;
-  grid-template-columns: repeat(5, minmax(7.5rem, 1fr));
-  min-width: 37.5rem;
+  grid-template-columns: repeat(7, minmax(6.5rem, 1fr));
+  min-width: 45.5rem;
 }
 
 .wb-month-head {
@@ -369,6 +632,24 @@
   flex-direction: column;
   gap: 0.3rem;
   background: transparent;
+}
+
+.wb-month-cell.is-outside-month {
+  background: rgba(120, 90, 60, 0.06);
+}
+
+.wb-month-cell.is-outside-month .wb-month-day-num {
+  color: var(--wb-ink-soft);
+  opacity: 0.72;
+}
+
+.wb-day-row.is-outside-month {
+  background: rgba(120, 90, 60, 0.04);
+}
+
+.wb-day-row.is-outside-month .wb-day-name,
+.wb-day-row.is-outside-month .wb-day-date {
+  opacity: 0.72;
 }
 
 .wb-month-cell.is-blank {
@@ -596,7 +877,7 @@
 
 .wb-slot-empty {
   appearance: none;
-  flex: 0 0 7.5rem;
+  flex: 0 0 calc(7.5rem + 4px);
   min-height: 5.5rem;
   border-radius: 0.35rem;
   border: 1.5px dashed var(--wb-empty-border);
@@ -637,12 +918,12 @@
 }
 
 .wb-note {
-  flex: 0 0 8.25rem;
+  flex: 0 0 calc(8.25rem + 4px);
   min-height: 5.5rem;
   padding: 0.55rem 0.7rem 0.55rem 0.85rem;
   border-radius: 0.2rem 0.2rem 0.35rem 0.35rem;
   box-shadow: var(--wb-shadow-note);
-  color: var(--wb-ink);
+  color: var(--wb-note-ink);
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
@@ -738,7 +1019,7 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: none;
-  color: var(--wb-ink-soft);
+  color: var(--wb-note-ink-soft);
   opacity: 0.95;
 }
 
@@ -812,7 +1093,7 @@
   background: rgba(255, 250, 243, 0.55);
   border-radius: 0.4rem;
   font-size: 0.62rem;
-  color: var(--wb-ink);
+  color: var(--wb-note-ink);
   padding: 0.2rem 0.3rem;
 }
 
@@ -844,7 +1125,7 @@
   appearance: none;
   border: none;
   background: rgba(61, 52, 44, 0.08);
-  color: var(--wb-ink-soft);
+  color: var(--wb-note-ink-soft);
   width: 1.35rem;
   height: 1.35rem;
   border-radius: 999px;
@@ -957,15 +1238,15 @@
 
 .wb-tag-plus {
   width: 2.55rem;
-  border: 1px solid rgba(120, 90, 60, 0.18);
-  background: #fff;
+  border: 1px solid var(--wb-board-line);
+  background: var(--wb-tab);
   color: var(--wb-ink);
   font-size: 1.25rem;
   line-height: 1;
 }
 
 .wb-tag-plus:hover {
-  background: rgba(120, 90, 60, 0.08);
+  background: var(--wb-empty-fill);
 }
 
 .wb-tag-confirm {
@@ -984,8 +1265,8 @@
 
 .wb-tag-cancel {
   width: 2.55rem;
-  border: 1px solid rgba(120, 90, 60, 0.18);
-  background: #fff;
+  border: 1px solid var(--wb-board-line);
+  background: var(--wb-tab);
   color: var(--wb-ink-soft);
   font-size: 1.15rem;
   line-height: 1;
@@ -997,7 +1278,7 @@
   align-self: flex-start;
   max-width: 100%;
   border-radius: 999px;
-  background: rgba(61, 52, 44, 0.1);
+  background: var(--wb-empty-fill);
   color: var(--wb-ink);
   padding: 0.18rem 0.55rem;
   font-size: 0.68rem;
@@ -1126,6 +1407,75 @@
   color: var(--wb-ink-soft);
 }
 
+.wb-signin-prompt-backdrop {
+  z-index: 120;
+}
+
+.wb-signin-prompt {
+  max-width: 24rem;
+}
+
+.wb-signin-prompt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1.15rem;
+}
+
+.wb-signin-prompt-google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 3rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1.15rem;
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.22);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.wb-signin-prompt-google:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(17, 24, 39, 0.28);
+}
+
+.wb-signin-prompt-google:focus-visible {
+  outline: 2px solid rgba(17, 24, 39, 0.35);
+  outline-offset: 2px;
+}
+
+.wb-signin-prompt-google-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.wb-signin-prompt-dismiss {
+  width: 100%;
+  min-height: 2.75rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  background: transparent;
+  color: var(--wb-ink-soft);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wb-signin-prompt-dismiss:hover {
+  color: var(--wb-ink);
+  background: rgba(120, 90, 60, 0.08);
+}
+
 .wb-sticky-modal {
   width: 100%;
   max-width: 28rem;
@@ -1141,7 +1491,7 @@
     0 1px 0 rgba(255, 255, 255, 0.35) inset,
     2px 8px 28px rgba(61, 52, 44, 0.22);
   border: 1px solid rgba(61, 52, 44, 0.06);
-  color: var(--wb-ink);
+  color: var(--wb-note-ink);
   transform: rotate(-0.6deg);
   background-image: linear-gradient(
     180deg,
@@ -1275,7 +1625,7 @@
 
   .wb-slot-empty,
   .wb-note {
-    flex-basis: 9rem;
+    flex-basis: calc(9rem + 4px);
     min-height: 6rem;
   }
 }
@@ -1403,6 +1753,43 @@
   color: var(--wb-ink-soft);
 }
 
+.wb-streak-restore {
+  appearance: none;
+  margin-top: 0.45rem;
+  width: 100%;
+  border: 1px solid var(--wb-add);
+  background: rgba(196, 92, 62, 0.1);
+  color: var(--wb-add);
+  border-radius: 0.55rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.wb-streak-restore:hover:not(:disabled) {
+  background: rgba(196, 92, 62, 0.18);
+}
+
+.wb-streak-restore:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.wb-streak-restore-hint,
+.wb-streak-error {
+  margin: 0.35rem 0 0;
+  font-size: 0.62rem;
+  line-height: 1.3;
+  color: var(--wb-ink-soft);
+}
+
+.wb-streak-error {
+  color: #8a3a28;
+}
+
 .wb-royal-delta.is-up {
   color: #1f6b3a;
 }
@@ -1455,7 +1842,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--wb-ink-soft);
+  color: var(--wb-note-ink-soft);
 }
 
 .wb-note-priority--high {
@@ -1552,6 +1939,20 @@
 
 .wb-today-btn:hover {
   opacity: 0.9;
+}
+
+.wb-mission-quick-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+  align-items: stretch;
+}
+
+.wb-mission-quick-row .wb-mission-card,
+.wb-mission-quick-row .wb-quick-capture {
+  margin: 0;
+  min-width: 0;
 }
 
 .wb-mission-card,
@@ -1652,15 +2053,28 @@
 .wb-inline-form button,
 .wb-objective-form > button {
   appearance: none;
-  border: 1px solid var(--wb-ink);
-  background: var(--wb-ink);
-  color: #fffaf3;
+  border: 1px solid var(--wb-tab-active);
+  background: var(--wb-tab-active);
+  color: var(--wb-tab-active-text);
   border-radius: 0.75rem;
   padding: 0.5rem 0.9rem;
   font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.wb-quick-capture-row button:hover:not(:disabled),
+.wb-inline-form button:hover:not(:disabled),
+.wb-objective-form > button:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.wb-quick-capture-row button:disabled,
+.wb-inline-form button:disabled,
+.wb-objective-form > button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .wb-quick-hint {
@@ -1762,6 +2176,7 @@
   flex-direction: column;
   gap: 0.75rem;
   padding-bottom: 2rem;
+  padding-right: 2.75rem;
 }
 
 .wb-dash-hero {
@@ -1895,6 +2310,7 @@
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1rem;
+  padding-right: 2.75rem;
 }
 
 .wb-achievements-title,
@@ -2088,12 +2504,16 @@
 
   .wb-note,
   .wb-slot-empty {
-    flex: 0 0 11.5rem;
+    flex: 0 0 calc(11.5rem + 4px);
     scroll-snap-align: start;
   }
 
   .wb-toolbar {
     gap: 0.35rem;
+  }
+
+  .wb-mission-quick-row {
+    grid-template-columns: 1fr;
   }
 
   .wb-quick-capture-row,
@@ -2273,6 +2693,7 @@
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.25rem;
+  padding-right: 2.75rem;
 }
 
 .wb-analytics-head-actions {
@@ -2373,7 +2794,7 @@
 
 .wb-analytics-day-bars {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.55rem;
   margin-top: 1rem;
   align-items: end;
@@ -2699,6 +3120,307 @@
 
 .wb-achievements-empty {
   grid-column: 1 / -1;
+}
+
+/* Leaderboard */
+.wb-lb-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-right: 2.75rem;
+}
+
+.wb-lb-title {
+  margin: 0.25rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.wb-lb-sub,
+.wb-lb-muted,
+.wb-lb-avatar-hint {
+  margin: 0.2rem 0 0;
+  color: var(--wb-ink-soft);
+  font-size: 0.85rem;
+}
+
+.wb-lb-avatar-panel {
+  border: 1px solid var(--wb-board-line);
+  border-radius: 1rem;
+  padding: 0.9rem;
+  margin-bottom: 0.85rem;
+  background: rgba(255, 250, 243, 0.55);
+}
+
+.wb-lb-avatar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.wb-lb-avatar-btn {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--wb-board-line);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.wb-lb-avatar-btn.is-active {
+  border-color: var(--wb-ink);
+  box-shadow: 0 0 0 2px rgba(61, 52, 44, 0.12);
+}
+
+.wb-lb-invites {
+  margin-bottom: 0.85rem;
+}
+
+.wb-lb-invite-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.45rem;
+}
+
+.wb-lb-invite-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--wb-board-line);
+  border-radius: 0.85rem;
+  padding: 0.75rem;
+  background: rgba(255, 250, 243, 0.75);
+}
+
+.wb-lb-invite-copy {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.wb-lb-invite-actions {
+  display: flex;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.wb-lb-layout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 18rem) 1fr;
+  gap: 0.85rem;
+}
+
+.wb-lb-sidebar,
+.wb-lb-main {
+  border: 1px solid var(--wb-board-line);
+  border-radius: 1rem;
+  padding: 0.9rem;
+  background: rgba(255, 250, 243, 0.45);
+}
+
+.wb-lb-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wb-ink-soft);
+  margin-bottom: 0.35rem;
+}
+
+.wb-lb-create-row {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.wb-lb-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--wb-board-line);
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.7rem;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--wb-ink);
+}
+
+.wb-lb-board-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.wb-lb-board-btn {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--wb-board-line);
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+}
+
+.wb-lb-board-btn.is-active {
+  border-color: var(--wb-ink);
+  background: rgba(255, 250, 243, 0.95);
+}
+
+.wb-lb-board-name {
+  display: block;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.wb-lb-board-meta {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--wb-ink-soft);
+}
+
+.wb-lb-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.wb-lb-detail-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.wb-lb-invite-form {
+  margin-bottom: 0.85rem;
+}
+
+.wb-lb-success {
+  margin: 0.45rem 0 0;
+  font-size: 0.8rem;
+  color: #2f6b3f;
+}
+
+.wb-lb-rankings {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.wb-lb-row {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid var(--wb-board-line);
+  border-radius: 0.85rem;
+  padding: 0.7rem 0.8rem;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.wb-lb-row.is-me {
+  border-color: var(--wb-ink);
+  background: rgba(255, 250, 243, 0.95);
+}
+
+.wb-lb-row.is-gold {
+  background: rgba(255, 236, 179, 0.45);
+}
+
+.wb-lb-row.is-silver {
+  background: rgba(230, 236, 245, 0.65);
+}
+
+.wb-lb-row.is-bronze {
+  background: rgba(245, 224, 198, 0.55);
+}
+
+.wb-lb-rank {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 800;
+}
+
+.wb-lb-avatar {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  background: rgba(255, 250, 243, 0.95);
+  border: 1px solid var(--wb-board-line);
+}
+
+.wb-lb-username {
+  margin: 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.wb-lb-meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: var(--wb-ink-soft);
+}
+
+.wb-lb-owner-badge,
+.wb-lb-you-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(61, 52, 44, 0.08);
+}
+
+.wb-lb-xp {
+  text-align: right;
+}
+
+.wb-lb-xp-value {
+  margin: 0;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.wb-lb-xp-label {
+  margin: 0.1rem 0 0;
+  font-size: 0.68rem;
+  color: var(--wb-ink-soft);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.wb-lb-invite-popup .wb-modal-actions {
+  justify-content: flex-end;
+}
+
+.wb-lb-invite-popup .wb-today-btn {
+  min-width: 6rem;
+}
+
+@media (max-width: 900px) {
+  .wb-lb-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .wb-lb-head {
+    flex-direction: column;
+    padding-right: 0;
+  }
+
+  .wb-lb-invite-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 900px) {

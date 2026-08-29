@@ -22,7 +22,7 @@ const authenticateToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Authentication error:', error);
-    return res.status(403).json({ message: 'Invalid or expired token' });
+    return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 
@@ -38,15 +38,40 @@ const authorizeAdminOrSuperior = (req, res, next) => {
   if (req.user && (req.user.role === 'admin' || req.user.role === 'superior')) {
     next();
   } else {
-    res.status(403).json({ message: 'Access denied: Workboard access required' });
+    res.status(403).json({ message: 'Access denied: Taskboard access required' });
   }
 };
 
-const canEditWorkboard = (user) => user && user.role === 'admin';
+const canEditWorkboard = (user) => Boolean(user && user.isActive !== false);
+
+const optionalAuthenticateToken = async (req, res, next) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+      req.user = null;
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    if (!user || !user.isActive) {
+      req.user = null;
+      return next();
+    }
+
+    req.user = user;
+    return next();
+  } catch (_error) {
+    req.user = null;
+    return next();
+  }
+};
 
 module.exports = {
   authenticateToken,
   authorizeAdmin,
   authorizeAdminOrSuperior,
-  canEditWorkboard
+  canEditWorkboard,
+  optionalAuthenticateToken
 };

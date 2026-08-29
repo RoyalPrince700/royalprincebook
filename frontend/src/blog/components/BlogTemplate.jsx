@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import ContentPageShell from '../../components/ContentPageShell';
 import { isLeadershipFromWithin } from '../../utils/bookUtils';
 
 const BlogTemplate = ({ post }) => {
@@ -31,59 +32,78 @@ const BlogTemplate = ({ post }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 pb-20 pt-28 text-slate-900 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-4xl">
-        <div className="rounded-[2.5rem] border border-white/70 bg-white/85 px-6 py-10 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur sm:px-10">
-          <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-            <span>{post.category}</span>
-            <span className="text-slate-300">|</span>
-            <span>{post.readTime}</span>
-            <span className="text-slate-300">|</span>
-            <span>{post.author}</span>
-          </div>
+    <ContentPageShell>
+      <section className="pf-content-section" style={{ paddingTop: '1rem' }}>
+        <div className="pf-container pf-article-shell">
+          <header className="pf-article-header">
+            <div className="pf-content-card-meta">
+              <span>{post.category}</span>
+              <span className="pf-content-card-meta-sep">|</span>
+              <span>{post.readTime}</span>
+              <span className="pf-content-card-meta-sep">|</span>
+              <span>{post.author}</span>
+            </div>
 
-          <h1 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl">
-            {post.title}
-          </h1>
+            <h1 className="pf-page-hero-title" style={{ maxWidth: 'none' }}>
+              {post.title}
+            </h1>
 
-          <p className="mt-5 max-w-3xl text-lg leading-relaxed text-slate-600">
-            {post.intro}
-          </p>
-        </div>
+            <p className="pf-page-hero-copy" style={{ maxWidth: 'none', fontSize: '1.05rem' }}>
+              {post.intro}
+            </p>
+          </header>
 
-        <article className="mx-auto mt-8 max-w-3xl rounded-[2.5rem] border border-white/70 bg-white/85 px-6 py-10 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur sm:px-10">
-          {post.sections.map((section) => (
-            <section key={section.heading} className="mb-10 last:mb-0">
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-                {section.heading}
-              </h2>
-              <div className="mt-4 space-y-4 text-base leading-relaxed text-slate-600">
-                {section.paragraphs.map((paragraph, index) => (
-                  <p key={`${section.heading}-${index}`}>{paragraph}</p>
-                ))}
-              </div>
-              {section.cta && (
-                <div className="mt-6 rounded-[1.75rem] border border-blue-100 bg-blue-50/80 p-5 text-left shadow-sm">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-700">
-                    {section.cta.eyebrow || 'Recommended Read'}
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                    {section.cta.text}
-                  </p>
-                  <Link
-                    to={section.cta.target === 'leadership-from-within' ? leadershipBookPath : section.cta.target}
-                    className="mt-4 inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-                    style={{ color: 'white' }}
-                  >
-                    {section.cta.label}
-                  </Link>
+          <article className="pf-article-body">
+            {post.sections.map((section) => (
+              <section key={section.heading}>
+                <h2>{section.heading}</h2>
+                <div>
+                  {section.paragraphs.map((paragraph, index) => (
+                    <p key={`${section.heading}-${index}`}>{paragraph}</p>
+                  ))}
                 </div>
-              )}
-            </section>
-          ))}
-        </article>
-      </div>
-    </div>
+                {section.cta && (
+                  <div className="pf-cta-panel">
+                    <p className="pf-cta-panel-eyebrow">
+                      {section.cta.eyebrow || 'Recommended Read'}
+                    </p>
+                    <p className="pf-cta-panel-text">{section.cta.text}</p>
+                    <div className="pf-cta-panel-actions">
+                      <Link
+                        to={
+                          section.cta.target === 'leadership-from-within'
+                            ? leadershipBookPath
+                            : section.cta.target
+                        }
+                        className="pf-btn pf-btn-primary pf-btn-sm"
+                      >
+                        {section.cta.label}
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </section>
+            ))}
+          </article>
+
+          <div className="pf-panel-sm" style={{ marginTop: '2rem' }}>
+            <p className="pf-page-hero-copy" style={{ margin: 0, maxWidth: 'none' }}>
+              Want to go deeper than this article? Explore <em>Leadership From Within</em> for a
+              practical guide to the mindset, discipline, and self-leadership that prepare you for
+              visible responsibility.
+            </p>
+            <div className="pf-cta-panel-actions" style={{ marginTop: '1.25rem' }}>
+              <Link to={leadershipBookPath} className="pf-btn pf-btn-primary pf-btn-sm">
+                View Leadership From Within
+              </Link>
+              <Link to="/blog" className="pf-btn pf-btn-secondary pf-btn-sm">
+                Back to blog
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </ContentPageShell>
   );
 };
 

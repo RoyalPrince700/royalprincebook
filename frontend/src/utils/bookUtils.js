@@ -12,12 +12,20 @@ export const isLeadershipFromWithin = (title) => {
   );
 };
 
+export const isBuildWithAi = (title) => {
+  const normalized = normalizeTitle(title);
+  return normalized.includes('build with ai');
+};
+
 export const getBookCover = (title) => {
   if (!title) return 'https://placehold.co/280x420/e9ecef/333333?text=No+Cover';
 
-  // Handle common spelling variation in seeded data/title text.
   if (isLeadershipFromWithin(title)) {
     return leadingFromWithinImage;
+  }
+
+  if (isBuildWithAi(title)) {
+    return 'https://placehold.co/280x420/1e3a5f/ffffff?text=Build+with+AI';
   }
 
   return `https://placehold.co/280x420/e9ecef/333333?text=${encodeURIComponent(title)}`;

@@ -37,7 +37,7 @@ const AboutSection = () => {
           />
           <div className="pf-about-portrait-caption">
             <span className="pf-about-portrait-name">Royal Prince</span>
-            <span className="pf-about-portrait-role">Growth Officer · Product Builder</span>
+            <span className="pf-about-portrait-role">{aboutContent.role}</span>
           </div>
         </motion.div>
 
@@ -46,26 +46,47 @@ const AboutSection = () => {
           <p className="pf-about-hook">{aboutContent.hook}</p>
 
           <div className="pf-about-highlights">
-            {aboutContent.highlights.map((item, index) => (
-              <motion.article
-                key={item.id}
-                className="pf-about-highlight"
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.07, duration: 0.45 }}
-                whileHover={{ y: -3 }}
-              >
-                <div className="pf-about-highlight-top">
-                  <span className="pf-about-highlight-eyebrow">{item.eyebrow}</span>
-                  <span className="pf-about-highlight-icon-wrap">
-                    <HighlightIcon name={item.icon} />
-                  </span>
-                </div>
-                <h3 className="pf-about-highlight-title">{item.title}</h3>
-                <p className="pf-about-highlight-text">{item.text}</p>
-              </motion.article>
-            ))}
+            {aboutContent.highlights.map((item, index) => {
+              const card = (
+                <>
+                  <div className="pf-about-highlight-top">
+                    <span className="pf-about-highlight-eyebrow">{item.eyebrow}</span>
+                    <span className="pf-about-highlight-icon-wrap">
+                      <HighlightIcon name={item.icon} />
+                    </span>
+                  </div>
+                  <h3 className="pf-about-highlight-title">
+                    {item.url ? (
+                      <a
+                        href={item.url}
+                        className="pf-about-highlight-link"
+                        target={item.url.startsWith('http') ? '_blank' : undefined}
+                        rel={item.url.startsWith('http') ? 'noreferrer' : undefined}
+                      >
+                        {item.title}
+                      </a>
+                    ) : (
+                      item.title
+                    )}
+                  </h3>
+                  <p className="pf-about-highlight-text">{item.text}</p>
+                </>
+              );
+
+              return (
+                <motion.article
+                  key={item.id}
+                  className="pf-about-highlight"
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.07, duration: 0.45 }}
+                  whileHover={{ y: -3 }}
+                >
+                  {card}
+                </motion.article>
+              );
+            })}
           </div>
 
           <div className="pf-topic-tags">

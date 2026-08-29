@@ -7,11 +7,15 @@
 }
 
 .App.home-mode,
+.App.portfolio-mode,
 .App.admin-mode,
+.App.taskboard-mode,
+.App.noteboard-mode,
 .App.artboard-mode {
   padding-top: 0;
 }
 
+.App.noteboard-mode,
 .App.artboard-mode {
   height: 100dvh;
   max-height: 100dvh;
@@ -19,7 +23,9 @@
   overflow: hidden;
 }
 
+html:has(.noteboard-mode),
 html:has(.artboard-mode),
+body:has(.noteboard-mode),
 body:has(.artboard-mode) {
   height: 100%;
   max-height: 100dvh;

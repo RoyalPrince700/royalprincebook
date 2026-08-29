@@ -1,5 +1,5 @@
 /**
- * Workboard gamification — XP, levels, scores, streaks.
+ * Taskboard gamification — XP, levels, scores, streaks.
  * Keep formulas here so UI components stay thin.
  */
 
@@ -169,13 +169,10 @@ const weekdayKeysDescending = (fromDateKey, count) => {
   const cursor = new Date(year, month - 1, day);
 
   while (keys.length < count) {
-    const dow = cursor.getDay();
-    if (dow >= 1 && dow <= 5) {
-      const y = cursor.getFullYear();
-      const m = String(cursor.getMonth() + 1).padStart(2, '0');
-      const d = String(cursor.getDate()).padStart(2, '0');
-      keys.push(`${y}-${m}-${d}`);
-    }
+    const y = cursor.getFullYear();
+    const m = String(cursor.getMonth() + 1).padStart(2, '0');
+    const d = String(cursor.getDate()).padStart(2, '0');
+    keys.push(`${y}-${m}-${d}`);
     cursor.setDate(cursor.getDate() - 1);
   }
 
@@ -190,7 +187,7 @@ const isProductiveDay = (dateKey, tasks) => {
 };
 
 /**
- * Current productive-day streak ending at today (Mon–Fri).
+ * Current productive-day streak ending at today (includes weekends).
  * Days with zero planned tasks break the streak.
  *
  * @param {Array} tasks
@@ -216,7 +213,7 @@ export const calculateCurrentStreak = (tasks = [], todayKey) => {
       (task) => task?.date === dateKey && isPlanned(task)
     ).length;
 
-    // If today has no planned work yet, skip it and continue from prior weekdays.
+    // If today has no planned work yet, skip it and continue from prior days.
     if (plannedCount === 0) {
       if (streak === 0 && dateKey === anchor) continue;
       break;
@@ -260,21 +257,18 @@ export const calculateLongestStreak = (tasks = []) => {
   let current = 0;
 
   while (cursor <= end) {
-    const dow = cursor.getDay();
-    if (dow >= 1 && dow <= 5) {
-      const y = cursor.getFullYear();
-      const m = String(cursor.getMonth() + 1).padStart(2, '0');
-      const d = String(cursor.getDate()).padStart(2, '0');
-      const dateKey = `${y}-${m}-${d}`;
+    const y = cursor.getFullYear();
+    const m = String(cursor.getMonth() + 1).padStart(2, '0');
+    const d = String(cursor.getDate()).padStart(2, '0');
+    const dateKey = `${y}-${m}-${d}`;
 
-      if (isProductiveDay(dateKey, tasks)) {
-        current += 1;
-        longest = Math.max(longest, current);
-      } else {
-        // Only break when the day had planned work, or we already started a streak
-        // and hit a gap weekday that had tasks in range. Empty days break streaks.
-        current = 0;
-      }
+    if (isProductiveDay(dateKey, tasks)) {
+      current += 1;
+      longest = Math.max(longest, current);
+    } else {
+      // Only break when the day had planned work, or we already started a streak
+      // and hit a gap day that had tasks in range. Empty days break streaks.
+      current = 0;
     }
     cursor.setDate(cursor.getDate() + 1);
   }
@@ -330,10 +324,10 @@ export const calculateRoyalScore = (data = {}) => {
 };
 
 /**
- * Compact weekly rollup for the Workboard summary strip.
+ * Compact weekly rollup for the Taskboard summary strip.
  * Planned / completed / rate come from calculateDayPlanningStats (not current-date proxies).
  *
- * @param {string} weekStart YYYY-MM-DD (Monday)
+ * @param {string} weekStart YYYY-MM-DD (Sunday)
  * @param {Array} tasks
  * @returns {{ planned: number, completed: number, completionRate: number, xp: number, streak: number, label: string }}
  */
@@ -341,7 +335,7 @@ export const calculateWeeklySummary = (weekStart, tasks = [], weekIndex = 0) => 
   const weekDates = [];
   const [year, month, day] = String(weekStart).split('-').map(Number);
   const cursor = new Date(year, month - 1, day);
-  for (let i = 0; i < 5; i += 1) {
+  for (let i = 0; i < 7; i += 1) {
     const y = cursor.getFullYear();
     const m = String(cursor.getMonth() + 1).padStart(2, '0');
     const d = String(cursor.getDate()).padStart(2, '0');
@@ -638,10 +632,10 @@ const shiftDateKeyBy = (dateKey, amount) => {
   return `${y}-${m}-${d}`;
 };
 
-/** Monday–Friday keys starting at weekStart (Monday). */
+/** Sunday–Saturday keys starting at weekStart (Sunday). */
 export const workWeekDateKeys = (weekStart) => {
   if (!DATE_RE.test(String(weekStart || ''))) return [];
-  return [0, 1, 2, 3, 4].map((offset) => shiftDateKeyBy(weekStart, offset));
+  return [0, 1, 2, 3, 4, 5, 6].map((offset) => shiftDateKeyBy(weekStart, offset));
 };
 
 const sumXpFromTasks = (tasks = []) =>
@@ -915,8 +909,7 @@ export const calculateProductivityTrends = (tasks = [], todayKey, weekStart) => 
       const [y, m, d] = String(todayKey).split('-').map(Number);
       const date = new Date(y, m - 1, d);
       const dow = date.getDay();
-      const back = dow === 0 ? 6 : dow - 1;
-      date.setDate(date.getDate() - back);
+      date.setDate(date.getDate() - dow);
       return toDateKeyFromValue(date);
     })();
   const lastWeekStart = shiftDateKeyBy(thisWeekStart, -7);
@@ -934,7 +927,7 @@ export const calculateProductivityTrends = (tasks = [], todayKey, weekStart) => 
     todayKey
   });
   // Approximate prior royal using tasks completed/scheduled up to end of last week.
-  const lastWeekEnd = shiftDateKeyBy(lastWeekStart, 4);
+  const lastWeekEnd = shiftDateKeyBy(lastWeekStart, 6);
   const priorTasks = list.filter((task) => {
     const keys = [task?.date, getOriginalDate(task), toDateKeyFromValue(task?.completedAt)].filter(
       Boolean

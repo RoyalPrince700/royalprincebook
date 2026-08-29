@@ -3,9 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import axios from 'axios';
 import BookCard from './BookCard';
-import { useCart } from '../../contexts/CartContext';
+import ContentPageShell from '../ContentPageShell';
+import PageHero from '../PageHero';
 import useBookPurchase from '../../hooks/useBookPurchase';
+import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
 import PageLoader from '../PageLoader';
+import { mergeBooksForCatalog } from '../../utils/localBookService';
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -19,13 +22,9 @@ const BookList = () => {
   });
 
   const { user } = useAuth();
-  const { addToCart, isInCart, itemCount, removeFromCart } = useCart();
   const navigate = useNavigate();
-  const { checkoutBook, buyingBookId } = useBookPurchase({
-    onPurchaseSuccess: async (book) => {
-      removeFromCart(book._id);
-    }
-  });
+  const { confirm } = usePlatformDialog();
+  const { checkoutBook, buyingBookId } = useBookPurchase();
 
   useEffect(() => {
     fetchBooks();
@@ -34,7 +33,7 @@ const BookList = () => {
   const fetchBooks = async () => {
     try {
       const response = await axios.get('/books');
-      setBooks(response.data.books || []);
+      setBooks(mergeBooksForCatalog(response.data.books || []));
     } catch (fetchError) {
       console.error('Failed to fetch books:', fetchError);
       setError('Failed to load books');
@@ -57,7 +56,15 @@ const BookList = () => {
   };
 
   const handleDeleteBook = async (bookId) => {
-    if (!window.confirm('Are you sure you want to delete this book?')) {
+    const shouldDelete = await confirm({
+      kicker: 'Delete book',
+      title: 'Remove this book?',
+      message: 'This book will be permanently deleted. This cannot be undone.',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      variant: 'danger'
+    });
+    if (!shouldDelete) {
       return;
     }
 
@@ -72,10 +79,6 @@ const BookList = () => {
 
   const handleBuyBook = (book) => {
     checkoutBook(book);
-  };
-
-  const handleAddBookToCart = (book) => {
-    addToCart(book);
   };
 
   const handleReadBook = (book) => {
@@ -94,105 +97,69 @@ const BookList = () => {
     return (
       <PageLoader
         title="Loading the collection"
-        message="Fetching available books, cart details, and store highlights."
+        message="Fetching available books and store highlights."
       />
     );
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-slate-50 text-slate-900">
-      <section className="relative px-4 pb-12 pt-20 sm:px-6 md:pt-28 lg:px-8">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(241,245,249,0.92)_45%,rgba(226,232,240,0.7)_100%)]" />
-        <div className="absolute inset-x-0 top-0 h-80 bg-linear-to-b from-white via-white/80 to-transparent" />
-        <div className="absolute left-1/2 top-32 h-72 w-72 -translate-x-1/2 rounded-full bg-blue-200/25 blur-3xl" />
-
-        <div className="relative mx-auto max-w-7xl">
-          <div className="text-center">
-            <span className="inline-flex items-center rounded-full border border-slate-200 bg-white/80 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-600 shadow-sm backdrop-blur">
-              Library
-            </span>
-            <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-6xl">
-              Explore the full collection.
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
-              Browse every title in a cleaner, more focused storefront designed to keep attention on the books.
+    <ContentPageShell>
+      <PageHero
+        eyebrow="Library"
+        title="Explore the full collection."
+        description="Browse every title in a cleaner, more focused storefront designed to keep attention on the books."
+        centered
+      >
+        <div className="pf-stat-grid">
+          <div className="pf-stat-card">
+            <p className="pf-stat-label">Titles</p>
+            <p className="pf-stat-value">{books.length}</p>
+          </div>
+          <div className="pf-stat-card">
+            <p className="pf-stat-label">Checkout</p>
+            <p className="pf-stat-text">Buy any book instantly with secure payment.</p>
+          </div>
+          <div className="pf-stat-card">
+            <p className="pf-stat-label">Experience</p>
+            <p className="pf-stat-text">
+              Fast checkout, clean browsing, and a product-first layout.
             </p>
           </div>
-
-          <div className="mx-auto mt-10 grid max-w-5xl gap-4 md:grid-cols-3">
-            <div className="rounded-4xl border border-white/70 bg-white/75 p-6 shadow-sm backdrop-blur">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Titles</p>
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{books.length}</p>
-            </div>
-            <div className="rounded-4xl border border-white/70 bg-white/75 p-6 shadow-sm backdrop-blur">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Cart</p>
-              <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">{itemCount}</p>
-            </div>
-            <div className="rounded-4xl border border-white/70 bg-white/75 p-6 shadow-sm backdrop-blur">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Experience</p>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Fast checkout, clean browsing, and a product-first layout.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              to="/cart"
-              className="inline-flex min-w-40 items-center justify-center rounded-full bg-slate-950 px-8 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-              style={{ color: 'white' }}
-            >
-              View Cart{itemCount > 0 ? ` (${itemCount})` : ''}
-            </Link>
-            {user?.role === 'admin' ? (
-              <>
-                <Link
-                  to="/dashboard"
-                  className="inline-flex min-w-40 items-center justify-center rounded-full border border-slate-300 bg-white/80 px-8 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-white"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm((prev) => !prev)}
-                  className="inline-flex min-w-40 items-center justify-center rounded-full border border-blue-200 bg-blue-50 px-8 py-3 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
-                >
-                  {showCreateForm ? 'Close Form' : 'Create New Book'}
-                </button>
-                <Link
-                  to="/admin"
-                  className="inline-flex min-w-40 items-center justify-center rounded-full border border-slate-300 bg-white/80 px-8 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-white"
-                >
-                  Admin Overview
-                </Link>
-              </>
-            ) : null}
-          </div>
         </div>
-      </section>
 
-      <section className="px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          {error && (
-            <div className="mb-6 rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+        <div className="pf-page-hero-actions">
+          {user?.role === 'admin' ? (
+            <>
+              <Link to="/dashboard" className="pf-btn pf-btn-secondary">
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowCreateForm((prev) => !prev)}
+                className="pf-btn pf-btn-secondary pf-btn-admin"
+              >
+                {showCreateForm ? 'Close Form' : 'Create New Book'}
+              </button>
+              <Link to="/admin" className="pf-btn pf-btn-secondary">
+                Admin Overview
+              </Link>
+            </>
+          ) : null}
+        </div>
+      </PageHero>
+
+      <section className="pf-content-section">
+        <div className="pf-container">
+          {error && <div className="pf-alert-error">{error}</div>}
 
           {showCreateForm && user?.role === 'admin' && (
-            <div className="mb-8 rounded-4xl border border-white/70 bg-white/80 p-6 shadow-xl backdrop-blur">
-              <div className="mb-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Admin
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-                  Create a new book
-                </h2>
-              </div>
+            <div className="pf-panel" style={{ marginBottom: '2rem' }}>
+              <p className="pf-section-label">Admin</p>
+              <h2 className="pf-section-heading">Create a new book</h2>
 
-              <form onSubmit={handleCreateBook} className="grid gap-5">
+              <form onSubmit={handleCreateBook} className="pf-form-grid" style={{ marginTop: '1.5rem' }}>
                 <div>
-                  <label htmlFor="title" className="mb-2 block text-sm font-medium text-slate-700">
+                  <label htmlFor="title" className="pf-form-label">
                     Title
                   </label>
                   <input
@@ -201,12 +168,12 @@ const BookList = () => {
                     value={newBook.title}
                     onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
                     required
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400"
+                    className="pf-form-input"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="description" className="mb-2 block text-sm font-medium text-slate-700">
+                  <label htmlFor="description" className="pf-form-label">
                     Description
                   </label>
                   <textarea
@@ -214,12 +181,12 @@ const BookList = () => {
                     value={newBook.description}
                     onChange={(e) => setNewBook({ ...newBook, description: e.target.value })}
                     rows="4"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400"
+                    className="pf-form-input"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="genre" className="mb-2 block text-sm font-medium text-slate-700">
+                  <label htmlFor="genre" className="pf-form-label">
                     Genre
                   </label>
                   <input
@@ -228,21 +195,18 @@ const BookList = () => {
                     value={newBook.genre}
                     onChange={(e) => setNewBook({ ...newBook, genre: e.target.value })}
                     placeholder="e.g. Leadership, Growth, Business"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-400"
+                    className="pf-form-input"
                   />
                 </div>
 
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    type="submit"
-                    className="inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-medium text-white transition hover:bg-slate-800"
-                  >
+                <div className="pf-cta-panel-actions">
+                  <button type="submit" className="pf-btn pf-btn-primary pf-btn-sm">
                     Create Book
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowCreateForm(false)}
-                    className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
+                    className="pf-btn pf-btn-secondary pf-btn-sm"
                   >
                     Cancel
                   </button>
@@ -251,35 +215,25 @@ const BookList = () => {
             </div>
           )}
 
-          <div className="mb-8 flex items-end justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Collection
-              </p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
-                All books
-              </h2>
-            </div>
+          <div style={{ marginBottom: '2rem' }}>
+            <p className="pf-section-label">Collection</p>
+            <h2 className="pf-section-heading">All books</h2>
           </div>
 
           {books.length === 0 ? (
-            <div className="rounded-4xl border border-white/70 bg-white/80 px-6 py-16 text-center shadow-xl backdrop-blur">
-              <h3 className="text-2xl font-semibold tracking-tight text-slate-950">No books found</h3>
-              <p className="mt-3 text-slate-600">
-                Add a book to start building the collection.
-              </p>
+            <div className="pf-empty-state">
+              <h3>No books found</h3>
+              <p>Add a book to start building the collection.</p>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            <div className="pf-content-grid">
               {books.map((book) => (
                 <BookCard
                   key={book._id}
                   book={book}
                   isOwned={getIsOwned(book)}
-                  isInCart={isInCart(book._id)}
                   onRead={handleReadBook}
                   onBuy={handleBuyBook}
-                  onAddToCart={handleAddBookToCart}
                   onDelete={handleDeleteBook}
                   showActions={true}
                   showAdminActions={user?.role === 'admin'}
@@ -290,7 +244,7 @@ const BookList = () => {
           )}
         </div>
       </section>
-    </div>
+    </ContentPageShell>
   );
 };
 

@@ -8,9 +8,9 @@ const { canEditWorkboard } = require('../middleware/auth');
 const {
   syncUserAchievements,
   listAchievementsForUser,
-  calculateCurrentStreak,
   toDateKey
 } = require('../utils/workboardAchievements');
+const { buildStreakPayload, recordVisit } = require('../utils/workboardStreak');
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -38,15 +38,23 @@ const resolveOwnerId = async (req) => {
 };
 
 const loadAchievementContext = async (ownerId) => {
+  const streakFields =
+    'workboardXp workboardAchievements workboardVisitStreak workboardLongestStreak workboardLastVisitDate workboardStreakBeforeBreak workboardStreakRestoreMonth workboardStreakRestoreCount';
+
   const [owner, tasks] = await Promise.all([
-    User.findById(ownerId).select('workboardXp workboardAchievements'),
+    User.findById(ownerId).select(streakFields),
     WorkboardTask.find({ owner: ownerId })
       .select('date originalDate rolledFromDate status priority focusTime xpAwarded completedAt cancelledAt')
       .lean()
   ]);
 
   const todayKey = toDateKey(new Date());
-  const streak = calculateCurrentStreak(tasks, todayKey);
+  let streak = 0;
+
+  if (owner) {
+    await recordVisit(owner, todayKey);
+    streak = buildStreakPayload(owner, todayKey).current;
+  }
 
   return {
     owner,

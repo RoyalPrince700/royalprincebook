@@ -34,7 +34,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin', 'superior'],
+    enum: ['user', 'admin', 'superior', 'webdev_student'],
     default: 'user'
   },
   isActive: {
@@ -60,6 +60,41 @@ const userSchema = new mongoose.Schema({
       }
     ],
     default: []
+  },
+  /** Visit-based taskboard streak (day 1 on first visit / return after break). */
+  workboardVisitStreak: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  workboardLongestStreak: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  workboardLastVisitDate: {
+    type: String,
+    default: null
+  },
+  /** Streak count saved when user misses a day — restorable with XP. */
+  workboardStreakBeforeBreak: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  workboardStreakRestoreMonth: {
+    type: String,
+    default: null
+  },
+  workboardStreakRestoreCount: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  /** Taskboard leaderboard avatar preset id (emoji-based). */
+  workboardAvatar: {
+    type: String,
+    default: 'royal-crown'
   }
 }, {
   timestamps: true

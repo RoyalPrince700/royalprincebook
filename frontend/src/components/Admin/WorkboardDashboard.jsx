@@ -35,7 +35,8 @@ const WorkboardDashboard = ({
   onGoBoard,
   onGoAchievements,
   onGoProjects,
-  onGoAnalytics
+  onGoAnalytics,
+  onGoLeaderboard
 }) => {
   const mission = useMemo(
     () => buildTodaysMission(statsTasks, todayKey, customMissionTitle),
@@ -85,7 +86,7 @@ const WorkboardDashboard = ({
             Today
           </button>
           <button type="button" className="wb-mode-btn" onClick={onGoBoard}>
-            Workboard
+            Taskboard
           </button>
           <button type="button" className="wb-mode-btn" onClick={onGoProjects}>
             Boss Battles
@@ -96,6 +97,11 @@ const WorkboardDashboard = ({
           {onGoAnalytics ? (
             <button type="button" className="wb-mode-btn" onClick={onGoAnalytics}>
               Analytics
+            </button>
+          ) : null}
+          {onGoLeaderboard ? (
+            <button type="button" className="wb-mode-btn" onClick={onGoLeaderboard}>
+              Leaderboard
             </button>
           ) : null}
         </div>

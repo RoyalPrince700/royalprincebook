@@ -1,7 +1,10 @@
 const { sendEmail } = require('./mailtrap.config');
 const {
   getWelcomeEmailTemplate,
-  getBookPurchaseEmailTemplate
+  getBookPurchaseEmailTemplate,
+  getLeaderboardInviteEmailTemplate,
+  getWorkboardAccessRequestEmailTemplate,
+  getWorkboardAccessGrantedEmailTemplate
 } = require('./emailtemplates');
 
 const normalizeUrl = (url) => {
@@ -69,7 +72,77 @@ const sendBookPurchaseEmail = async ({ user, book, paymentData }) => {
   });
 };
 
+const sendLeaderboardInviteEmail = async ({ invitedUser, inviter, leaderboardName }) => {
+  if (!invitedUser?.email) {
+    return null;
+  }
+
+  const template = getLeaderboardInviteEmailTemplate({
+    email: invitedUser.email,
+    inviterName: inviter?.username,
+    leaderboardName,
+    leaderboardUrl: `${getFrontendUrl()}/taskboard?mode=leaderboard`
+  });
+
+  return sendEmail({
+    to: [{ email: invitedUser.email }],
+    category: 'leaderboard-invite-email',
+    ...template
+  });
+};
+
+const sendWorkboardAccessRequestEmail = async ({ owner, requester, message = '' }) => {
+  if (!owner?.email) {
+    return null;
+  }
+
+  const template = getWorkboardAccessRequestEmailTemplate({
+    email: owner.email,
+    requesterName: requester?.username,
+    requesterEmail: requester?.email,
+    message,
+    taskboardUrl: `${getFrontendUrl()}/taskboard`
+  });
+
+  return sendEmail({
+    to: [{ email: owner.email }],
+    category: 'workboard-access-request-email',
+    ...template
+  });
+};
+
+const sendWorkboardAccessGrantedEmail = async ({
+  requester,
+  owner,
+  permissions = [],
+  ownerNote = '',
+  shareToken = ''
+}) => {
+  if (!requester?.email) {
+    return null;
+  }
+
+  const sharePath = shareToken ? `/taskboard/share/${shareToken}` : '/taskboard';
+
+  const template = getWorkboardAccessGrantedEmailTemplate({
+    email: requester.email,
+    ownerName: owner?.username,
+    permissions,
+    ownerNote,
+    shareUrl: `${getFrontendUrl()}${sharePath}`
+  });
+
+  return sendEmail({
+    to: [{ email: requester.email }],
+    category: 'workboard-access-granted-email',
+    ...template
+  });
+};
+
 module.exports = {
   sendWelcomeEmail,
-  sendBookPurchaseEmail
+  sendBookPurchaseEmail,
+  sendLeaderboardInviteEmail,
+  sendWorkboardAccessRequestEmail,
+  sendWorkboardAccessGrantedEmail
 };

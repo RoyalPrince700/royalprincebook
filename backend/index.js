@@ -1,15 +1,16 @@
+const dotenv = require('dotenv');
+
+// Load env before any module that reads process.env at import time (mail, passport, etc.)
+dotenv.config();
+
 const express = require('express');
 const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const passport = require('passport');
 const { Server } = require('socket.io');
 const configurePassport = require('./config/passport');
 const { initArtboardSocket } = require('./realtime/artboardSocket');
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
@@ -81,7 +82,9 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bookwrite
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/admin', require('./routes/admin'));
-app.use('/api/workboard', require('./routes/workboard'));
+const taskboardRoutes = require('./routes/workboard');
+app.use('/api/taskboard', taskboardRoutes);
+app.use('/api/workboard', taskboardRoutes);
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/books', require('./routes/books'));
 app.use('/api/payment', require('./routes/payment'));

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import AdminLayout from './AdminLayout';
+import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
 
 const segments = [
   { id: 'progress', label: 'Progress', helper: 'Your speaking growth' },
@@ -507,6 +508,7 @@ const mergeAcademyState = (incoming = {}) => ({
 });
 
 const AdminArticulationGame = () => {
+  const { notify } = usePlatformDialog();
   const [activeTab, setActiveTab] = useState('progress');
   const [academy, setAcademy] = useState(defaultAcademy);
   const [loading, setLoading] = useState(true);
@@ -593,7 +595,11 @@ const AdminArticulationGame = () => {
       return;
     }
 
-    alert('Text-to-speech is not supported in this browser. Read the line aloud slowly.');
+    notify({
+      title: 'Text-to-speech unavailable',
+      message: 'Text-to-speech is not supported in this browser. Read the line aloud slowly.',
+      variant: 'warning'
+    });
   };
 
   const persistAcademy = useCallback(async (nextAcademy) => {

@@ -30,7 +30,7 @@ const workboardObjectiveSchema = new mongoose.Schema({
     default: 0,
     min: 0
   },
-  /** Monday of the work week this objective belongs to (YYYY-MM-DD). */
+  /** Sunday of the work week this objective belongs to (YYYY-MM-DD). */
   weekStart: {
     type: String,
     required: true,

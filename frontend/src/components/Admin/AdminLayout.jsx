@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBoardTheme } from '../../contexts/BoardThemeContext';
 
 const NavIcon = ({ name, className = 'h-5 w-5' }) => {
   const props = {
@@ -64,7 +65,7 @@ const NavIcon = ({ name, className = 'h-5 w-5' }) => {
           <path d="M2 14a5 5 0 0 0 5 5h1.5l1.5-3h5l1.5 3H18a5 5 0 0 0 5-5v-1a6 6 0 0 0-6-6H8a6 6 0 0 0-6 6z" />
         </svg>
       );
-    case 'workboard':
+    case 'taskboard':
       return (
         <svg {...props}>
           <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -97,7 +98,7 @@ const allNavItems = [
   { to: '/admin/users', label: 'Users', shortLabel: 'Users', icon: 'users', roles: ['admin'] },
   { to: '/admin/finance', label: 'Finance', shortLabel: 'Finance', icon: 'finance', roles: ['admin'] },
   { to: '/admin/game', label: 'Game', shortLabel: 'Game', icon: 'game', roles: ['admin'] },
-  { to: '/admin/workboard', label: 'Workboard', shortLabel: 'Board', icon: 'workboard', roles: ['admin', 'superior'] }
+  { to: '/taskboard', label: 'Taskboard', shortLabel: 'Board', icon: 'taskboard', roles: ['admin', 'superior'] }
 ];
 
 const PanelIcon = ({ open }) => (
@@ -126,24 +127,31 @@ const AdminLayout = ({
   actions,
   children,
   chrome = 'default',
-  hero = 'default'
+  hero = 'default',
+  standalone = false
 }) => {
   const { user } = useAuth();
+  const { boardTheme } = useBoardTheme();
   const navItems = allNavItems.filter((item) => item.roles.includes(user?.role));
   const mobileCols = Math.min(Math.max(navItems.length, 1), 7);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const isMinimal = chrome === 'minimal';
   const isImmersive = chrome === 'immersive';
-  const hideNav = isImmersive;
+  const hideNav = isImmersive || standalone;
   const isSplitHero = hero === 'split' && stats.length > 0;
 
   return (
     <div
-      className={`text-slate-900 ${
+      className={`admin-workspace-shell ${
         isImmersive
-          ? 'h-[100dvh] min-h-0 overflow-hidden bg-[var(--wb-board,#f7f1e8)]'
-          : `min-h-screen pb-28 lg:pb-0 ${isMinimal ? 'bg-[var(--wb-board,#f7f1e8)]' : 'bg-slate-50'}`
+          ? 'admin-workspace-shell--immersive h-[100dvh] min-h-0 overflow-hidden bg-[var(--wb-board,#f7f1e8)]'
+          : `admin-workspace-shell--default min-h-screen pb-28 lg:pb-0 ${
+              isMinimal
+                ? 'admin-workspace-shell--minimal bg-[var(--wb-board,#f7f1e8)]'
+                : 'admin-workspace-shell--standard bg-slate-50'
+            }`
       }`}
+      data-board-theme={isMinimal || isImmersive ? boardTheme : undefined}
     >
       {!hideNav ? (
       <aside
@@ -155,7 +163,7 @@ const AdminLayout = ({
           <button
             type="button"
             onClick={() => setSidebarOpen((open) => !open)}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-95"
+            className="admin-sidebar-toggle inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-95"
             title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
             aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
             aria-expanded={sidebarOpen}
@@ -172,11 +180,11 @@ const AdminLayout = ({
               end={item.to === '/admin'}
               title={item.label}
               className={({ isActive }) =>
-                `rounded-3xl border transition-all active:scale-[0.985] lg:active:scale-100 ${
+                `admin-nav-link rounded-3xl border transition-all active:scale-[0.985] lg:active:scale-100 ${
                   sidebarOpen ? 'px-3.5 py-3' : 'flex h-12 w-12 items-center justify-center self-center p-0'
                 } ${
                   isActive
-                    ? 'border-slate-950 bg-slate-950 text-white shadow-lg'
+                    ? 'is-active border-slate-950 bg-slate-950 text-white shadow-lg'
                     : 'border-white/70 bg-white/70 text-slate-700 hover:border-slate-200 hover:bg-white'
                 }`
               }
@@ -185,7 +193,7 @@ const AdminLayout = ({
                 sidebarOpen ? (
                   <div className="flex items-center gap-3">
                     <span
-                      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl ${
+                      className={`admin-nav-icon inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl ${
                         isActive ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-700'
                       }`}
                     >
@@ -207,7 +215,7 @@ const AdminLayout = ({
           <Link
             to="/dashboard"
             title="Dashboard"
-            className={`inline-flex items-center justify-center rounded-3xl border border-slate-300 bg-white text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 ${
+            className={`admin-panel-btn inline-flex items-center justify-center rounded-3xl border border-slate-300 bg-white text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 ${
               sidebarOpen ? 'px-5 py-3' : 'h-12 w-12'
             }`}
           >
@@ -216,7 +224,7 @@ const AdminLayout = ({
           <Link
             to="/all-books"
             title="Browse Books"
-            className={`inline-flex items-center justify-center rounded-3xl bg-slate-950 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-95 ${
+            className={`admin-panel-btn inline-flex items-center justify-center rounded-3xl bg-slate-950 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-95 ${
               sidebarOpen ? 'px-5 py-3' : 'h-12 w-12'
             }`}
             style={{ color: 'white' }}
@@ -235,17 +243,17 @@ const AdminLayout = ({
                 isMinimal
                   ? 'px-3 pb-8 pt-4 sm:px-5 sm:pb-10 sm:pt-4'
                   : 'px-3 pb-10 pt-4 sm:px-6 sm:pb-16 sm:pt-6'
-              } ${sidebarOpen ? 'lg:pl-[312px]' : 'lg:pl-[108px]'}`
+              } ${hideNav ? 'lg:pl-3 sm:lg:pl-5' : sidebarOpen ? 'lg:pl-[312px]' : 'lg:pl-[108px]'}`
         }
       >
         {isImmersive ? null : !isMinimal ? (
           <>
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(241,245,249,0.92)_45%,rgba(226,232,240,0.7)_100%)]" />
+            <div className="admin-workspace-bg-standard absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(241,245,249,0.92)_45%,rgba(226,232,240,0.7)_100%)]" />
             <div className="absolute inset-x-0 top-0 h-64 sm:h-80 bg-linear-to-b from-white via-white/80 to-transparent" />
             <div className="absolute left-1/2 top-20 sm:top-28 h-64 w-64 sm:h-80 sm:w-80 -translate-x-1/2 rounded-full bg-blue-200/25 blur-3xl" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,252,245,0.9),rgba(247,241,232,0.95)_50%,rgba(240,230,214,0.85)_100%)]" />
+          <div className="admin-workspace-bg-minimal absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,252,245,0.9),rgba(247,241,232,0.95)_50%,rgba(240,230,214,0.85)_100%)]" />
         )}
 
         <div
@@ -255,7 +263,7 @@ const AdminLayout = ({
         >
           <main className={isImmersive ? 'h-full min-w-0' : 'min-w-0'}>
             {!isMinimal && !isImmersive ? (
-              <div className="rounded-[1.75rem] border border-white/70 bg-white/80 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:rounded-4xl sm:p-6 lg:p-8">
+              <div className="admin-hero-card rounded-[1.75rem] border border-white/70 bg-white/80 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:rounded-4xl sm:p-6 lg:p-8">
                 <div
                   className={
                     isSplitHero
@@ -316,7 +324,7 @@ const AdminLayout = ({
                     {stats.map((stat) => (
                       <div
                         key={stat.label}
-                        className="rounded-3xl border border-slate-200 bg-slate-50/90 p-4 transition-all hover:shadow-sm sm:p-6"
+                        className="admin-stat-card rounded-3xl border border-slate-200 bg-slate-50/90 p-4 transition-all hover:shadow-sm sm:p-6"
                       >
                         <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
                           {stat.label}
@@ -350,7 +358,7 @@ const AdminLayout = ({
       </section>
 
       {!hideNav ? (
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-14px_30px_rgba(15,23,42,0.12)] backdrop-blur lg:hidden">
+      <nav className="admin-workspace-mobile-nav fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-14px_30px_rgba(15,23,42,0.12)] backdrop-blur lg:hidden">
         <div
           className="mx-auto grid max-w-lg gap-1"
           style={{ gridTemplateColumns: `repeat(${mobileCols}, minmax(0, 1fr))` }}

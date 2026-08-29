@@ -7,10 +7,9 @@ const { emitArtboardEvent } = require('../realtime/artboardSocket');
 
 const DEFAULT_NOTE_SIZE = { width: 176, height: 140 };
 const STARTER_NOTE = { x: 280, y: 180, color: 'yellow', text: '', zIndex: 1 };
-const SHARE_PATH_PREFIX = '/admin/workboard/artboard/share';
+const SHARE_PATH_PREFIX = '/noteboard/share';
 
-const canUseArtboard = (user) =>
-  user && (user.role === 'admin' || user.role === 'superior');
+const canUseArtboard = (user) => Boolean(user && user.isActive !== false);
 
 const findOwnedArtboard = async (artboardId, userId) =>
   Artboard.findOne({ _id: artboardId, owner: userId });
@@ -98,6 +97,19 @@ const createNoteOnBoard = async (board, body = {}) => {
   return note;
 };
 
+const loadBoardNotes = async (board) =>
+  ArtboardNote.find({ artboard: board._id }).sort({
+    zIndex: 1,
+    createdAt: 1
+  });
+
+const ensureDefaultNote = async (board) => {
+  const notes = await loadBoardNotes(board);
+  if (notes.length > 0) return notes;
+  const defaultNote = await createNoteOnBoard(board, STARTER_NOTE);
+  return [defaultNote];
+};
+
 const applyNotePatch = (note, body = {}) => {
   if (body.text !== undefined) {
     note.text = String(body.text || '').trim().slice(0, 500);
@@ -119,7 +131,7 @@ const applyNotePatch = (note, body = {}) => {
 const listArtboards = async (req, res) => {
   try {
     if (!canUseArtboard(req.user)) {
-      return res.status(403).json({ message: 'Artboard access required' });
+      return res.status(403).json({ message: 'Noteboard access required' });
     }
 
     const boards = await Artboard.find({ owner: req.user._id })
@@ -136,14 +148,14 @@ const listArtboards = async (req, res) => {
     });
   } catch (error) {
     console.error('List artboards error:', error);
-    res.status(500).json({ message: 'Failed to list artboards' });
+    res.status(500).json({ message: 'Failed to list noteboards' });
   }
 };
 
 const createArtboard = async (req, res) => {
   try {
     if (!canUseArtboard(req.user)) {
-      return res.status(403).json({ message: 'Artboard access required' });
+      return res.status(403).json({ message: 'Noteboard access required' });
     }
 
     const title = String(req.body.title || '').trim() || 'Untitled';
@@ -156,21 +168,22 @@ const createArtboard = async (req, res) => {
       title
     });
 
-    // New boards start empty — users add notes themselves.
+    const notes = await ensureDefaultNote(board);
+
     res.status(201).json({
-      artboard: serializeBoard(board, []),
+      artboard: serializeBoard(board, notes),
       noteSize: DEFAULT_NOTE_SIZE
     });
   } catch (error) {
     console.error('Create artboard error:', error);
-    res.status(500).json({ message: 'Failed to create artboard' });
+    res.status(500).json({ message: 'Failed to create noteboard' });
   }
 };
 
 const getArtboard = async (req, res) => {
   try {
     if (!canUseArtboard(req.user)) {
-      return res.status(403).json({ message: 'Artboard access required' });
+      return res.status(403).json({ message: 'Noteboard access required' });
     }
 
     const board = await findOwnedArtboard(req.params.id, req.user._id);
@@ -178,10 +191,7 @@ const getArtboard = async (req, res) => {
       return res.status(404).json({ message: 'Artboard not found' });
     }
 
-    const notes = await ArtboardNote.find({ artboard: board._id }).sort({
-      zIndex: 1,
-      createdAt: 1
-    });
+    const notes = await ensureDefaultNote(board);
 
     res.json({
       artboard: serializeBoard(board, notes),
@@ -189,14 +199,14 @@ const getArtboard = async (req, res) => {
     });
   } catch (error) {
     console.error('Get artboard error:', error);
-    res.status(500).json({ message: 'Failed to load artboard' });
+    res.status(500).json({ message: 'Failed to load noteboard' });
   }
 };
 
 const updateArtboard = async (req, res) => {
   try {
     if (!canUseArtboard(req.user)) {
-      return res.status(403).json({ message: 'Artboard access required' });
+      return res.status(403).json({ message: 'Noteboard access required' });
     }
 
     const board = await findOwnedArtboard(req.params.id, req.user._id);
@@ -234,14 +244,14 @@ const updateArtboard = async (req, res) => {
     });
   } catch (error) {
     console.error('Update artboard error:', error);
-    res.status(500).json({ message: 'Failed to update artboard' });
+    res.status(500).json({ message: 'Failed to update noteboard' });
   }
 };
 
 const deleteArtboard = async (req, res) => {
   try {
     if (!canUseArtboard(req.user)) {
-      return res.status(403).json({ message: 'Artboard access required' });
+      return res.status(403).json({ message: 'Noteboard access required' });
     }
 
     const board = await findOwnedArtboard(req.params.id, req.user._id);
@@ -267,7 +277,7 @@ const deleteArtboard = async (req, res) => {
 const createNote = async (req, res) => {
   try {
     if (!canUseArtboard(req.user)) {
-      return res.status(403).json({ message: 'Artboard access required' });
+      return res.status(403).json({ message: 'Noteboard access required' });
     }
 
     const board = await findOwnedArtboard(req.params.id, req.user._id);
@@ -295,7 +305,7 @@ const createNote = async (req, res) => {
 const updateNote = async (req, res) => {
   try {
     if (!canUseArtboard(req.user)) {
-      return res.status(403).json({ message: 'Artboard access required' });
+      return res.status(403).json({ message: 'Noteboard access required' });
     }
 
     const board = await findOwnedArtboard(req.params.id, req.user._id);
@@ -334,7 +344,7 @@ const updateNote = async (req, res) => {
 const deleteNote = async (req, res) => {
   try {
     if (!canUseArtboard(req.user)) {
-      return res.status(403).json({ message: 'Artboard access required' });
+      return res.status(403).json({ message: 'Noteboard access required' });
     }
 
     const board = await findOwnedArtboard(req.params.id, req.user._id);
@@ -370,7 +380,7 @@ const deleteNote = async (req, res) => {
 const createArtboardShare = async (req, res) => {
   try {
     if (!canUseArtboard(req.user)) {
-      return res.status(403).json({ message: 'Artboard access required' });
+      return res.status(403).json({ message: 'Noteboard access required' });
     }
 
     const board = await findOwnedArtboard(req.params.id, req.user._id);

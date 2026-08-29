@@ -29,7 +29,6 @@ const HeroSection = () => (
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="pf-hero-intro">
-          <span className="pf-eyebrow pf-eyebrow-gold">Portfolio</span>
           <h1 className="pf-hero-title">
             {heroContent.lines.map((line, index) => (
               <motion.span
@@ -47,16 +46,15 @@ const HeroSection = () => (
         <p className="pf-hero-subtitle">{heroContent.subheading}</p>
 
         <div className="pf-hero-actions">
-          <a href="#projects" className="pf-btn pf-btn-primary">
-            View My Work
-          </a>
-          <a
-            href={heroContent.cvPath}
-            download={heroContent.cvFileName}
-            className="pf-btn pf-btn-secondary"
-          >
-            Download CV
-          </a>
+          {heroContent.actions.map((action) => (
+            <a
+              key={action.label}
+              href={action.href}
+              className={`pf-btn ${action.primary ? 'pf-btn-primary' : 'pf-btn-secondary'}`}
+            >
+              {action.label}
+            </a>
+          ))}
         </div>
 
         <div className="pf-hero-tags">

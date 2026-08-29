@@ -2,6 +2,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import BoardLoader from './BoardLoader';
 import { getArtboardSocket, getSocketId } from '../../utils/artboardSocket';
+import { useAuth } from '../../contexts/AuthContext';
+import BoardThemeToggle from '../BoardThemeToggle';
+import BoardWebsiteLink from '../BoardWebsiteLink';
+import { useSignInPrompt } from '../Auth/SignInPromptModal';
+import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
 import './AdminWorkboard.css';
 import './AdminArtboard.css';
 
@@ -15,6 +20,15 @@ const VIEW_STORAGE_KEY = 'artboard:view';
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
 const ZOOM_STEP = 0.1;
+const GUEST_BOARD_ID = 'guest-preview';
+const GUEST_DEFAULT_NOTE = {
+  id: 'guest-default-note',
+  text: '',
+  color: 'yellow',
+  x: 280,
+  y: 180,
+  zIndex: 1
+};
 
 const noteId = (note) => String(note.id || note._id);
 
@@ -206,13 +220,17 @@ const copyTextToClipboard = async (text) => {
 
 const shareUrlFromResponse = (data) => {
   const path =
-    data?.path || (data?.token ? `/admin/workboard/artboard/share/${data.token}` : '');
+    data?.path || (data?.token ? `/noteboard/share/${data.token}` : '');
   if (!path) return '';
   return `${window.location.origin}${path}`;
 };
 
 const AdminArtboard = ({ onExit, shareToken = '' }) => {
+  const { isAuthenticated } = useAuth();
   const isSharedMode = Boolean(shareToken);
+  const isGuest = !isAuthenticated && !isSharedMode;
+  const { requireSignIn, signInPrompt } = useSignInPrompt('note');
+  const { confirm } = usePlatformDialog();
   const [boards, setBoards] = useState([]);
   const [activeId, setActiveId] = useState('');
   const [title, setTitle] = useState('');
@@ -257,8 +275,8 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   const noteApiBase = useCallback(
     (boardId) =>
       isSharedMode
-        ? `/workboard/artboards/share/${shareToken}`
-        : `/workboard/artboards/${boardId || activeIdRef.current}`,
+        ? `/taskboard/artboards/share/${shareToken}`
+        : `/taskboard/artboards/${boardId || activeIdRef.current}`,
     [isSharedMode, shareToken]
   );
 
@@ -438,7 +456,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     setTitle(artboard.title || 'Untitled');
     setNotes(nextNotes);
     setTopZ(Math.max(1, ...nextNotes.map((n) => n.zIndex || 1)));
-    if (!isSharedMode) {
+    if (!isSharedMode && String(artboard.id) !== GUEST_BOARD_ID) {
       try {
         localStorage.setItem(STORAGE_KEY, String(artboard.id));
       } catch {
@@ -452,7 +470,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   }, []);
 
   useEffect(() => {
-    if (!activeId) return undefined;
+    if (!activeId || isGuest) return undefined;
 
     const socket = getArtboardSocket();
     const boardId = String(activeId);
@@ -508,7 +526,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     const onBoardDeleted = (payload) => {
       if (String(payload?.artboardId) !== boardId) return;
       if (isSharedMode) {
-        setError('This artboard was deleted by the owner');
+        setError('This noteboard was deleted by the owner');
         setNotes([]);
       }
     };
@@ -539,7 +557,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       socket.off('artboard:peer', onPeer);
       setPeerCount(0);
     };
-  }, [activeId, isSharedMode]);
+  }, [activeId, isGuest, isSharedMode]);
 
   const closeSharePopover = useCallback(() => {
     setSharePopoverBoardId('');
@@ -573,6 +591,10 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   const handleShareBoard = async (board, event) => {
     event?.preventDefault?.();
     event?.stopPropagation?.();
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
     const id = String(board.id);
     if (sharePopoverBoardId === id && shareUrl) {
       closeSharePopover();
@@ -587,7 +609,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     setShareLoading(true);
     try {
       const response = await axios.post(
-        `/workboard/artboards/${id}/share`,
+        `/taskboard/artboards/${id}/share`,
         {},
         { headers: socketHeaders() }
       );
@@ -619,11 +641,11 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   const loadBoard = useCallback(
     async (id) => {
       if (isSharedMode) {
-        const response = await axios.get(`/workboard/artboards/share/${shareToken}`);
+        const response = await axios.get(`/taskboard/artboards/share/${shareToken}`);
         applyBoard(response.data.artboard);
         return;
       }
-      const response = await axios.get(`/workboard/artboards/${id}`);
+      const response = await axios.get(`/taskboard/artboards/${id}`);
       applyBoard(response.data.artboard);
     },
     [applyBoard, isSharedMode, shareToken]
@@ -633,8 +655,18 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     setLoading(true);
     setError('');
     try {
+      if (isGuest) {
+        setBoards([{ id: GUEST_BOARD_ID, title: 'My Noteboard' }]);
+        applyBoard({
+          id: GUEST_BOARD_ID,
+          title: 'My Noteboard',
+          notes: [GUEST_DEFAULT_NOTE]
+        });
+        return;
+      }
+
       if (isSharedMode) {
-        const response = await axios.get(`/workboard/artboards/share/${shareToken}`);
+        const response = await axios.get(`/taskboard/artboards/share/${shareToken}`);
         const board = response.data.artboard;
         setBoards([
           {
@@ -648,12 +680,12 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
         return;
       }
 
-      const listRes = await axios.get('/workboard/artboards');
+      const listRes = await axios.get('/taskboard/artboards');
       const list = listRes.data.artboards || [];
       setBoards(list);
 
       if (list.length === 0) {
-        const created = await axios.post('/workboard/artboards', { title: 'My Artboard' });
+        const created = await axios.post('/taskboard/artboards', { title: 'My Noteboard' });
         const board = created.data.artboard;
         setBoards([
           {
@@ -678,12 +710,12 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       console.error(err);
       setError(
         err.response?.data?.message ||
-          (isSharedMode ? 'Failed to open shared artboard' : 'Failed to load artboards')
+          (isSharedMode ? 'Failed to open shared noteboard' : 'Failed to load noteboards')
       );
     } finally {
       setLoading(false);
     }
-  }, [applyBoard, isSharedMode, loadBoard, shareToken]);
+  }, [applyBoard, isGuest, isSharedMode, loadBoard, shareToken]);
 
   useEffect(() => {
     bootstrap();
@@ -733,20 +765,33 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     try {
       await loadBoard(id);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to open artboard');
+      setError(err.response?.data?.message || 'Failed to open noteboard');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteBoard = async (board) => {
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
     const id = String(board.id);
     const label = board.title || 'Untitled';
-    if (!window.confirm(`Delete “${label}”? This cannot be undone.`)) return;
+    const shouldDelete = await confirm({
+      theme: 'board',
+      kicker: 'Delete board',
+      title: 'Remove this noteboard?',
+      message: `“${label}” will be permanently deleted. This cannot be undone.`,
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      variant: 'danger'
+    });
+    if (!shouldDelete) return;
 
     setError('');
     try {
-      await axios.delete(`/workboard/artboards/${id}`);
+      await axios.delete(`/taskboard/artboards/${id}`);
 
       writeViewState((prev) => {
         const byBoard = { ...(prev.byBoard || {}) };
@@ -765,7 +810,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
         return;
       }
 
-      const created = await axios.post('/workboard/artboards', { title: 'My Artboard' });
+      const created = await axios.post('/taskboard/artboards', { title: 'My Noteboard' });
       const next = created.data.artboard;
       setBoards([
         {
@@ -777,12 +822,16 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       ]);
       applyBoard(next);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to delete artboard');
+      setError(err.response?.data?.message || 'Failed to delete noteboard');
     }
   };
 
   const handleCreateBoard = async () => {
     if (creating || isSharedMode) return;
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
     persistView();
     viewRestoredForRef.current = '';
     setCreating(true);
@@ -790,7 +839,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     closeSharePopover();
     setError('');
     try {
-      const response = await axios.post('/workboard/artboards', { title: 'Untitled' });
+      const response = await axios.post('/taskboard/artboards', { title: 'Untitled' });
       const board = response.data.artboard;
       applyBoard(board);
       setBoards((prev) => {
@@ -806,7 +855,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       setTitleDraft(board.title || 'Untitled');
       setEditingTitle(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create artboard');
+      setError(err.response?.data?.message || 'Failed to create noteboard');
     } finally {
       setCreating(false);
     }
@@ -815,12 +864,16 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   const saveTitle = async () => {
     const trimmed = titleDraft.trim();
     setEditingTitle(false);
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
     if (!trimmed || trimmed === title || !activeId || isSharedMode) return;
     const previous = title;
     setTitle(trimmed);
     try {
       await axios.patch(
-        `/workboard/artboards/${activeId}`,
+        `/taskboard/artboards/${activeId}`,
         { title: trimmed },
         { headers: socketHeaders() }
       );
@@ -829,11 +882,12 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       );
     } catch (err) {
       setTitle(previous);
-      setError(err.response?.data?.message || 'Failed to rename artboard');
+      setError(err.response?.data?.message || 'Failed to rename noteboard');
     }
   };
 
   const queueNoteSave = useCallback((id, patch) => {
+    if (isGuest) return;
     const boardId = activeIdRef.current;
     if (!boardId) return;
     const key = String(id);
@@ -850,7 +904,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
         setError(err.response?.data?.message || 'Failed to save note');
       }
     }, 280);
-  }, [markLocalNoteWrite, noteApiBase]);
+  }, [isGuest, markLocalNoteWrite, noteApiBase]);
 
   const updateNoteLocal = useCallback((id, patch) => {
     setNotes((prev) =>
@@ -859,6 +913,10 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   }, []);
 
   const addNote = async () => {
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
     if (!activeId) return;
     setError('');
     try {
@@ -882,6 +940,10 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   };
 
   const handleTextChange = (id, text) => {
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
     updateNoteLocal(id, { text });
     queueNoteSave(id, { text });
   };
@@ -991,6 +1053,10 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   };
 
   const onNotePointerDown = (event, note) => {
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
     if (event.button !== 0) return;
 
     const onText =
@@ -1017,21 +1083,42 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
 
   if (loading && !activeId) {
     return (
-      <div className="ab-shell">
-        <BoardLoader label="Opening artboard…" />
-      </div>
+      <>
+        {signInPrompt}
+        <div className="ab-shell">
+          <div className="wb-board-chrome ab-top-chrome">
+            <div className="wb-board-chrome-slot">
+              <BoardWebsiteLink />
+            </div>
+            <div className="wb-board-chrome-slot">
+              <BoardThemeToggle />
+            </div>
+          </div>
+          <BoardLoader label="Opening noteboard…" />
+        </div>
+      </>
     );
   }
 
   return (
-    <div className={`ab-shell wb-board ${isHand ? 'ab-shell--hand' : 'ab-shell--select'}`}>
+    <>
+      {signInPrompt}
+      <div className={`ab-shell wb-board ${isHand ? 'ab-shell--hand' : 'ab-shell--select'}`}>
+      <div className="wb-board-chrome ab-top-chrome">
+        <div className="wb-board-chrome-slot">
+          <BoardWebsiteLink />
+        </div>
+        <div className="wb-board-chrome-slot">
+          <BoardThemeToggle />
+        </div>
+      </div>
       {error ? <p className="ab-error">{error}</p> : null}
 
       <aside
         className={`ab-side-rail${railOpen ? ' is-open' : ''}${
           editingTitle ? ' has-flyout' : ''
         }`}
-        aria-label="Artboard controls"
+        aria-label="Noteboard controls"
       >
         <div className={`ab-side-top ${railOpen ? '' : 'is-compact'}`}>
           <button
@@ -1058,11 +1145,11 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
             type="button"
             className={`ab-side-btn${railOpen ? ' ab-side-btn--row' : ''}`}
             onClick={onExit}
-            aria-label="Back to workboard"
-            title="Workboard"
+            aria-label="Back to taskboard"
+            title="Taskboard"
           >
             <SideIcon name="back" />
-            {railOpen ? <span className="ab-side-btn-label">Workboard</span> : null}
+            {railOpen ? <span className="ab-side-btn-label">Taskboard</span> : null}
           </button>
         ) : null}
 
@@ -1085,7 +1172,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
         {!isSharedMode ? (
           <div className="ab-layers">
             {railOpen ? <p className="ab-layers-heading">Boards</p> : null}
-            <div className="ab-layers-list" role="list" aria-label="Artboards">
+            <div className="ab-layers-list" role="list" aria-label="Noteboards">
               {boards.map((board, index) => {
                 const isActive = String(board.id) === String(activeId);
                 const shareOpen = sharePopoverBoardId === String(board.id);
@@ -1160,11 +1247,15 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
               editingTitle ? ' is-active' : ''
             }`}
             onClick={() => {
+              if (isGuest) {
+                requireSignIn();
+                return;
+              }
               closeSharePopover();
               setTitleDraft(title);
               setEditingTitle(true);
             }}
-            aria-label="Rename artboard"
+            aria-label="Rename noteboard"
             title={title || 'Untitled'}
           >
             <SideIcon name="rename" />
@@ -1178,7 +1269,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
             className={`ab-side-btn${railOpen ? ' ab-side-btn--row' : ''}`}
             onClick={handleCreateBoard}
             disabled={creating}
-            aria-label="New artboard"
+            aria-label="New noteboard"
             title="New board"
           >
             <SideIcon name="new" />
@@ -1219,7 +1310,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
                   setTitleDraft(title);
                 }
               }}
-              aria-label="Artboard title"
+              aria-label="Noteboard title"
               placeholder="Name this board"
             />
           </div>
@@ -1257,7 +1348,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
                 value={shareUrl}
                 readOnly
                 onFocus={(e) => e.target.select()}
-                aria-label="Artboard share URL"
+                aria-label="Noteboard share URL"
               />
               <div className="ab-share-popover-actions">
                 <button
@@ -1333,6 +1424,10 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
                     tabIndex={isHand ? -1 : 0}
                     onChange={(e) => handleTextChange(id, e.target.value)}
                     onFocus={() => {
+                      if (isGuest) {
+                        requireSignIn();
+                        return;
+                      }
                       if (!isHand) bringToFront(id);
                     }}
                   />
@@ -1343,7 +1438,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
         </div>
       </div>
 
-      <div className="ab-tool-rail" role="toolbar" aria-label="Artboard tools">
+      <div className="ab-tool-rail" role="toolbar" aria-label="Noteboard tools">
         <button
           type="button"
           className={`ab-tool-btn${tool === 'select' ? ' is-active' : ''}`}
@@ -1392,6 +1487,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
         </span>
       </div>
     </div>
+    </>
   );
 };
 

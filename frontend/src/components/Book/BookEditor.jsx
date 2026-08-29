@@ -3,7 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../contexts/AuthContext';
-import { bookData as leadingFromWithinBook } from '../../chapters';
+import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
+import { isLocalBookId } from '../../utils/localBookService';
 import axios from 'axios';
 import PageLoader from '../PageLoader';
 
@@ -11,6 +12,7 @@ const BookEditor = () => {
   const { bookId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { confirm } = usePlatformDialog();
 
   const [book, setBook] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -65,8 +67,8 @@ const BookEditor = () => {
   }, [pageData, currentPage]);
 
   const fetchBook = async () => {
-    if (bookId === leadingFromWithinBook._id) {
-        setError('This book is managed locally and cannot be edited via the web interface.');
+    if (isLocalBookId(bookId)) {
+        setError('This book is managed locally. Edit the chapter files in content/build-with-ai/ or frontend/src/chapters/.');
         setLoading(false);
         return;
     }
@@ -161,7 +163,15 @@ const BookEditor = () => {
   };
 
   const deleteCurrentPage = async () => {
-    if (!window.confirm('Are you sure you want to delete this page?')) {
+    const shouldDelete = await confirm({
+      kicker: 'Delete page',
+      title: 'Remove this page?',
+      message: 'This page will be permanently deleted from the book.',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      variant: 'danger'
+    });
+    if (!shouldDelete) {
       return;
     }
 

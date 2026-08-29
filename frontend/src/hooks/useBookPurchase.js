@@ -3,12 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { closePaymentModal, useFlutterwave } from 'flutterwave-react-v3';
 import { useAuth } from '../contexts/AuthContext';
+import { usePlatformDialog } from '../contexts/PlatformDialogContext';
 import { getRedirectPath } from '../utils/authRedirect';
 
 const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, refreshProfile, addPurchasedBook } = useAuth();
+  const { notify } = usePlatformDialog();
   const [selectedBook, setSelectedBook] = useState(null);
   const [buyingBookId, setBuyingBookId] = useState(null);
   const [flwPublicKey, setFlwPublicKey] = useState('');
@@ -58,12 +60,20 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
     }
 
     if (!flwPublicKey) {
-      alert('Payment is not ready yet. Please try again in a moment.');
+      notify({
+        title: 'Payment not ready',
+        message: 'Please try again in a moment.',
+        variant: 'warning'
+      });
       return;
     }
 
     if (!book?.price || book.price <= 0) {
-      alert('This book is free and does not require payment.');
+      notify({
+        title: 'Free book',
+        message: 'This book is free and does not require payment.',
+        variant: 'info'
+      });
       return;
     }
 
@@ -83,7 +93,11 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
         if (response.status !== 'successful') {
           setBuyingBookId(null);
           setSelectedBook(null);
-          alert('Payment was not successful.');
+          notify({
+            title: 'Payment failed',
+            message: 'Your payment was not successful.',
+            variant: 'error'
+          });
           return;
         }
 
@@ -100,10 +114,18 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
             await onPurchaseSuccess(currentBook);
           }
 
-          alert('Payment successful. You can now read this book.');
+          notify({
+            title: 'Payment successful',
+            message: 'You can now read this book.',
+            variant: 'success'
+          });
         } catch (error) {
           console.error('Payment verification failed:', error);
-          alert('Payment verification failed. Please contact support.');
+          notify({
+            title: 'Verification failed',
+            message: 'Payment verification failed. Please contact support.',
+            variant: 'error'
+          });
         } finally {
           setBuyingBookId(null);
           setSelectedBook(null);
@@ -120,7 +142,8 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
     triggerFlutterwavePayment,
     refreshProfile,
     addPurchasedBook,
-    onPurchaseSuccess
+    onPurchaseSuccess,
+    notify
   ]);
 
   return {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { contactLinks, heroContent } from '../data/portfolioData';
+import { contactLinks } from '../data/portfolioData';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
 
 const iconPaths = {
@@ -10,6 +10,9 @@ const iconPaths = {
   twitter: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z',
   whatsapp: 'M12 2a10 10 0 00-8.94 14.5L2 22l5.67-1.49A10 10 0 1012 2z'
 };
+
+const meetingMailto =
+  "mailto:joseph.adesunkanmi@gmail.com?subject=Let's Build Something Great";
 
 const ContactSection = () => (
   <SectionWrapper id="contact" className="pf-contact-section">
@@ -43,18 +46,17 @@ const ContactSection = () => (
 
         <motion.div className="pf-contact-cta" whileHover={{ y: -4 }}>
           <h3>Ready to move?</h3>
-          <p>Book a meeting, download my resume, or send a direct message.</p>
+          <p>Book a meeting or send a direct message.</p>
           <div className="pf-contact-actions">
-            <a href="mailto:joseph.adesunkanmi@gmail.com?subject=Let's Build Something Great" className="pf-btn pf-btn-primary">
-              Book a Meeting
-            </a>
-            <a
-              href={heroContent.cvPath}
-              download={heroContent.cvFileName}
-              className="pf-btn pf-btn-secondary"
+            <button
+              type="button"
+              className="pf-btn pf-btn-primary"
+              onClick={() => {
+                window.location.href = meetingMailto;
+              }}
             >
-              Download Resume
-            </a>
+              Book a Meeting
+            </button>
           </div>
         </motion.div>
       </div>

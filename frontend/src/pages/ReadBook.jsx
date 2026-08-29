@@ -2,16 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import { usePlatformDialog } from '../contexts/PlatformDialogContext';
 import ChapterReader from '../components/Book/ChapterReader';
+import InteractiveChapterReader from '../chapters/build-with-ai/InteractiveChapterReader';
+import { chapterDemoMaps } from '../chapters/build-with-ai';
 import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
 import { getOriginalBookPrice } from '../utils/bookUtils';
 import PageLoader from '../components/PageLoader';
 import { getRedirectPath } from '../utils/authRedirect';
 import './ReadBook.css';
+import { getLocalBook, isLocalBookId } from '../utils/localBookService';
 
 const ReadBook = () => {
   const { bookId } = useParams();
   const { user, refreshProfile, addPurchasedBook } = useAuth();
+  const { notify } = usePlatformDialog();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -56,6 +61,11 @@ const ReadBook = () => {
 
   const fetchBook = async () => {
     try {
+      if (isLocalBookId(bookId)) {
+        setBook(getLocalBook(bookId));
+        return;
+      }
+
       const response = await axios.get(`/books/details/${bookId}`);
       setBook(response.data.book);
     } catch (error) {
@@ -101,7 +111,11 @@ const ReadBook = () => {
       link.remove();
     } catch (error) {
       console.error('Download failed:', error);
-      alert('Failed to download book');
+      notify({
+        title: 'Download failed',
+        message: 'Unable to download this book right now.',
+        variant: 'error'
+      });
     }
   };
 
@@ -136,7 +150,11 @@ const ReadBook = () => {
     }
 
     if (!flwPublicKey) {
-      alert("Payment system initializing, please try again in a moment.");
+      notify({
+        title: 'Payment not ready',
+        message: 'Payment system is initializing. Please try again in a moment.',
+        variant: 'warning'
+      });
       return;
     }
     
@@ -152,13 +170,25 @@ const ReadBook = () => {
              });
              addPurchasedBook(book._id);
              await refreshProfile();
-             alert("Payment successful! You can now read the book.");
+             notify({
+               title: 'Payment successful',
+               message: 'You can now read the book.',
+               variant: 'success'
+             });
            } catch (err) {
              console.error("Verification failed", err);
-             alert("Payment verification failed. Please contact support.");
+             notify({
+               title: 'Verification failed',
+               message: 'Payment verification failed. Please contact support.',
+               variant: 'error'
+             });
            }
         } else {
-          alert("Payment failed.");
+          notify({
+            title: 'Payment failed',
+            message: 'Your payment was not completed.',
+            variant: 'error'
+          });
         }
       },
       onClose: () => {
@@ -343,7 +373,7 @@ const ReadBook = () => {
           </button>
         </aside>
 
-        <div className="content-area">
+        <div className={`content-area ${currentPage?.interactive ? 'content-area-wide' : ''}`}>
           <div className="reader-top-meta">
             <div>
               <p className="reader-content-label">Reading Experience</p>
@@ -360,10 +390,18 @@ const ReadBook = () => {
 
           {currentPage ? (
             <>
-              <ChapterReader 
-                title={currentPage.title} 
-                content={currentPage.formattedContent || currentPage.rawContent} 
-              />
+              {currentPage.interactive && currentPage.segments ? (
+                <InteractiveChapterReader
+                  title={currentPage.title}
+                  segments={currentPage.segments}
+                  demoMap={chapterDemoMaps[currentPage.demoMapKey] || {}}
+                />
+              ) : (
+                <ChapterReader
+                  title={currentPage.title}
+                  content={currentPage.formattedContent || currentPage.rawContent}
+                />
+              )}
 
               <div className="nav-controls">
                 <button

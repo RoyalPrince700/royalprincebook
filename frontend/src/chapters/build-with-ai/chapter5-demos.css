@@ -1,0 +1,447 @@
+/* Chapter 5 — UI previews + Cursor prompts embedded in book */
+
+/* Restore portfolio home page colors — book reader was overriding hero text */
+.pf-book-preview {
+  color: var(--pf-text);
+  background: var(--pf-bg);
+}
+
+.chapter-content-interactive .pf-book-preview .pf-hero-title,
+.chapter-content-interactive .pf-book-preview .pf-hero-line {
+  color: var(--pf-text);
+}
+
+.chapter-content-interactive .pf-book-preview .pf-hero-subtitle {
+  color: var(--pf-text-muted);
+}
+
+.chapter-content-interactive .pf-book-preview .pf-tag {
+  color: var(--pf-text-muted);
+}
+
+.c5-demo {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 1.25rem 1.35rem 1.5rem;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.06);
+}
+
+.c5-demo-eyebrow {
+  margin: 0 0 0.85rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #1e3a5f;
+}
+
+.c5-demo-frame {
+  border-radius: 0.85rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.c5-demo-frame-hero .c5-site-preview-hero .pf-hero {
+  min-height: auto;
+  padding: 1.75rem 1.25rem 2.25rem;
+}
+
+.chapter-reader-interactive .c5-demo-frame-hero .c5-site-preview-hero .pf-hero {
+  padding: 2rem 1.25rem 2.5rem;
+}
+
+.chapter-reader-interactive .c5-demo-frame-hero .c5-site-preview-hero .pf-hero-portrait-wrap,
+.chapter-reader-interactive .c5-full-hero-wrap .pf-hero-portrait-wrap {
+  max-width: min(320px, 36vw);
+}
+
+.chapter-reader-interactive .c5-demo-frame-hero .c5-site-preview-hero .pf-hero-title {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+.c5-demo-frame-hero .c5-site-preview-hero .pf-hero-portrait-wrap {
+  max-width: 280px;
+}
+
+.c5-demo-frame-footer {
+  background: white;
+}
+
+.c5-demo-frame-full {
+  max-height: none;
+  overflow: visible;
+}
+
+.c5-annotate-list {
+  margin: 1rem 0 0;
+  padding-left: 1.15rem;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.c5-annotate-list li {
+  margin-bottom: 0.35rem;
+}
+
+.c5-annotate-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Cursor prompt box */
+.c5-cursor-prompt {
+  margin-top: 1.25rem;
+  padding: 1rem 1.1rem;
+  border-radius: 0.85rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+.c5-cursor-prompt-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+  color: #a5b4fc;
+  font-size: 0.85rem;
+}
+
+.c5-cursor-prompt-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #818cf8;
+}
+
+.c5-cursor-prompt-note {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.c5-cursor-prompt-text {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.65rem;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #cbd5e1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+/* Product cards grid */
+.c5-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.c5-card-grid-compact {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+/* Forms / login preview */
+.c5-button-showcase {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding: 1rem;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.c5-login-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0;
+}
+
+.c5-login-panel {
+  padding: 1.5rem;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+}
+
+.c5-login-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(30, 58, 95, 0.08);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1e3a5f;
+}
+
+.c5-login-title {
+  margin: 0.85rem 0 0.35rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.c5-login-muted {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.c5-login-google-box {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.c5-login-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.c5-login-google-btn {
+  width: 100%;
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.c5-google-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.c5-contact-form {
+  padding: 1.5rem;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.c5-form-section-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.c5-contact-form label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.c5-contact-form input,
+.c5-contact-form textarea {
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid #cbd5e1;
+  background: white;
+  font-size: 0.88rem;
+  font-family: inherit;
+}
+
+.c5-contact-form textarea {
+  resize: vertical;
+}
+
+/* Sidebar */
+.c5-sidebar-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: 220px;
+}
+
+.c5-sidebar {
+  padding: 1rem 0.85rem;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+}
+
+.c5-sidebar-title {
+  margin: 0 0 0.75rem;
+  padding: 0 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.c5-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.c5-sidebar-nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  border: none;
+  border-radius: 0.65rem;
+  background: transparent;
+  text-align: left;
+  font-size: 0.85rem;
+  color: #475569;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.c5-sidebar-nav button.is-active {
+  background: rgba(30, 58, 95, 0.08);
+  color: #1e3a5f;
+  font-weight: 600;
+}
+
+.c5-sidebar-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex-shrink: 0;
+}
+
+.c5-sidebar-main {
+  padding: 1.25rem 1.35rem;
+  background: #f8fafc;
+}
+
+.c5-sidebar-main-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.c5-sidebar-main h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.c5-sidebar-main p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #64748b;
+}
+
+/* Full page */
+.c5-full-page {
+  background: #f8fafc;
+}
+
+.c5-full-hero-wrap .pf-hero {
+  min-height: auto;
+  padding: 1.25rem 0 1.75rem;
+}
+
+.chapter-reader-interactive .c5-full-hero-wrap .pf-hero {
+  padding: 1.5rem 1rem 2rem;
+}
+
+.c5-full-hero-wrap .pf-hero-portrait-wrap {
+  max-width: 220px;
+}
+
+.c5-full-store {
+  padding: 1.5rem 1rem 2rem;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+}
+
+.c5-full-store-label {
+  margin: 0 0 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.c5-full-store-heading {
+  margin: 0 0 1rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Live site component previews (Royal Prince Hub reference) */
+.c5-site-preview {
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.c5-site-preview-nav .pf-desktop-section-nav {
+  position: relative;
+  top: auto;
+  border-radius: 0;
+}
+
+.c5-site-preview-hero .pf-hero {
+  min-height: auto;
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.c5-site-preview-hero .pf-hero-portrait-wrap {
+  max-width: min(280px, 40vw);
+}
+
+.c5-site-preview-cards {
+  padding: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .c5-site-preview-hero .pf-hero-content {
+    text-align: center;
+  }
+
+  .c5-sidebar-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .c5-sidebar {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .c5-sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .c5-login-panel {
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .c5-card-grid {
+    grid-template-columns: 1fr;
+  }
+}

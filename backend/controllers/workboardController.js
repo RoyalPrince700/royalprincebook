@@ -5,7 +5,7 @@ const WorkboardPresence = require('../models/WorkboardPresence');
 const WorkboardShare = require('../models/WorkboardShare');
 const WorkboardTag = require('../models/WorkboardTag');
 const User = require('../models/User');
-const { canEditWorkboard } = require('../middleware/auth');
+const { canEditWorkboard, optionalAuthenticateToken } = require('../middleware/auth');
 const {
   PRIORITIES,
   DEFAULT_PRIORITY,
@@ -13,11 +13,24 @@ const {
   applyCompletionXp
 } = require('../utils/workboardXp');
 const { calculateLevel } = require('../utils/workboardAchievements');
+const {
+  buildStreakPayload,
+  recordVisit,
+  restoreStreak,
+  toDateKey: streakToDateKey
+} = require('../utils/workboardStreak');
 const { runAchievementSync } = require('./workboardExecutionController');
+const { buildShareAccessPayload } = require('./workboardAccessController');
+const {
+  hasWorkboardPermission,
+  getPermissionsForUser,
+  canCollaborateOnBoard
+} = require('../utils/workboardAccess');
 const mongoose = require('mongoose');
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const TASKBOARD_SHARE_PATH_PREFIX = '/taskboard/share';
 const STATUSES = ['started', 'in_progress', 'almost_done', 'completed', 'postponed', 'cancelled'];
 const LEGACY_STATUS_MAP = {
   todo: 'started',
@@ -108,13 +121,12 @@ const addDays = (dateKey, amount) => {
 const startOfWeek = (dateKey) => {
   const date = parseDateKey(dateKey);
   const day = date.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  date.setDate(date.getDate() + diff);
+  date.setDate(date.getDate() - day);
   return toDateKey(date);
 };
 
-/** Workboard weeks are Mon–Fri (matches Week 1–4 UI). */
-const endOfWeek = (dateKey) => addDays(startOfWeek(dateKey), 4);
+/** Workboard weeks are Sun–Sat (matches Week 1–4 UI). */
+const endOfWeek = (dateKey) => addDays(startOfWeek(dateKey), 6);
 
 const startOfMonth = (dateKey) => {
   const date = parseDateKey(dateKey);
@@ -136,6 +148,13 @@ const getRangeForPeriod = (period, dateKey) => {
     return { startDate: startOfMonth(dateKey), endDate: endOfMonth(dateKey) };
   }
   return { startDate: dateKey, endDate: dateKey };
+};
+
+const buildTaskboardShareUrl = (req, token) => {
+  const frontend = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+  const path = `${TASKBOARD_SHARE_PATH_PREFIX}/${token}`;
+  if (frontend) return `${frontend}${path}`;
+  return `${req.protocol}://${req.get('host')}${path}`;
 };
 
 const STATUS_LABELS = {
@@ -206,9 +225,9 @@ const formatRangeLabel = (period, startDate, endDate) => {
 };
 
 const buildDocxFilename = (period, startDate, endDate) => {
-  if (period === 'day') return `workboard-daily-${startDate}.docx`;
-  if (period === 'week') return `workboard-weekly-${startDate}-to-${endDate}.docx`;
-  return `workboard-monthly-${startDate.slice(0, 7)}.docx`;
+  if (period === 'day') return `taskboard-daily-${startDate}.docx`;
+  if (period === 'week') return `taskboard-weekly-${startDate}-to-${endDate}.docx`;
+  return `taskboard-monthly-${startDate.slice(0, 7)}.docx`;
 };
 
 const summarizeTasks = (tasks) => {
@@ -234,7 +253,7 @@ const summarizeTasks = (tasks) => {
 
 const buildReportMarkdown = ({ ownerName, period, startDate, endDate, tasks, summary }) => {
   const lines = [
-    `# Workboard Report`,
+    `# Taskboard Report`,
     ``,
     `**Worker:** ${ownerName}`,
     `**Period:** ${period}`,
@@ -300,6 +319,13 @@ const resolveOwnerId = async (req) => {
   }
 
   if (requestedOwnerId && requestedOwnerId !== req.user._id.toString()) {
+    const canCollaborate = await canCollaborateOnBoard(
+      requestedOwnerId,
+      req.user._id.toString()
+    );
+    if (canCollaborate) {
+      return requestedOwnerId;
+    }
     if (req.user.role !== 'admin') {
       return null;
     }
@@ -359,7 +385,7 @@ const getWorkers = async (req, res) => {
     });
   } catch (error) {
     console.error('Workboard workers error:', error);
-    res.status(500).json({ message: 'Failed to load workboard workers' });
+    res.status(500).json({ message: 'Failed to load taskboard workers' });
   }
 };
 
@@ -388,7 +414,10 @@ const getTasks = async (req, res) => {
     }
 
     const canEdit =
-      canEditWorkboard(req.user) && ownerId === req.user._id.toString();
+      canEditWorkboard(req.user) &&
+      (ownerId === req.user._id.toString() ||
+        (await canCollaborateOnBoard(ownerId, req.user._id)));
+    const myPermissions = await getPermissionsForUser(ownerId, req.user._id);
 
     const presence = await WorkboardPresence.findOne({ user: ownerId });
     const owner = await User.findById(ownerId).select('username email');
@@ -427,6 +456,7 @@ const getTasks = async (req, res) => {
         endDate,
         owner: ownerPayload,
         canEdit,
+        myPermissions,
         presence: presencePayload,
         tasksByDate,
         tasks: sortTasks(normalized),
@@ -442,6 +472,7 @@ const getTasks = async (req, res) => {
       date,
       owner: ownerPayload,
       canEdit,
+      myPermissions,
       presence: presencePayload,
       tasks: sortTasks(tasks).map((task) => ({
         ...task,
@@ -452,7 +483,7 @@ const getTasks = async (req, res) => {
     });
   } catch (error) {
     console.error('Workboard get tasks error:', error);
-    res.status(500).json({ message: 'Failed to load workboard tasks' });
+    res.status(500).json({ message: 'Failed to load taskboard tasks' });
   }
 };
 
@@ -472,7 +503,8 @@ const createTask = async (req, res) => {
       assignedBy = '',
       tag = '',
       priority = DEFAULT_PRIORITY,
-      project = null
+      project = null,
+      ownerId: requestedOwnerId
     } = req.body;
 
     if (!title?.trim()) {
@@ -504,14 +536,24 @@ const createTask = async (req, res) => {
       projectId = project;
     }
 
+    const userId = req.user._id.toString();
+    let boardOwnerId = userId;
+    if (requestedOwnerId && requestedOwnerId !== userId) {
+      const canAdd = await hasWorkboardPermission(requestedOwnerId, userId, 'add_task');
+      if (!canAdd) {
+        return res.status(403).json({ message: 'You do not have permission to add tasks here' });
+      }
+      boardOwnerId = requestedOwnerId;
+    }
+
     const previousLevel = calculateLevel(
-      (await User.findById(req.user._id).select('workboardXp'))?.workboardXp || 0
+      (await User.findById(boardOwnerId).select('workboardXp'))?.workboardXp || 0
     );
 
-    const savedTag = await upsertTag(req.user._id, tag);
+    const savedTag = await upsertTag(boardOwnerId, tag);
 
     const task = new WorkboardTask({
-      owner: req.user._id,
+      owner: boardOwnerId,
       title: title.trim(),
       description: String(description || '').trim(),
       date,
@@ -532,13 +574,13 @@ const createTask = async (req, res) => {
 
     const xpResult = applyCompletionXp(task, 'started', status);
     await task.save();
-    const totalXp = await adjustUserWorkboardXp(req.user._id, xpResult.xpDelta);
+    const totalXp = await adjustUserWorkboardXp(boardOwnerId, xpResult.xpDelta);
     const nextLevel = calculateLevel(totalXp);
-    const achievementSync = await runAchievementSync(req.user._id);
+    const achievementSync = await runAchievementSync(boardOwnerId);
 
     res.status(201).json({
       task,
-      tags: await listTagNames(req.user._id),
+      tags: await listTagNames(boardOwnerId),
       xpAwarded: xpResult.awarded,
       xpDelta: xpResult.xpDelta,
       totalXp,
@@ -562,13 +604,18 @@ const updateTask = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
     }
-    if (task.owner.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'You can only edit your own tasks' });
+    const ownerId = task.owner.toString();
+    const userId = req.user._id.toString();
+    const canEditTask =
+      ownerId === userId ||
+      (await hasWorkboardPermission(ownerId, userId, 'edit_task'));
+    if (!canEditTask) {
+      return res.status(403).json({ message: 'You do not have permission to edit this task' });
     }
 
     const previousStatus = normalizeTaskStatus(task.status);
     const previousLevel = calculateLevel(
-      (await User.findById(req.user._id).select('workboardXp'))?.workboardXp || 0
+      (await User.findById(ownerId).select('workboardXp'))?.workboardXp || 0
     );
     if (!task.originalDate) {
       task.originalDate = task.date;
@@ -642,19 +689,19 @@ const updateTask = async (req, res) => {
       task.assignedBy = String(assignedBy || '').trim();
     }
     if (tag !== undefined) {
-      task.tag = await upsertTag(req.user._id, tag);
+      task.tag = await upsertTag(ownerId, tag);
     }
 
     const nextStatus = normalizeTaskStatus(task.status);
     const xpResult = applyCompletionXp(task, previousStatus, nextStatus);
     await task.save();
-    const totalXp = await adjustUserWorkboardXp(req.user._id, xpResult.xpDelta);
+    const totalXp = await adjustUserWorkboardXp(ownerId, xpResult.xpDelta);
     const nextLevel = calculateLevel(totalXp);
-    const achievementSync = await runAchievementSync(req.user._id);
+    const achievementSync = await runAchievementSync(ownerId);
 
     res.json({
       task,
-      tags: await listTagNames(req.user._id),
+      tags: await listTagNames(ownerId),
       xpAwarded: xpResult.awarded,
       xpDelta: xpResult.xpDelta,
       totalXp,
@@ -683,13 +730,19 @@ const updateTaskStatus = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
     }
-    if (task.owner.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'You can only update your own tasks' });
+    const ownerId = task.owner.toString();
+    const userId = req.user._id.toString();
+    const canUpdateStatus =
+      ownerId === userId ||
+      (await hasWorkboardPermission(ownerId, userId, 'update_status')) ||
+      (await hasWorkboardPermission(ownerId, userId, 'edit_task'));
+    if (!canUpdateStatus) {
+      return res.status(403).json({ message: 'You do not have permission to update this task' });
     }
 
     const previousStatus = normalizeTaskStatus(task.status);
     const previousLevel = calculateLevel(
-      (await User.findById(req.user._id).select('workboardXp'))?.workboardXp || 0
+      (await User.findById(ownerId).select('workboardXp'))?.workboardXp || 0
     );
     if (!task.originalDate) {
       task.originalDate = task.date;
@@ -702,9 +755,9 @@ const updateTaskStatus = async (req, res) => {
     }
     const xpResult = applyCompletionXp(task, previousStatus, status);
     await task.save();
-    const totalXp = await adjustUserWorkboardXp(req.user._id, xpResult.xpDelta);
+    const totalXp = await adjustUserWorkboardXp(ownerId, xpResult.xpDelta);
     const nextLevel = calculateLevel(totalXp);
-    const achievementSync = await runAchievementSync(req.user._id);
+    const achievementSync = await runAchievementSync(ownerId);
 
     res.json({
       task: { ...task.toObject(), status: normalizeTaskStatus(task.status) },
@@ -731,15 +784,20 @@ const deleteTask = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: 'Task not found' });
     }
-    if (task.owner.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'You can only delete your own tasks' });
+    const ownerId = task.owner.toString();
+    const userId = req.user._id.toString();
+    const canDelete =
+      ownerId === userId ||
+      (await hasWorkboardPermission(ownerId, userId, 'delete_task'));
+    if (!canDelete) {
+      return res.status(403).json({ message: 'You do not have permission to delete this task' });
     }
 
     const clawback =
       normalizeTaskStatus(task.status) === 'completed' ? Number(task.xpAwarded) || 0 : 0;
 
     await task.deleteOne();
-    const totalXp = await adjustUserWorkboardXp(req.user._id, clawback ? -clawback : 0);
+    const totalXp = await adjustUserWorkboardXp(ownerId, clawback ? -clawback : 0);
 
     res.json({ message: 'Task deleted', xpDelta: clawback ? -clawback : 0, totalXp });
   } catch (error) {
@@ -762,7 +820,11 @@ const addComment = async (req, res) => {
 
     const isOwner = task.owner.toString() === req.user._id.toString();
     const isSuperior = req.user.role === 'superior';
-    if (!isOwner && !isSuperior) {
+    const canComment =
+      isOwner ||
+      isSuperior ||
+      (await hasWorkboardPermission(task.owner.toString(), req.user._id.toString(), 'add_comment'));
+    if (!canComment) {
       return res.status(403).json({ message: 'Not allowed to comment on this task' });
     }
 
@@ -813,7 +875,7 @@ const buildReportDocx = ({ ownerName, period, startDate, endDate, tasks, summary
   const rangeLabel = formatRangeLabel(period, startDate, endDate);
   const children = [
     new Paragraph({
-      text: `Workboard Report — ${periodTitle}`,
+      text: `Taskboard Report — ${periodTitle}`,
       heading: HeadingLevel.HEADING_1,
       spacing: { after: 200 }
     }),
@@ -1064,7 +1126,7 @@ const createShareLink = async (req, res) => {
     }
 
     if (canEditWorkboard(req.user) && ownerId !== req.user._id.toString() && req.user.role !== 'superior') {
-      return res.status(403).json({ message: 'You can only share your own workboard' });
+      return res.status(403).json({ message: 'You can only share your own taskboard' });
     }
 
     const { startDate, endDate } = getRangeForPeriod(period, date);
@@ -1076,7 +1138,8 @@ const createShareLink = async (req, res) => {
       createdBy: req.user._id,
       period,
       startDate,
-      endDate
+      endDate,
+      anchorDate: date
     });
 
     res.status(201).json({
@@ -1084,8 +1147,10 @@ const createShareLink = async (req, res) => {
       period: share.period,
       startDate: share.startDate,
       endDate: share.endDate,
+      anchorDate: share.anchorDate || share.startDate,
       expiresAt: share.expiresAt,
-      path: `/admin/workboard/share/${share.token}`
+      path: `${TASKBOARD_SHARE_PATH_PREFIX}/${share.token}`,
+      url: buildTaskboardShareUrl(req, share.token)
     });
   } catch (error) {
     console.error('Workboard share create error:', error);
@@ -1115,6 +1180,14 @@ const getSharedReport = async (req, res) => {
       ...task,
       status: normalizeTaskStatus(task.status)
     }));
+    const tasksByDate = {};
+    normalizedTasks.forEach((task) => {
+      if (!tasksByDate[task.date]) tasksByDate[task.date] = [];
+      tasksByDate[task.date].push(task);
+    });
+    Object.keys(tasksByDate).forEach((key) => {
+      tasksByDate[key] = sortTasks(tasksByDate[key]);
+    });
     const summary = summarizeTasks(normalizedTasks);
     const markdown = buildReportMarkdown({
       ownerName: owner?.username || 'Worker',
@@ -1126,11 +1199,14 @@ const getSharedReport = async (req, res) => {
     });
 
     const presence = await WorkboardPresence.findOne({ user: share.owner });
+    const anchorDate = share.anchorDate || share.startDate;
+    const access = await buildShareAccessPayload(share, req.user?._id);
 
     res.json({
       period: share.period,
       startDate: share.startDate,
       endDate: share.endDate,
+      anchorDate,
       owner: owner
         ? { id: owner._id, username: owner.username, email: owner.email }
         : null,
@@ -1140,8 +1216,12 @@ const getSharedReport = async (req, res) => {
       },
       summary,
       tasks: normalizedTasks,
+      tasksByDate,
       markdown,
-      readOnly: true
+      readOnly: access.readOnly,
+      permission: access.permission,
+      myPermissions: access.myPermissions,
+      accessRequest: access.accessRequest
     });
   } catch (error) {
     console.error('Workboard shared report error:', error);
@@ -1264,7 +1344,7 @@ const createTag = async (req, res) => {
 
 /**
  * Lightweight history payload for streaks / royal score.
- * Returns lean task fields + owner's workboardXp — formulas stay on the client.
+ * Returns lean task fields + owner's workboardXp + visit streak state.
  */
 const getGamificationStats = async (req, res) => {
   try {
@@ -1275,9 +1355,11 @@ const getGamificationStats = async (req, res) => {
 
     const endDate = toDateKey(new Date());
     const startDate = addDays(endDate, -(GAMIFICATION_LOOKBACK_DAYS - 1));
+    const streakFields =
+      'workboardXp username workboardAchievements workboardVisitStreak workboardLongestStreak workboardLastVisitDate workboardStreakBeforeBreak workboardStreakRestoreMonth workboardStreakRestoreCount';
 
     const [owner, tasks] = await Promise.all([
-      User.findById(ownerId).select('workboardXp username workboardAchievements'),
+      User.findById(ownerId).select(streakFields),
       WorkboardTask.find({
         owner: ownerId,
         $or: [
@@ -1291,6 +1373,10 @@ const getGamificationStats = async (req, res) => {
         .lean()
     ]);
 
+    if (!owner) {
+      return res.status(404).json({ message: 'Owner not found' });
+    }
+
     const normalized = tasks.map((task) => ({
       ...task,
       status: normalizeTaskStatus(task.status),
@@ -1298,17 +1384,66 @@ const getGamificationStats = async (req, res) => {
       originalDate: task.originalDate || task.date || null
     }));
 
+    const isOwnBoard =
+      canEditWorkboard(req.user) && ownerId === req.user._id.toString();
+    let streakPayload = buildStreakPayload(owner, endDate);
+
+    if (isOwnBoard) {
+      const visitResult = await recordVisit(owner, endDate);
+      streakPayload = visitResult.streak;
+
+      if (visitResult.changed) {
+        await runAchievementSync(ownerId);
+      }
+    }
+
     res.json({
       ownerId,
-      totalXp: owner?.workboardXp || 0,
+      totalXp: owner.workboardXp || 0,
       startDate,
       endDate,
       tasks: normalized,
-      achievements: owner?.workboardAchievements || []
+      achievements: owner.workboardAchievements || [],
+      streak: streakPayload
     });
   } catch (error) {
     console.error('Workboard gamification stats error:', error);
     res.status(500).json({ message: 'Failed to load gamification stats' });
+  }
+};
+
+const restoreVisitStreak = async (req, res) => {
+  try {
+    if (!canEditWorkboard(req.user)) {
+      return res.status(403).json({ message: 'Not allowed to restore streak' });
+    }
+
+    const ownerId = req.user._id.toString();
+    const todayKey = streakToDateKey();
+    const user = await User.findById(ownerId).select(
+      'workboardXp workboardVisitStreak workboardLongestStreak workboardLastVisitDate workboardStreakBeforeBreak workboardStreakRestoreMonth workboardStreakRestoreCount workboardAchievements'
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const result = await restoreStreak(user, todayKey);
+    if (!result.ok) {
+      return res.status(400).json({ message: result.message });
+    }
+
+    const achievementResult = await runAchievementSync(ownerId);
+
+    res.json({
+      streak: result.streak,
+      totalXp: result.totalXp,
+      achievements: achievementResult.list || [],
+      newlyUnlocked: achievementResult.newlyUnlocked || []
+    });
+  } catch (error) {
+    console.error('Workboard streak restore error:', error);
+    res.status(500).json({ message: 'Failed to restore streak' });
   }
 };
 
@@ -1329,5 +1464,6 @@ module.exports = {
   getPresence,
   getTags,
   createTag,
-  getGamificationStats
+  getGamificationStats,
+  restoreVisitStreak
 };

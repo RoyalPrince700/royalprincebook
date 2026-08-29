@@ -4,6 +4,7 @@ import axios from 'axios';
 import AdminLayout from './AdminLayout';
 import PageLoader from '../PageLoader';
 import { formatCurrency, formatDate } from './adminUtils';
+import { mergeBooksForCatalog } from '../../utils/localBookService';
 
 const AdminBooks = () => {
   const [books, setBooks] = useState([]);
@@ -14,7 +15,7 @@ const AdminBooks = () => {
     const fetchBooks = async () => {
       try {
         const response = await axios.get('/admin/books');
-        setBooks(response.data.books || []);
+        setBooks(mergeBooksForCatalog(response.data.books || []));
       } catch (fetchError) {
         console.error('Failed to load admin books:', fetchError);
         setError('Failed to load admin books.');
@@ -102,12 +103,13 @@ const AdminBooks = () => {
                 <th className="px-4 py-2">Purchases</th>
                 <th className="px-4 py-2">Revenue</th>
                 <th className="px-4 py-2">Updated</th>
+                <th className="px-4 py-2">Actions</th>
               </tr>
             </thead>
             <tbody>
               {books.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-4 py-10 text-center text-sm text-slate-600">
+                  <td colSpan="8" className="px-4 py-10 text-center text-sm text-slate-600">
                     No books found.
                   </td>
                 </tr>
@@ -118,7 +120,8 @@ const AdminBooks = () => {
                       <div>
                         <p className="font-semibold text-slate-950">{book.title}</p>
                         <p className="mt-1 text-xs text-slate-500">
-                          {book.genre || 'General'} • {book.pagesCount || 0} pages
+                          {book.genre || 'General'} • {book.pagesCount || book.pages?.length || 0} pages
+                          {book.isLocal ? ' • Local draft' : ''}
                         </p>
                       </div>
                     </td>
@@ -139,8 +142,24 @@ const AdminBooks = () => {
                     <td className="border border-l-0 border-r-0 border-slate-200 px-4 py-4 font-medium text-slate-900">
                       {formatCurrency(book.revenue || 0)}
                     </td>
+                    <td className="border border-l-0 border-r-0 border-slate-200 px-4 py-4">
+                      {book.updatedAt ? formatDate(book.updatedAt) : '—'}
+                    </td>
                     <td className="rounded-r-3xl border border-l-0 border-slate-200 px-4 py-4">
-                      {formatDate(book.updatedAt)}
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          to={`/books/${book._id}/read`}
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                        >
+                          Read
+                        </Link>
+                        <Link
+                          to={`/books/${book._id}/details`}
+                          className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                        >
+                          Details
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))

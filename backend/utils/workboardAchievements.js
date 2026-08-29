@@ -90,8 +90,7 @@ const addDays = (dateKey, amount) => {
 const startOfWeek = (dateKey) => {
   const date = parseDateKey(dateKey);
   const day = date.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  date.setDate(date.getDate() + diff);
+  date.setDate(date.getDate() - day);
   return toDateKey(date);
 };
 
@@ -99,10 +98,7 @@ const weekdayKeysDescending = (fromDateKey, count) => {
   const keys = [];
   const cursor = parseDateKey(fromDateKey);
   while (keys.length < count) {
-    const dow = cursor.getDay();
-    if (dow >= 1 && dow <= 5) {
-      keys.push(toDateKey(cursor));
-    }
+    keys.push(toDateKey(cursor));
     cursor.setDate(cursor.getDate() - 1);
   }
   return keys;
@@ -192,7 +188,7 @@ const evaluateEarnedAchievementIds = (ctx = {}) => {
   const weekStart = startOfWeek(todayKey);
   for (let offset = 0; offset < 16; offset += 1) {
     const ws = addDays(weekStart, -offset * 7);
-    const weekDates = new Set([0, 1, 2, 3, 4].map((i) => addDays(ws, i)));
+    const weekDates = new Set([0, 1, 2, 3, 4, 5, 6].map((i) => addDays(ws, i)));
     const weekCritical = tasks.filter((t) => weekDates.has(t.date) && isCritical(t));
     if (weekCritical.length === 0) continue;
     if (weekCritical.every(isCompleted)) {

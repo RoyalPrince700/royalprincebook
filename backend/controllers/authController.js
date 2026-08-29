@@ -1,5 +1,6 @@
 const passport = require('passport');
 const User = require('../models/User');
+const { getAvatarEmoji, isValidAvatarId } = require('../utils/workboardAvatars');
 
 const getFrontendUrl = () => {
   const isProdLike =
@@ -55,7 +56,9 @@ const getProfile = async (req, res) => {
         role: user.role,
         createdAt: user.createdAt,
         purchasedBooks: user.purchasedBooks || [],
-        workboardXp: user.workboardXp || 0
+        workboardXp: user.workboardXp || 0,
+        workboardAvatar: user.workboardAvatar || 'royal-crown',
+        avatarEmoji: getAvatarEmoji(user.workboardAvatar)
       }
     });
   } catch (error) {
@@ -67,26 +70,38 @@ const getProfile = async (req, res) => {
 // Update user profile
 const updateProfile = async (req, res) => {
   try {
-    const { username, email } = req.body;
+    const { username, email, workboardAvatar } = req.body;
     const userId = req.user._id;
 
-    // Check if new email/username is already taken
-    const existingUser = await User.findOne({
-      $and: [
-        { _id: { $ne: userId } },
-        { $or: [{ email }, { username }] }
-      ]
-    });
+    const orClauses = [];
+    if (email) orClauses.push({ email });
+    if (username) orClauses.push({ username });
 
-    if (existingUser) {
-      return res.status(400).json({
-        message: 'Email or username already taken'
+    if (orClauses.length) {
+      const existingUser = await User.findOne({
+        $and: [{ _id: { $ne: userId } }, { $or: orClauses }]
       });
+
+      if (existingUser) {
+        return res.status(400).json({
+          message: 'Email or username already taken'
+        });
+      }
+    }
+
+    const updates = {};
+    if (username != null) updates.username = username;
+    if (email != null) updates.email = email;
+    if (workboardAvatar != null) {
+      if (!isValidAvatarId(workboardAvatar)) {
+        return res.status(400).json({ message: 'Invalid avatar selection' });
+      }
+      updates.workboardAvatar = workboardAvatar;
     }
 
     const user = await User.findByIdAndUpdate(
       userId,
-      { username, email },
+      updates,
       { new: true, runValidators: true }
     );
 
@@ -102,7 +117,9 @@ const updateProfile = async (req, res) => {
         email: user.email,
         role: user.role,
         purchasedBooks: user.purchasedBooks || [],
-        workboardXp: user.workboardXp || 0
+        workboardXp: user.workboardXp || 0,
+        workboardAvatar: user.workboardAvatar || 'royal-crown',
+        avatarEmoji: getAvatarEmoji(user.workboardAvatar)
       }
     });
   } catch (error) {
@@ -118,7 +135,7 @@ const updateUserRole = async (req, res) => {
     const { id } = req.params;
     const adminId = req.user._id;
 
-    if (!['user', 'admin', 'superior'].includes(role)) {
+    if (!['user', 'admin', 'superior', 'webdev_student'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
 
