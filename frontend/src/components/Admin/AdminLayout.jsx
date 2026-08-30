@@ -145,7 +145,7 @@ const AdminLayout = ({
       className={`admin-workspace-shell ${
         isImmersive
           ? 'admin-workspace-shell--immersive h-[100dvh] min-h-0 overflow-hidden bg-[var(--wb-board,#f7f1e8)]'
-          : `admin-workspace-shell--default min-h-screen pb-28 lg:pb-0 ${
+          : `admin-workspace-shell--default min-h-screen ${hideNav ? 'pb-4' : 'pb-28'} lg:pb-0 ${
               isMinimal
                 ? 'admin-workspace-shell--minimal bg-[var(--wb-board,#f7f1e8)]'
                 : 'admin-workspace-shell--standard bg-slate-50'

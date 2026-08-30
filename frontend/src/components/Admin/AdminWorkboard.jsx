@@ -1957,156 +1957,166 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
           ) : (
             <>
               <div className="wb-toolbar">
-                <BoardWebsiteLink className="wb-website-link--toolbar" />
-                <div className="wb-mode-toggle" role="group" aria-label="Board mode">
-              <button
-                type="button"
-                className="wb-mode-btn"
-                aria-pressed="false"
-                onClick={() => setBoardMode('dashboard')}
-              >
-                Command
-              </button>
-              <button
-                type="button"
-                className="wb-mode-btn is-active"
-                aria-pressed="true"
-              >
-                Taskboard
-              </button>
-              <button
-                type="button"
-                className="wb-mode-btn"
-                aria-pressed="false"
-                onClick={() => navigate('/noteboard')}
-              >
-                Noteboard
-              </button>
-              <button
-                type="button"
-                className="wb-mode-btn"
-                aria-pressed="false"
-                onClick={() => setBoardMode('projects')}
-              >
-                Battles
-              </button>
-              <button
-                type="button"
-                className="wb-mode-btn"
-                aria-pressed="false"
-                onClick={() => setBoardMode('achievements')}
-              >
-                Marks
-              </button>
-              <button
-                type="button"
-                className="wb-mode-btn"
-                aria-pressed="false"
-                onClick={() => setBoardMode('analytics')}
-                title="Analytics"
-              >
-                Intel
-              </button>
-              <button
-                type="button"
-                className="wb-mode-btn"
-                aria-pressed="false"
-                onClick={() => setBoardMode('leaderboard')}
-                title="Leaderboard"
-              >
-                Leaderboard
-              </button>
-              <button
-                type="button"
-                className="wb-mode-btn"
-                aria-pressed="false"
-                onClick={() => setBoardMode('victories')}
-                title="Victory Journal"
-              >
-                Wins
-              </button>
-            </div>
+                <div className="wb-toolbar-row wb-toolbar-row--primary">
+                  <BoardWebsiteLink className="wb-website-link--toolbar" />
+                  <div className="wb-toolbar-scroll">
+                    <div className="wb-mode-toggle" role="group" aria-label="Board mode">
+                      <button
+                        type="button"
+                        className="wb-mode-btn"
+                        aria-pressed="false"
+                        onClick={() => setBoardMode('dashboard')}
+                      >
+                        Command
+                      </button>
+                      <button
+                        type="button"
+                        className="wb-mode-btn is-active"
+                        aria-pressed="true"
+                      >
+                        Taskboard
+                      </button>
+                      <button
+                        type="button"
+                        className="wb-mode-btn"
+                        aria-pressed="false"
+                        onClick={() => navigate('/noteboard')}
+                      >
+                        Noteboard
+                      </button>
+                      <button
+                        type="button"
+                        className="wb-mode-btn"
+                        aria-pressed="false"
+                        onClick={() => setBoardMode('projects')}
+                      >
+                        Battles
+                      </button>
+                      <button
+                        type="button"
+                        className="wb-mode-btn"
+                        aria-pressed="false"
+                        onClick={() => setBoardMode('achievements')}
+                      >
+                        Marks
+                      </button>
+                      <button
+                        type="button"
+                        className="wb-mode-btn"
+                        aria-pressed="false"
+                        onClick={() => setBoardMode('analytics')}
+                        title="Analytics"
+                      >
+                        Intel
+                      </button>
+                      <button
+                        type="button"
+                        className="wb-mode-btn"
+                        aria-pressed="false"
+                        onClick={() => setBoardMode('leaderboard')}
+                        title="Leaderboard"
+                      >
+                        Leaderboard
+                      </button>
+                      <button
+                        type="button"
+                        className="wb-mode-btn"
+                        aria-pressed="false"
+                        onClick={() => setBoardMode('victories')}
+                        title="Victory Journal"
+                      >
+                        Wins
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
-            <button
-              type="button"
-              className="wb-today-btn"
-              onClick={goToToday}
-              title="Jump to today (T)"
-            >
-              Today
-            </button>
+                <div className="wb-toolbar-row wb-toolbar-row--controls">
+                  <button
+                    type="button"
+                    className="wb-today-btn"
+                    onClick={goToToday}
+                    title="Jump to today (T)"
+                  >
+                    Today
+                  </button>
 
-            <button
-              type="button"
-              className="wb-mode-btn"
-              onClick={() => {
-                setSearchOpen(true);
-                requestAnimationFrame(() => searchInputRef.current?.focus());
-              }}
-              title="Search (/)"
-              aria-label="Search taskboard"
-            >
-              Search
-            </button>
+                  <button
+                    type="button"
+                    className="wb-mode-btn"
+                    onClick={() => {
+                      setSearchOpen(true);
+                      requestAnimationFrame(() => searchInputRef.current?.focus());
+                    }}
+                    title="Search (/)"
+                    aria-label="Search taskboard"
+                  >
+                    Search
+                  </button>
 
-            <select
-              className="wb-month-select"
-              value={selectedMonthIndex}
-              onChange={(event) => setSelectedMonthIndex(event.target.value)}
-              aria-label="Select month"
-            >
-              {MONTH_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+                  <select
+                    className="wb-month-select"
+                    value={selectedMonthIndex}
+                    onChange={(event) => setSelectedMonthIndex(event.target.value)}
+                    aria-label="Select month"
+                  >
+                    {MONTH_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
 
-            <select
-              className="wb-year-select"
-              value={selectedYear}
-              onChange={(event) => setSelectedYear(event.target.value)}
-              aria-label="Select year"
-            >
-              {yearOptions.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
+                  <select
+                    className="wb-year-select"
+                    value={selectedYear}
+                    onChange={(event) => setSelectedYear(event.target.value)}
+                    aria-label="Select year"
+                  >
+                    {yearOptions.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
 
-            <div className="wb-view-toggle" role="group" aria-label="Calendar view">
-              <button
-                type="button"
-                className={`wb-view-btn${viewMode === 'week' ? ' is-active' : ''}`}
-                onClick={() => setViewMode('week')}
-              >
-                Week
-              </button>
-              <button
-                type="button"
-                className={`wb-view-btn${viewMode === 'month' ? ' is-active' : ''}`}
-                onClick={() => setViewMode('month')}
-              >
-                Month
-              </button>
-            </div>
+                  <div className="wb-view-toggle" role="group" aria-label="Calendar view">
+                    <button
+                      type="button"
+                      className={`wb-view-btn${viewMode === 'week' ? ' is-active' : ''}`}
+                      onClick={() => setViewMode('week')}
+                    >
+                      Week
+                    </button>
+                    <button
+                      type="button"
+                      className={`wb-view-btn${viewMode === 'month' ? ' is-active' : ''}`}
+                      onClick={() => setViewMode('month')}
+                    >
+                      Month
+                    </button>
+                  </div>
+                </div>
 
-            <div className={`wb-weeks${viewMode === 'month' ? ' is-secondary' : ''}`}>
-              {monthWeeks.map((week) => (
-                <button
-                  key={week.start}
-                  type="button"
-                  className={`wb-week-tab${
-                    viewMode === 'week' && activeWeekIndex === week.index ? ' is-active' : ''
-                  }`}
-                  onClick={() => selectWeek(week.index)}
-                >
-                  {week.label}
-                </button>
-              ))}
-            </div>
-          </div>
+                <div className="wb-toolbar-row wb-toolbar-row--weeks">
+                  <div className="wb-toolbar-scroll">
+                    <div className={`wb-weeks${viewMode === 'month' ? ' is-secondary' : ''}`}>
+                      {monthWeeks.map((week) => (
+                        <button
+                          key={week.start}
+                          type="button"
+                          className={`wb-week-tab${
+                            viewMode === 'week' && activeWeekIndex === week.index ? ' is-active' : ''
+                          }`}
+                          onClick={() => selectWeek(week.index)}
+                        >
+                          {week.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
           {viewMode === 'week' ? (
             <p className="wb-week-range">{formatWeekRange(weekStart)}</p>

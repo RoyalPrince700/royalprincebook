@@ -1,0 +1,18 @@
+/* Scroll Progress */
+.pf-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 100;
+  background: transparent;
+  transform-origin: left;
+}
+
+.pf-scroll-progress-bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--pf-gold), var(--pf-gold-light));
+}

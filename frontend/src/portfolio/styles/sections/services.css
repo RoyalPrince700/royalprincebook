@@ -1,0 +1,53 @@
+/* Services */
+.pf-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+
+.pf-service-card {
+  padding: 1.5rem;
+  border-radius: var(--pf-radius);
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.pf-service-card-active,
+.pf-service-card:hover {
+  border-color: rgba(201, 162, 39, 0.4);
+  box-shadow: var(--pf-shadow);
+  background: var(--pf-card-hover);
+}
+
+.pf-service-icon {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(201, 162, 39, 0.12);
+  color: var(--pf-gold-dark);
+  font-size: 1rem;
+}
+
+[data-theme='dark'] .pf-service-icon {
+  color: var(--pf-gold-light);
+}
+
+.pf-service-title {
+  margin: 1rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.pf-service-summary {
+  margin: 0.75rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  color: var(--pf-text-muted);
+}

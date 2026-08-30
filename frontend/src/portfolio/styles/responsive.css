@@ -1,0 +1,223 @@
+/* Mobile & small tablet — portfolio home */
+@media (max-width: 1023px) {
+  .pf-main {
+    padding-inline-end: 2.75rem;
+  }
+
+  .pf-back-to-top {
+    right: 3rem;
+    bottom: 1rem;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+@media (max-width: 899px) {
+  .pf-hero-content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .pf-hero-portrait-wrap {
+    order: -1;
+    width: min(100%, 18rem);
+    margin-inline: auto;
+  }
+
+  .pf-hero-title {
+    font-size: clamp(1.85rem, 8.5vw, 2.85rem);
+  }
+
+  .pf-hero-subtitle {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .pf-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 1.5rem;
+  }
+
+  .pf-hero-actions .pf-btn {
+    width: 100%;
+  }
+
+  .pf-hero-tags {
+    margin-top: 1.15rem;
+  }
+
+  .pf-floating-icon {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .pf-site-nav .pf-desktop-section-nav-scroll {
+    display: none;
+  }
+
+  .pf-site-nav-theme-desktop {
+    display: none;
+  }
+
+  .pf-site-nav .pf-desktop-section-nav-inner {
+    gap: 0.5rem;
+    min-height: 3.65rem;
+    padding-block: 0.4rem;
+    justify-content: space-between;
+  }
+
+  .pf-site-nav .pf-site-nav-end {
+    margin-left: auto;
+  }
+
+  .pf-site-nav .pf-desktop-section-nav-brand-mark,
+  .pf-site-nav .pf-desktop-section-nav-theme,
+  .pf-site-nav-menu-btn {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+
+  .pf-section-title {
+    font-size: clamp(1.65rem, 6.5vw, 2.35rem);
+  }
+
+  .pf-section-copy {
+    font-size: 0.92rem;
+  }
+
+  .pf-timeline-card-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .pf-timeline-logo {
+    max-width: 5.5rem;
+  }
+
+  .pf-project-head {
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .pf-project-head > div {
+    min-width: 0;
+    flex: 1 1 calc(100% - 5.5rem);
+  }
+
+  .pf-contact-shell {
+    padding: 1.35rem;
+  }
+
+  .pf-contact-links {
+    flex-direction: column;
+  }
+
+  .pf-contact-link {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pf-contact-actions .pf-btn {
+    width: 100%;
+  }
+
+  .pf-testimonial-card {
+    padding: 1.35rem;
+  }
+
+  .pf-testimonial-quote {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .pf-media-show {
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+  }
+
+  .pf-media-player {
+    padding: 1.25rem;
+  }
+
+  .pf-book-card {
+    padding: 1.15rem;
+  }
+
+  .pf-book-title {
+    font-size: 1.25rem;
+  }
+
+  .pf-growth-chart {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pf-case-card {
+    padding: 1.15rem;
+  }
+
+  .pf-about-hook {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --pf-layout-gutter: clamp(0.85rem, 4vw, 1.15rem);
+    --pf-nav-height: calc(4rem + 0.85rem);
+  }
+
+  .pf-section {
+    padding: 3.25rem 0;
+  }
+
+  .pf-section-header {
+    margin-bottom: 2rem;
+  }
+
+  .pf-hero {
+    padding-top: calc(var(--pf-nav-height) + 0.85rem);
+    padding-bottom: 1.25rem;
+  }
+
+  .pf-hero-portrait-wrap {
+    width: min(100%, 16rem);
+  }
+
+  .pf-hero-title {
+    font-size: clamp(1.65rem, 9vw, 2.35rem);
+  }
+
+  .pf-trust-section {
+    padding-top: 0.85rem;
+  }
+
+  .pf-trust-section .pf-section-header {
+    margin-bottom: 1.25rem;
+  }
+
+  .pf-timeline-item {
+    grid-template-columns: 1.35rem 1fr;
+    gap: 0.75rem;
+  }
+
+  .pf-timeline-card {
+    padding: 1rem 1.1rem;
+  }
+
+  .pf-footer-inner {
+    gap: 1rem;
+  }
+
+  .pf-footer-nav,
+  .pf-footer-links {
+    gap: 0.65rem 1rem;
+  }
+
+  .pf-contact-section {
+    padding-bottom: 4.5rem;
+  }
+}

@@ -2,12 +2,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { philosophy } from '../data/portfolioData';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
+import SwipeCardRail from './SwipeCardRail';
 
 const PhilosophySection = () => (
   <SectionWrapper id="philosophy" className="pf-philosophy-section">
     <div className="pf-container">
       <SectionHeader eyebrow="My Philosophy" title="How I try to work." />
-      <div className="pf-philosophy-grid">
+      <SwipeCardRail className="pf-philosophy-grid" ariaLabel="Philosophy">
         {philosophy.map((item, index) => (
           <motion.p
             key={item}
@@ -20,7 +21,7 @@ const PhilosophySection = () => (
             {item}
           </motion.p>
         ))}
-      </div>
+      </SwipeCardRail>
     </div>
   </SectionWrapper>
 );

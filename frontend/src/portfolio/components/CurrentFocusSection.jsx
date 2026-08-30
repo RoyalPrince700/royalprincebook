@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { currentFocus } from '../data/portfolioData';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
+import SwipeCardRail from './SwipeCardRail';
 
 const FocusCard = ({ item, index }) => {
   const motionProps = {
@@ -35,11 +36,11 @@ const CurrentFocusSection = () => (
   <SectionWrapper id="focus">
     <div className="pf-container">
       <SectionHeader eyebrow="Current Focus" title="Where my energy is going right now." />
-      <div className="pf-focus-grid">
+      <SwipeCardRail className="pf-focus-grid" ariaLabel="Current focus areas">
         {currentFocus.map((item, index) => (
           <FocusCard key={item.title} item={item} index={index} />
         ))}
-      </div>
+      </SwipeCardRail>
     </div>
   </SectionWrapper>
 );

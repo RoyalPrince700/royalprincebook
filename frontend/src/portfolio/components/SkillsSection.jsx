@@ -2,12 +2,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { skills } from '../data/portfolioData';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
+import SwipeCardRail from './SwipeCardRail';
 
 const SkillsSection = () => (
   <SectionWrapper id="skills">
     <div className="pf-container">
       <SectionHeader eyebrow="Skills" title="What I work with." />
-      <div className="pf-skills-grid">
+      <SwipeCardRail className="pf-skills-grid" ariaLabel="Skills">
         {Object.entries(skills).map(([category, items], index) => (
           <motion.article
             key={category}
@@ -28,7 +29,7 @@ const SkillsSection = () => (
             </div>
           </motion.article>
         ))}
-      </div>
+      </SwipeCardRail>
     </div>
   </SectionWrapper>
 );

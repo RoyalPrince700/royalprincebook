@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { writingContent } from '../data/portfolioData';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
+import SwipeCardRail from './SwipeCardRail';
 
 const WritingSection = () => (
   <SectionWrapper id="writing">
@@ -28,7 +29,7 @@ const WritingSection = () => (
         </div>
       </motion.article>
 
-      <div className="pf-writing-grid">
+      <SwipeCardRail className="pf-writing-grid" ariaLabel="Articles and writing">
         {writingContent.posts.map((post, index) => (
           <motion.article
             key={post.slug}
@@ -47,7 +48,7 @@ const WritingSection = () => (
             </Link>
           </motion.article>
         ))}
-      </div>
+      </SwipeCardRail>
     </div>
   </SectionWrapper>
 );

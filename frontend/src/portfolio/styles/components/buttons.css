@@ -1,0 +1,42 @@
+/* Buttons */
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.6rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.pf-btn-primary {
+  background: var(--pf-text);
+  color: var(--pf-bg) !important;
+}
+
+.pf-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--pf-shadow);
+}
+
+.pf-btn-secondary {
+  background: var(--pf-card);
+  border-color: var(--pf-border-strong);
+  color: var(--pf-text) !important;
+  backdrop-filter: blur(12px);
+}
+
+.pf-btn-secondary:hover {
+  border-color: var(--pf-gold);
+  transform: translateY(-2px);
+}
+
+.pf-btn-sm {
+  padding: 0.65rem 1.15rem;
+  font-size: 0.82rem;
+}

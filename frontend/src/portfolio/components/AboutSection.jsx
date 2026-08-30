@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { aboutContent } from '../data/portfolioData';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
+import SwipeCardRail from './SwipeCardRail';
 
 const highlightIcons = {
   chart:
@@ -45,7 +46,7 @@ const AboutSection = () => {
           <SectionHeader align="left" eyebrow="About" title={aboutContent.title} />
           <p className="pf-about-hook">{aboutContent.hook}</p>
 
-          <div className="pf-about-highlights">
+          <SwipeCardRail className="pf-about-highlights" ariaLabel="About highlights">
             {aboutContent.highlights.map((item, index) => {
               const card = (
                 <>
@@ -87,7 +88,7 @@ const AboutSection = () => {
                 </motion.article>
               );
             })}
-          </div>
+          </SwipeCardRail>
 
           <div className="pf-topic-tags">
             {aboutContent.topics.map((topic) => (

@@ -806,6 +806,13 @@ body:has([data-board-theme='dark'].admin-workspace-shell--immersive) {
   pointer-events: auto;
 }
 
+@media (max-width: 639px) {
+  .wb-theme-corner {
+    top: max(0.5rem, env(safe-area-inset-top));
+    right: max(0.5rem, env(safe-area-inset-right));
+  }
+}
+
 .wb-board {
   position: relative;
 }

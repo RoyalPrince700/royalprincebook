@@ -1,0 +1,91 @@
+/* Login — theme colors only (original layout/content preserved) */
+.pf-login-shell {
+  color: var(--pf-text);
+}
+
+.pf-login-content {
+  position: relative;
+  z-index: 1;
+}
+
+.pf-login-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--pf-border-strong);
+  background: var(--pf-card);
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--pf-gold-dark);
+  box-shadow: var(--pf-shadow);
+  backdrop-filter: blur(12px);
+}
+
+[data-theme='dark'] .pf-login-badge {
+  color: var(--pf-gold-light);
+}
+
+.pf-login-badge-inner {
+  border-color: var(--pf-border);
+  background: rgba(201, 162, 39, 0.08);
+}
+
+.pf-login-aside-title,
+.pf-login-title {
+  color: var(--pf-text);
+  opacity: 1;
+}
+
+.pf-login-muted {
+  color: var(--pf-text-muted);
+  opacity: 1;
+}
+
+.pf-login-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--pf-text-soft);
+}
+
+.pf-login-card {
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+  box-shadow: var(--pf-shadow);
+  backdrop-filter: blur(12px);
+}
+
+.pf-login-panel {
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+  box-shadow: var(--pf-shadow-lg);
+  backdrop-filter: blur(12px);
+}
+
+.pf-login-google-box {
+  border: 1px solid var(--pf-border);
+  background: rgba(201, 162, 39, 0.05);
+}
+
+.pf-login-note {
+  color: var(--pf-text-soft);
+}
+
+.pf-auth-link {
+  font-weight: 600;
+  color: var(--pf-gold-dark) !important;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+[data-theme='dark'] .pf-auth-link {
+  color: var(--pf-gold-light) !important;
+}
+
+.pf-auth-link:hover {
+  color: var(--pf-gold) !important;
+}

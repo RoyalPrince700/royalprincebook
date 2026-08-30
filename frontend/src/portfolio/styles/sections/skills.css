@@ -1,0 +1,34 @@
+/* Skills */
+.pf-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.pf-skill-card {
+  padding: 1.5rem;
+  border-radius: var(--pf-radius);
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+}
+
+.pf-skill-category {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.pf-skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 1rem;
+}
+
+.pf-skill-tag {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--pf-border);
+  font-size: 0.78rem;
+  color: var(--pf-text-muted);
+}

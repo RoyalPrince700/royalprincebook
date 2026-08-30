@@ -1,0 +1,193 @@
+/* Hero */
+.pf-hero {
+  position: relative;
+  overflow: hidden;
+  padding: calc(var(--pf-nav-height) + 1.75rem) 0 2rem;
+  scroll-margin-top: var(--pf-nav-height);
+}
+
+.pf-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.pf-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(201, 162, 39, 0.12), transparent 35%),
+    radial-gradient(circle at 80% 10%, rgba(10, 10, 10, 0.04), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), var(--pf-bg));
+}
+
+[data-theme='dark'] .pf-hero-gradient {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(201, 162, 39, 0.08), transparent 35%),
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.03), transparent 30%),
+    linear-gradient(180deg, rgba(10, 10, 10, 0.98), var(--pf-bg));
+}
+
+.pf-hero-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(10, 10, 10, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 10, 10, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black, transparent 75%);
+}
+
+.pf-floating-icon {
+  position: absolute;
+  font-size: 1.1rem;
+  color: var(--pf-gold);
+  opacity: 0.35;
+}
+
+.pf-hero-content {
+  position: relative;
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.pf-hero-content > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pf-hero-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: clamp(1rem, 2.5vw, 1.6rem);
+  width: 100%;
+  min-width: 0;
+}
+
+.pf-hero-intro .pf-eyebrow {
+  margin: 0;
+}
+
+@media (min-width: 900px) and (max-width: 1023px) {
+  .pf-hero-content {
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+    gap: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .pf-hero-portrait-wrap {
+    width: 100%;
+    max-width: none;
+    justify-self: stretch;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pf-hero-content {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: clamp(1.75rem, 2.5vw, 2.5rem);
+  }
+
+  .pf-hero-intro {
+    gap: 1.5rem;
+  }
+
+  .pf-hero-portrait-wrap {
+    width: 100%;
+    max-width: none;
+    justify-self: stretch;
+  }
+}
+
+.pf-hero-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  font-size: clamp(2.35rem, 5.25vw, 4.25rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.02;
+  overflow-wrap: anywhere;
+}
+
+.pf-hero-line {
+  display: block;
+}
+
+.pf-hero-subtitle {
+  margin: 1.5rem 0 0;
+  max-width: 36.25rem;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--pf-text-muted);
+}
+
+.pf-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 2rem;
+}
+
+.pf-hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.pf-tag {
+  display: inline-flex;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+  font-size: 0.78rem;
+  color: var(--pf-text-muted);
+}
+
+.pf-tag-gold {
+  border-color: rgba(201, 162, 39, 0.35);
+  color: var(--pf-gold-dark);
+}
+
+[data-theme='dark'] .pf-tag-gold {
+  color: var(--pf-gold-light);
+}
+
+.pf-hero-portrait-wrap {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 24rem);
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.pf-hero-portrait-glow {
+  position: absolute;
+  inset: 10% 5% 0;
+  border-radius: var(--pf-radius-lg);
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.25), transparent);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.pf-hero-portrait {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--pf-radius-lg);
+  border: 1px solid var(--pf-border);
+  box-shadow: var(--pf-shadow-lg);
+  object-fit: cover;
+  object-position: center top;
+}

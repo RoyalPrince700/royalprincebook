@@ -1,0 +1,123 @@
+/* Mobile swipe card rails */
+@media (min-width: 768px) {
+  .pf-swipe-rail-track {
+    display: contents;
+  }
+
+  .pf-swipe-rail-footer {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .pf-swipe-rail {
+    --pf-swipe-card-width: min(86vw, 20rem);
+    display: block;
+  }
+
+  .pf-swipe-rail-wide {
+    --pf-swipe-card-width: min(92vw, 24rem);
+  }
+
+  .pf-swipe-rail-compact {
+    --pf-swipe-card-width: min(78vw, 16rem);
+  }
+
+  .pf-swipe-rail.pf-impact-grid,
+  .pf-swipe-rail.pf-services-grid,
+  .pf-swipe-rail.pf-projects-grid,
+  .pf-swipe-rail.pf-case-studies-grid,
+  .pf-swipe-rail.pf-skills-grid,
+  .pf-swipe-rail.pf-writing-grid,
+  .pf-swipe-rail.pf-philosophy-grid,
+  .pf-swipe-rail.pf-focus-grid,
+  .pf-swipe-rail.pf-about-highlights,
+  .pf-swipe-rail.pf-client-grid {
+    grid-template-columns: unset;
+  }
+
+  .pf-swipe-rail-track {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--pf-layout-gutter);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-inline: calc(-1 * var(--pf-layout-gutter));
+    padding-inline: var(--pf-layout-gutter);
+    padding-bottom: 0.15rem;
+  }
+
+  .pf-swipe-rail-track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pf-swipe-rail-track > * {
+    flex: 0 0 var(--pf-swipe-card-width);
+    scroll-snap-align: start;
+    min-width: 0;
+    max-width: var(--pf-swipe-card-width);
+  }
+
+  .pf-swipe-rail-track > .pf-project-card,
+  .pf-swipe-rail-track > .pf-case-card {
+    height: auto;
+  }
+
+  .pf-swipe-rail-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.55rem;
+    margin-top: 1rem;
+  }
+
+  .pf-swipe-rail-dots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+  }
+
+  .pf-swipe-rail-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    border: none;
+    padding: 0;
+    background: var(--pf-border-strong);
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+
+  .pf-swipe-rail-dot-active {
+    background: var(--pf-gold);
+    transform: scale(1.2);
+  }
+
+  .pf-swipe-rail-hint {
+    margin: 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--pf-text-soft);
+  }
+
+  .pf-impact-section .pf-swipe-rail-hint,
+  .pf-philosophy-section .pf-swipe-rail-hint {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .pf-impact-section .pf-swipe-rail-dot,
+  .pf-philosophy-section .pf-swipe-rail-dot {
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .pf-impact-section .pf-swipe-rail-dot-active,
+  .pf-philosophy-section .pf-swipe-rail-dot-active {
+    background: var(--pf-gold-light);
+  }
+}

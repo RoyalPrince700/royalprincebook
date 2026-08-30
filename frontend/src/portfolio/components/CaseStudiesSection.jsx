@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { caseStudies } from '../data/portfolioData';
 import GrowthBarChart from './GrowthBarChart';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
+import SwipeCardRail from './SwipeCardRail';
 
 const CaseStudiesSection = () => (
   <SectionWrapper id="case-studies" className="pf-case-studies-section">
@@ -12,7 +13,7 @@ const CaseStudiesSection = () => (
         title="Projects I've shipped."
         description="What each one is, how it works, and who it's for."
       />
-      <div className="pf-case-studies-grid">
+      <SwipeCardRail className="pf-case-studies-grid" ariaLabel="Case studies" variant="wide">
         {caseStudies.map((study, index) => (
           <motion.article
             key={study.id}
@@ -83,7 +84,7 @@ const CaseStudiesSection = () => (
             )}
           </motion.article>
         ))}
-      </div>
+      </SwipeCardRail>
     </div>
   </SectionWrapper>
 );

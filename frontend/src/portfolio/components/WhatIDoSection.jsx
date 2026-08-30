@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { whatIDo } from '../data/portfolioData';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
+import SwipeCardRail from './SwipeCardRail';
 
 const iconMap = {
   code: '⌘',
@@ -23,7 +24,7 @@ const WhatIDoSection = () => {
     <SectionWrapper id="services">
       <div className="pf-container">
         <SectionHeader eyebrow="What I Do" title="I don't just plan. I build." />
-        <div className="pf-services-grid">
+        <SwipeCardRail className="pf-services-grid" ariaLabel="Services">
           {whatIDo.map((item) => (
             <motion.article
               key={item.title}
@@ -43,7 +44,7 @@ const WhatIDoSection = () => {
               </motion.p>
             </motion.article>
           ))}
-        </div>
+        </SwipeCardRail>
       </div>
     </SectionWrapper>
   );

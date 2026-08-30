@@ -1,0 +1,79 @@
+/* Writing */
+.pf-book-card {
+  display: grid;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--pf-radius-lg);
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+  box-shadow: var(--pf-shadow);
+}
+
+@media (min-width: 768px) {
+  .pf-book-card {
+    grid-template-columns: 10rem 1fr;
+  }
+}
+
+.pf-book-cover {
+  width: 100%;
+  max-width: 10rem;
+  border-radius: 1rem;
+  object-fit: cover;
+}
+
+.pf-book-title {
+  margin: 0.5rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.pf-book-copy {
+  margin: 0.75rem 0 1rem;
+  color: var(--pf-text-muted);
+  line-height: 1.65;
+}
+
+.pf-writing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.pf-writing-card {
+  padding: 1.25rem;
+  border-radius: var(--pf-radius);
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+}
+
+.pf-writing-category {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pf-gold-dark);
+}
+
+.pf-writing-title {
+  margin: 0.5rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.pf-writing-excerpt {
+  margin: 0.65rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--pf-text-muted);
+}
+
+.pf-writing-link {
+  display: inline-block;
+  margin-top: 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--pf-text) !important;
+}

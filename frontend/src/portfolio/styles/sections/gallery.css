@@ -1,0 +1,98 @@
+/* Gallery */
+.pf-gallery {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 0.85rem;
+}
+
+.pf-gallery-item {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  padding: 0;
+  border-radius: 1.25rem;
+  cursor: pointer;
+  background: var(--pf-card);
+}
+
+.pf-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pf-gallery-wide { grid-column: span 7; min-height: 14rem; }
+.pf-gallery-tall { grid-column: span 5; min-height: 18rem; }
+.pf-gallery-square { grid-column: span 4; min-height: 12rem; }
+
+.pf-gallery-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.35);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.pf-gallery-item:hover .pf-gallery-overlay {
+  opacity: 1;
+}
+
+.pf-gallery-icon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.pf-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(10, 10, 10, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.pf-lightbox-content {
+  position: relative;
+  max-width: 56rem;
+  width: 100%;
+}
+
+.pf-lightbox-content img {
+  width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 1rem;
+}
+
+.pf-lightbox-close {
+  position: absolute;
+  top: -2.5rem;
+  right: 0;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.pf-lightbox-caption {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+@media (max-width: 768px) {
+  .pf-gallery-wide,
+  .pf-gallery-tall,
+  .pf-gallery-square {
+    grid-column: span 12;
+    min-height: 14rem;
+  }
+}

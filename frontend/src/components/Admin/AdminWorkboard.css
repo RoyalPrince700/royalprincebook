@@ -93,6 +93,14 @@
   min-width: 0;
 }
 
+.wb-toolbar-row {
+  display: contents;
+}
+
+.wb-toolbar-scroll {
+  min-width: 0;
+}
+
 .wb-website-link--toolbar {
   flex-shrink: 0;
 }
@@ -1631,6 +1639,123 @@
 }
 
 @media (max-width: 639px) {
+  .wb-board {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .wb-topbar {
+    padding-top: 2.75rem;
+    padding-right: 0;
+    gap: 0.5rem;
+  }
+
+  .wb-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .wb-toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.45rem;
+    min-width: 0;
+  }
+
+  .wb-toolbar-row--primary {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .wb-toolbar-row--controls {
+    gap: 0.35rem;
+  }
+
+  .wb-toolbar-row--weeks {
+    flex-wrap: nowrap;
+  }
+
+  .wb-toolbar-scroll {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+
+  .wb-toolbar-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wb-mode-toggle {
+    flex-wrap: nowrap;
+    max-width: 100%;
+  }
+
+  .wb-mode-btn {
+    flex-shrink: 0;
+    padding: 0.35rem 0.65rem;
+  }
+
+  .wb-weeks {
+    flex-wrap: nowrap;
+    max-width: 100%;
+  }
+
+  .wb-week-tab {
+    flex-shrink: 0;
+  }
+
+  .wb-month-select {
+    min-width: 0;
+    flex: 1 1 7.5rem;
+  }
+
+  .wb-year-select {
+    min-width: 0;
+    flex: 0 1 5rem;
+  }
+
+  .wb-view-toggle {
+    flex-shrink: 0;
+  }
+
+  .wb-today-btn {
+    flex-shrink: 0;
+  }
+
+  .wb-report-bar-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .wb-report-range {
+    min-width: 0;
+  }
+
+  .wb-report-download,
+  .wb-report-share {
+    width: 100%;
+    text-align: center;
+  }
+
+  .wb-dash {
+    padding-right: 0;
+    padding-bottom: 1.5rem;
+  }
+
+  .wb-analytics-head,
+  .wb-victory-head,
+  .wb-achievements-head,
+  .wb-projects-head,
+  .wb-lb-head {
+    padding-right: 0;
+  }
+
   .wb-day-row {
     grid-template-columns: 1fr;
     gap: 0.4rem;
@@ -1647,12 +1772,41 @@
     margin: 0;
   }
 
-  .wb-month-select {
-    min-width: 8.5rem;
+  .wb-month-head,
+  .wb-month-row {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    min-width: 0;
   }
 
   .wb-month-cell {
-    min-height: 6.5rem;
+    min-height: 5.5rem;
+    padding: 0.28rem 0.15rem 0.32rem;
+  }
+
+  .wb-month-cell.is-blank {
+    min-height: 5.5rem;
+  }
+
+  .wb-month-day-num {
+    font-size: 0.68rem;
+  }
+
+  .wb-month-chip {
+    padding: 0.22rem 0.28rem 0.22rem 0.25rem;
+    min-height: 1.45rem;
+  }
+
+  .wb-month-chip-title {
+    font-size: 0.58rem;
+  }
+
+  .wb-month-empty-hit {
+    min-height: 2.75rem;
+  }
+
+  .wb-month-head-cell {
+    padding: 0.4rem 0.2rem;
+    font-size: 0.62rem;
   }
 
   .wb-game-strip {
@@ -1666,8 +1820,13 @@
   .wb-xp-toast {
     left: 1rem;
     right: 1rem;
-    bottom: 1rem;
+    bottom: max(1rem, env(safe-area-inset-bottom));
     transform: none;
+  }
+
+  .wb-quick-hint {
+    font-size: 0.62rem;
+    line-height: 1.35;
   }
 }
 
@@ -1892,11 +2051,24 @@
 @keyframes wb-xp-toast-in {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(8px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
+  }
+}
+
+@media (min-width: 640px) {
+  @keyframes wb-xp-toast-in {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   }
 }
 
@@ -2476,10 +2648,35 @@
 }
 
 @media (max-width: 639px) {
+  .wb-note.is-openable:hover {
+    filter: none;
+    transform: none;
+  }
+
+  .wb-note--tilt-0.is-openable:hover {
+    transform: rotate(-1.1deg);
+  }
+
+  .wb-note--tilt-1.is-openable:hover {
+    transform: rotate(0.8deg);
+  }
+
+  .wb-note--tilt-2.is-openable:hover {
+    transform: rotate(-0.4deg);
+  }
+
+  .wb-note--tilt-3.is-openable:hover {
+    transform: rotate(1.2deg);
+  }
+
   .wb-calendar {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
   }
 
   .wb-day-row {
@@ -2487,6 +2684,7 @@
     border-radius: 1rem;
     padding: 0.65rem;
     background: rgba(255, 250, 243, 0.4);
+    min-height: 0;
   }
 
   .wb-day-label {
@@ -2500,12 +2698,16 @@
     padding-bottom: 0.25rem;
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
+    margin: 0 -0.15rem;
+    padding-left: 0.15rem;
+    padding-right: 0.15rem;
   }
 
   .wb-note,
   .wb-slot-empty {
-    flex: 0 0 calc(11.5rem + 4px);
+    flex: 0 0 calc(10.5rem + 4px);
     scroll-snap-align: start;
+    min-height: 5.25rem;
   }
 
   .wb-toolbar {
@@ -2521,6 +2723,11 @@
     flex-direction: column;
   }
 
+  .wb-quick-capture-row button,
+  .wb-mission-edit-row .wb-today-btn {
+    width: 100%;
+  }
+
   .wb-focus-panel {
     padding: 1.35rem 1.1rem;
   }
@@ -2528,6 +2735,29 @@
   .wb-achievements-head,
   .wb-projects-head {
     flex-direction: column;
+  }
+
+  .wb-modal-backdrop {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .wb-modal,
+  .wb-sticky-modal {
+    max-height: min(94vh, 52rem);
+    border-radius: 1rem 1rem 0.85rem 0.85rem;
+  }
+
+  .wb-modal-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wb-confirm-backdrop {
+    align-items: flex-end;
+  }
+
+  .wb-shared-header-main {
+    flex-wrap: wrap;
   }
 }
 

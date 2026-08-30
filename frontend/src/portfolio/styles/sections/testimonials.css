@@ -1,0 +1,72 @@
+/* Testimonials */
+.pf-testimonials-section {
+  background: linear-gradient(180deg, rgba(201, 162, 39, 0.04), transparent);
+}
+
+.pf-testimonial-shell {
+  max-width: 42rem;
+  margin-inline: auto;
+}
+
+.pf-testimonial-card {
+  padding: 2rem;
+  border-radius: var(--pf-radius-lg);
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+  box-shadow: var(--pf-shadow);
+}
+
+.pf-testimonial-quote {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.75;
+  color: var(--pf-text-muted);
+}
+
+.pf-testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--pf-border);
+}
+
+.pf-testimonial-author img {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
+.pf-testimonial-author h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.pf-testimonial-author p {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: var(--pf-text-soft);
+}
+
+.pf-testimonial-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.pf-testimonial-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--pf-border-strong);
+  cursor: pointer;
+}
+
+.pf-testimonial-dot-active {
+  background: var(--pf-gold);
+  transform: scale(1.15);
+}

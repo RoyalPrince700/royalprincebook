@@ -1,0 +1,24 @@
+/* Back to Top */
+.pf-back-to-top {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 999px;
+  background: var(--pf-card);
+  color: var(--pf-text);
+  box-shadow: var(--pf-shadow);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+}
+
+.pf-back-to-top:hover {
+  border-color: var(--pf-gold);
+  transform: translateY(-2px);
+}

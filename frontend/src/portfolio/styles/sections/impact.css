@@ -1,0 +1,51 @@
+/* Impact */
+.pf-impact-section {
+  background: var(--pf-dark-section);
+  color: #fafafa;
+}
+
+.pf-impact-section .pf-eyebrow,
+.pf-impact-section .pf-section-title,
+.pf-impact-section .pf-section-copy {
+  color: #fafafa;
+}
+
+.pf-impact-section .pf-eyebrow {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pf-impact-section .pf-section-copy {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.pf-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.pf-impact-card {
+  padding: 1.75rem;
+  border-radius: var(--pf-radius);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  transition: transform 0.3s ease;
+}
+
+.pf-impact-section .pf-stat-value {
+  display: block;
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--pf-gold-light);
+}
+
+.pf-impact-section .pf-impact-label {
+  margin: 0.85rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
+}

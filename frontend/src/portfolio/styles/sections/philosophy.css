@@ -1,0 +1,26 @@
+/* Philosophy */
+.pf-philosophy-section {
+  background: var(--pf-dark-section);
+  color: #fafafa;
+}
+
+.pf-philosophy-section .pf-section-title {
+  color: #fafafa;
+}
+
+.pf-philosophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+}
+
+.pf-philosophy-item {
+  margin: 0;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.4;
+}

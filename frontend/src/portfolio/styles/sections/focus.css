@@ -1,0 +1,35 @@
+/* Focus */
+.pf-focus-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 1rem;
+}
+
+.pf-focus-card {
+  display: block;
+  padding: 1.5rem;
+  border-radius: var(--pf-radius);
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pf-focus-card:hover {
+  border-color: rgba(201, 162, 39, 0.4);
+  box-shadow: var(--pf-shadow);
+}
+
+.pf-focus-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.pf-focus-card p {
+  margin: 0.65rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--pf-text-muted);
+}

@@ -3,12 +3,13 @@ import { motion } from 'framer-motion';
 import { impactStats } from '../data/portfolioData';
 import AnimatedCounter from './AnimatedCounter';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
+import SwipeCardRail from './SwipeCardRail';
 
 const ImpactSection = () => (
   <SectionWrapper id="impact" className="pf-impact-section">
     <div className="pf-container">
       <SectionHeader eyebrow="Impact By The Numbers" title="Results from the work." />
-      <div className="pf-impact-grid">
+      <SwipeCardRail className="pf-impact-grid" ariaLabel="Impact statistics" variant="compact">
         {impactStats.map((stat, index) => (
           <motion.article
             key={stat.label}
@@ -23,7 +24,7 @@ const ImpactSection = () => (
             <p className="pf-impact-label">{stat.label}</p>
           </motion.article>
         ))}
-      </div>
+      </SwipeCardRail>
     </div>
   </SectionWrapper>
 );

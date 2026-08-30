@@ -1,0 +1,26 @@
+/* Tech Stack */
+.pf-tech-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.pf-tech-pill {
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--pf-text-muted);
+  cursor: default;
+  transition: all 0.25s ease;
+}
+
+.pf-tech-pill-active,
+.pf-tech-pill:hover {
+  border-color: rgba(201, 162, 39, 0.45);
+  color: var(--pf-text);
+  background: rgba(201, 162, 39, 0.08);
+}

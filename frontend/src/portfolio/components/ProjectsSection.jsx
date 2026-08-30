@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { featuredProjects } from '../data/portfolioData';
 import SectionWrapper, { SectionHeader } from './SectionWrapper';
+import SwipeCardRail from './SwipeCardRail';
 
 const ProjectVisual = ({ project }) => {
   const visualClass = `pf-project-visual bg-linear-to-br ${project.gradient}`;
@@ -127,11 +128,11 @@ const ProjectsSection = () => (
         title="Things I've built and shipped."
         description="Real problems, my role in each, and what changed."
       />
-      <div className="pf-projects-grid">
+      <SwipeCardRail className="pf-projects-grid" ariaLabel="Featured projects" variant="wide">
         {featuredProjects.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}
-      </div>
+      </SwipeCardRail>
     </div>
   </SectionWrapper>
 );

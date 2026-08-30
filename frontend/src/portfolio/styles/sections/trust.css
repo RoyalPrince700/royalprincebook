@@ -1,0 +1,188 @@
+/* Trust Marquee */
+.pf-trust-section {
+  padding-top: 1.25rem;
+  overflow: hidden;
+}
+
+.pf-trust-section .pf-container {
+  margin-bottom: 1.25rem;
+}
+
+.pf-trust-section .pf-section-header {
+  margin-bottom: 1.75rem;
+}
+
+.pf-trust-marquee {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.pf-trust-marquee::before,
+.pf-trust-marquee::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(calc(8rem + 16px), calc(28vw + 16px), calc(20rem + 16px));
+  z-index: 2;
+  pointer-events: none;
+}
+
+.pf-trust-marquee::before {
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    var(--pf-bg) 0%,
+    var(--pf-bg) 18%,
+    transparent 100%
+  );
+}
+
+.pf-trust-marquee::after {
+  right: 0;
+  background: linear-gradient(
+    270deg,
+    var(--pf-bg) 0%,
+    var(--pf-bg) 18%,
+    transparent 100%
+  );
+}
+
+.pf-trust-marquee-track {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  gap: 0;
+  padding: 0.5rem 0;
+  animation: pf-trust-marquee 50s linear infinite;
+  will-change: transform;
+  -webkit-animation: pf-trust-marquee 50s linear infinite;
+}
+
+.pf-trust-marquee-group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.pf-trust-marquee:hover .pf-trust-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes pf-trust-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@-webkit-keyframes pf-trust-marquee {
+  from {
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+  to {
+    -webkit-transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.pf-trust-marquee-item {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 11rem;
+  height: 5.5rem;
+  padding: 0.85rem 1.5rem;
+  border-radius: var(--pf-radius);
+  border: 1px solid var(--pf-border);
+  background: var(--pf-card);
+  backdrop-filter: blur(12px);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.pf-trust-marquee-item:hover {
+  border-color: rgba(201, 162, 39, 0.45);
+  box-shadow: var(--pf-shadow);
+  transform: translateY(-3px);
+}
+
+.pf-trust-marquee-image {
+  max-width: 9rem;
+  max-height: 3.25rem;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: grayscale(0.2);
+  transition: filter 0.25s ease;
+}
+
+.pf-trust-marquee-item:hover .pf-trust-marquee-image {
+  filter: grayscale(0);
+}
+
+@media (max-width: 768px) {
+  .pf-trust-marquee {
+    overflow: hidden;
+  }
+
+  .pf-trust-marquee::before,
+  .pf-trust-marquee::after {
+    width: clamp(calc(2.5rem + 8px), calc(12vw + 8px), calc(4.5rem + 8px));
+  }
+
+  .pf-trust-marquee-track {
+    animation: pf-trust-marquee 35s linear infinite;
+    -webkit-animation: pf-trust-marquee 35s linear infinite;
+    animation-play-state: running !important;
+  }
+
+  .pf-trust-marquee-group {
+    gap: 0.85rem;
+    padding-right: 0.85rem;
+  }
+
+  .pf-trust-marquee:hover .pf-trust-marquee-track {
+    animation-play-state: running;
+  }
+
+  .pf-trust-marquee-item {
+    min-width: 8.5rem;
+    height: 4.75rem;
+    padding: 0.65rem 1rem;
+  }
+
+  .pf-trust-marquee-image {
+    max-width: 7rem;
+    max-height: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) and (min-width: 769px) {
+  .pf-trust-marquee {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  .pf-trust-marquee-track {
+    animation: none;
+    flex-wrap: nowrap;
+    width: max-content;
+    padding-inline: 1rem;
+  }
+
+  .pf-trust-marquee-group {
+    padding-right: 1rem;
+  }
+
+  .pf-trust-marquee-item {
+    scroll-snap-align: start;
+  }
+}
