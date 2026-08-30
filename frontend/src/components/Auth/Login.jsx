@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ContentPageShell from '../ContentPageShell';
+import BrandMark from '../BrandMark';
 import { getRedirectPath, normalizeRedirectPath } from '../../utils/authRedirect';
 
 const authErrors = {
@@ -59,6 +60,9 @@ const Login = () => {
 
           <section className="pf-login-panel mx-auto w-full max-w-xl rounded-[2.5rem] p-6 sm:p-8">
             <div className="text-center">
+              <Link to="/" className="pf-login-brand inline-flex" aria-label="Royal Prince Hub home">
+                <BrandMark className="pf-login-brand-mark" />
+              </Link>
               <span className="pf-login-badge pf-login-badge-inner">Sign In</span>
               <h2 className="pf-login-title mt-5 text-4xl font-semibold tracking-[-0.04em]">
                 Welcome back

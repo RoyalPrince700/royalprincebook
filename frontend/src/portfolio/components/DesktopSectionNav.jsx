@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import NavIcon from '../../components/NavIcon';
+import BrandMark from '../../components/BrandMark';
 import { portfolioNavSections } from '../data/portfolioData';
 
 const DesktopSectionNav = ({ active, progress, onScrollTo, theme, toggleTheme, visible }) => {
@@ -19,8 +20,8 @@ const DesktopSectionNav = ({ active, progress, onScrollTo, theme, toggleTheme, v
       transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="pf-desktop-section-nav-inner pf-desktop-section-nav-inner-full">
-        <Link to="/" className="pf-desktop-section-nav-brand" aria-label="Royal Prince home">
-          <span className="pf-desktop-section-nav-brand-mark">RP</span>
+        <Link to="/" className="pf-desktop-section-nav-brand" aria-label="Royal Prince Hub home">
+          <BrandMark theme={theme} />
         </Link>
 
         <div className="pf-desktop-section-nav-scroll">

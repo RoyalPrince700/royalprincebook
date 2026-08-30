@@ -1,7 +1,12 @@
 /* Trust Marquee */
 .pf-trust-section {
   padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
   overflow: hidden;
+}
+
+.pf-trust-section + #about {
+  padding-top: 2rem;
 }
 
 .pf-trust-section .pf-container {
@@ -130,6 +135,14 @@
 @media (max-width: 768px) {
   .pf-trust-marquee {
     overflow: hidden;
+  }
+
+  .pf-trust-section {
+    padding-bottom: 0.35rem;
+  }
+
+  .pf-trust-section + #about {
+    padding-top: 1.35rem;
   }
 
   .pf-trust-marquee::before,

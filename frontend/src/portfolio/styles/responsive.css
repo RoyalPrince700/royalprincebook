@@ -192,10 +192,15 @@
 
   .pf-trust-section {
     padding-top: 0.85rem;
+    padding-bottom: 0.35rem;
   }
 
   .pf-trust-section .pf-section-header {
     margin-bottom: 1.25rem;
+  }
+
+  .pf-trust-section + #about {
+    padding-top: 1.35rem;
   }
 
   .pf-timeline-item {

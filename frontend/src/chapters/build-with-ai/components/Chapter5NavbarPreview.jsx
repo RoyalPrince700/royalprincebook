@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
 import NavIcon from '../../../components/NavIcon';
+import BrandMark from '../../../components/BrandMark';
 import { chapter5NavLinks } from '../data/chapter5ReferenceData';
 import '../../../portfolio/styles/portfolio.css';
 
@@ -18,8 +19,8 @@ const Chapter5NavbarPreview = ({ activePath = '/' }) => {
       }`}
     >
       <div className="pf-container pf-desktop-section-nav-inner">
-        <Link to="/" className="pf-desktop-section-nav-brand" aria-label="Royal Prince home">
-          <span className="pf-desktop-section-nav-brand-mark">RP</span>
+        <Link to="/" className="pf-desktop-section-nav-brand" aria-label="Royal Prince Hub home">
+          <BrandMark theme={theme} />
         </Link>
 
         <nav className="pf-desktop-section-nav-scroll" aria-label="Main navigation">

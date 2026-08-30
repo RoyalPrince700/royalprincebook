@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { contactLinks, footerNavLinks } from '../portfolio/data/portfolioData';
+import BrandMark from './BrandMark';
 import '../portfolio/styles/portfolio.css';
 
 const Footer = () => {
@@ -9,6 +10,10 @@ const Footer = () => {
   return (
     <footer className="pf-footer">
       <div className="pf-container pf-footer-inner">
+        <Link to="/" className="pf-footer-brand" aria-label="Royal Prince Hub home">
+          <BrandMark className="pf-footer-brand-mark" />
+        </Link>
+
         <blockquote className="pf-footer-quote">
           "Ideas are good. Getting them done is what counts."
         </blockquote>

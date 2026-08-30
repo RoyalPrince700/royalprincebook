@@ -218,3 +218,9 @@
 .pf-about-more-copy:last-child {
   margin-bottom: 0.15rem;
 }
+
+@media (max-width: 768px) {
+  .pf-about-portrait-wrap {
+    display: none;
+  }
+}

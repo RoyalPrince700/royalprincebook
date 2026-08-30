@@ -5,6 +5,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { usePortfolioNav } from '../context/PortfolioNavContext';
 import { portfolioNavSections } from '../data/portfolioData';
 import DesktopSectionNav from './DesktopSectionNav';
+import BrandMark from '../../components/BrandMark';
 
 const icons = {
   home: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6',
@@ -166,7 +167,7 @@ const PortfolioSidebar = ({ progress = 0 }) => {
 
       <div className="pf-sidebar-brand">
         <Link to="/" className="pf-sidebar-brand-link" onClick={() => setMobileExpanded(false)}>
-          <span className="pf-sidebar-brand-mark">RP</span>
+          <BrandMark className="pf-sidebar-brand-mark" theme={theme} />
           <AnimatePresence>
             {showLabels && (
               <motion.span
@@ -175,7 +176,7 @@ const PortfolioSidebar = ({ progress = 0 }) => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -8 }}
               >
-                Royal Prince
+                Royal Prince Hub
               </motion.span>
             )}
           </AnimatePresence>

@@ -127,12 +127,13 @@
   justify-content: center;
   width: 2.35rem;
   height: 2.35rem;
-  border-radius: 0.8rem;
-  background: linear-gradient(135deg, var(--pf-gold), var(--pf-gold-light));
-  color: #0a0a0a;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.pf-desktop-section-nav-brand-mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .pf-desktop-section-nav-scroll {
@@ -554,12 +555,12 @@
   width: 2.5rem;
   height: 2.5rem;
   flex-shrink: 0;
-  border-radius: 0.85rem;
-  background: linear-gradient(135deg, var(--pf-gold), var(--pf-gold-light));
-  color: #0a0a0a;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+}
+
+.pf-sidebar-brand-mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .pf-sidebar-brand-text {

@@ -1,0 +1,6 @@
+<svg width="520" height="96" viewBox="0 0 520 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Royal Prince Hub horizontal lockup. Mark is path-based; wordmark uses system font fallback. -->
+  <path d="M48 12 L12 48 L12 66 Q12 84 30 84 L66 84 Q84 84 84 66 L84 30 Q84 12 66 12 Z" fill="#0A0A0A"/>
+  <path d="M37 6 L24 6 Q6 6 6 24 L6 37 Z" fill="#C9A227"/>
+  <text x="112" y="62" font-family="Fraunces, Georgia, serif" font-size="40" font-weight="700" letter-spacing="-0.8" fill="#0A0A0A">Royal Prince<tspan font-family="Inter, sans-serif" font-weight="500" letter-spacing="-0.5"> Hub</tspan></text>
+</svg>

@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getRedirectPath } from '../utils/authRedirect';
 import NavIcon from './NavIcon';
+import BrandMark from './BrandMark';
 import '../portfolio/styles/portfolio.css';
 
 const Navbar = () => {
@@ -106,8 +107,8 @@ const Navbar = () => {
       <div ref={menuRef} id="site-mobile-menu" className="pf-site-nav-mobile-panel">
         <div className="pf-site-nav-mobile-header">
           <Link to="/" className="pf-site-nav-mobile-brand" onClick={closeMenu}>
-            <span className="pf-desktop-section-nav-brand-mark">RP</span>
-            <span className="pf-site-nav-mobile-brand-text">Royal Prince</span>
+            <BrandMark />
+            <span className="pf-site-nav-mobile-brand-text">Royal Prince Hub</span>
           </Link>
           <button type="button" onClick={closeMenu} className="pf-site-nav-close" aria-label="Close menu">
             <NavIcon name="close" />
@@ -159,8 +160,8 @@ const Navbar = () => {
         className={`pf-desktop-section-nav pf-site-nav ${theme === 'dark' ? 'pf-site-nav-dark' : ''}`}
       >
       <div className="pf-container pf-desktop-section-nav-inner">
-        <Link to="/" className="pf-desktop-section-nav-brand" onClick={closeMenu} aria-label="Royal Prince home">
-          <span className="pf-desktop-section-nav-brand-mark">RP</span>
+        <Link to="/" className="pf-desktop-section-nav-brand" onClick={closeMenu} aria-label="Royal Prince Hub home">
+          <BrandMark />
         </Link>
 
         <nav className="pf-desktop-section-nav-scroll" aria-label="Main navigation">
