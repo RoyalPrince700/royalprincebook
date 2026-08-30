@@ -52,13 +52,16 @@
   display: grid;
   gap: 2rem;
   align-items: center;
-  width: 100%;
   min-width: 0;
 }
 
 .pf-hero-content > * {
   min-width: 0;
   max-width: 100%;
+}
+
+.pf-hero-copy {
+  min-width: 0;
 }
 
 .pf-hero-intro {

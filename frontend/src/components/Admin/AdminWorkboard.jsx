@@ -47,6 +47,8 @@ const NOTE_COLORS = ['yellow', 'mint', 'peach', 'sky', 'lilac'];
 const EMPTY_SLOT_COUNT = 4;
 const DEFAULT_START_TIME = '08:00';
 const DEFAULT_END_TIME = '17:00';
+const MOBILE_LAYOUT_STORAGE_KEY = 'workboard-mobile-layout';
+const OVERVIEW_PAGE_WIDTH = 960;
 
 const EMPTY_STREAK_META = {
   current: 0,
@@ -456,6 +458,17 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef(null);
   const calendarRef = useRef(null);
+  const overviewFrameRef = useRef(null);
+  const overviewInnerRef = useRef(null);
+  const [mobileLayoutMode, setMobileLayoutMode] = useState(() => {
+    try {
+      return localStorage.getItem(MOBILE_LAYOUT_STORAGE_KEY) === 'overview' ? 'overview' : 'cards';
+    } catch {
+      return 'cards';
+    }
+  });
+  const [overviewScale, setOverviewScale] = useState(1);
+  const [overviewFrameHeight, setOverviewFrameHeight] = useState(null);
 
   const { year: selectedYear, monthIndex: selectedMonthIndex } = useMemo(
     () => parseMonthKey(selectedMonthKey),
@@ -520,6 +533,54 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
     return weekStart ? workWeekDays(weekStart, selectedMonthKey) : [];
   }, [isSharedView, shareMeta, weekStart, selectedMonthKey]);
   const todayKey = toDateKey();
+
+  const updateOverviewLayout = useCallback(() => {
+    if (mobileLayoutMode !== 'overview') {
+      setOverviewScale(1);
+      setOverviewFrameHeight(null);
+      return;
+    }
+
+    const frame = overviewFrameRef.current;
+    const inner = overviewInnerRef.current;
+    if (!frame || !inner) return;
+
+    const available = frame.clientWidth;
+    const scale = available > 0 ? Math.min(1, available / OVERVIEW_PAGE_WIDTH) : 1;
+    setOverviewScale(scale);
+    setOverviewFrameHeight(inner.offsetHeight * scale);
+  }, [mobileLayoutMode]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(MOBILE_LAYOUT_STORAGE_KEY, mobileLayoutMode);
+    } catch {
+      /* ignore storage errors */
+    }
+  }, [mobileLayoutMode]);
+
+  useEffect(() => {
+    updateOverviewLayout();
+    if (mobileLayoutMode !== 'overview') return undefined;
+
+    const frame = overviewFrameRef.current;
+    const inner = overviewInnerRef.current;
+    if (!frame || !inner) return undefined;
+
+    const ro = new ResizeObserver(() => {
+      updateOverviewLayout();
+    });
+    ro.observe(frame);
+    ro.observe(inner);
+
+    const onResize = () => updateOverviewLayout();
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', onResize);
+    };
+  }, [mobileLayoutMode, updateOverviewLayout, days, monthGrid, tasksByDate, viewMode, loading, isSharedView]);
 
   const reportAnchorDate = useMemo(() => {
     if (reportPeriod === 'week') return weekStart;
@@ -1876,8 +1937,57 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
 
   return withSignInPrompt(
     <AdminLayout chrome="minimal" standalone={layoutStandalone}>
-      <BoardShell>
+      <BoardShell className={mobileLayoutMode === 'overview' ? 'wb-board--overview' : ''}>
         {error ? <div className="wb-error">{error}</div> : null}
+
+        <div className="wb-mobile-layout-bar">
+          <div className="wb-mobile-layout-toggle" role="group" aria-label="Board layout">
+            <button
+              type="button"
+              className={`wb-view-btn${mobileLayoutMode === 'cards' ? ' is-active' : ''}`}
+              onClick={() => setMobileLayoutMode('cards')}
+            >
+              Cards
+            </button>
+            <button
+              type="button"
+              className={`wb-view-btn${mobileLayoutMode === 'overview' ? ' is-active' : ''}`}
+              onClick={() => setMobileLayoutMode('overview')}
+            >
+              Overview
+            </button>
+          </div>
+          {mobileLayoutMode === 'overview' ? (
+            <p className="wb-mobile-layout-hint">Full-page fit · tap a note to open details</p>
+          ) : (
+            <p className="wb-mobile-layout-hint">Swipe toolbar rows sideways for more options</p>
+          )}
+        </div>
+
+        <div
+          ref={overviewFrameRef}
+          className={`wb-page-scaler${mobileLayoutMode === 'overview' ? ' is-overview' : ''}`}
+          style={
+            mobileLayoutMode === 'overview' && overviewFrameHeight
+              ? { height: overviewFrameHeight }
+              : undefined
+          }
+        >
+          <div
+            ref={overviewInnerRef}
+            className={`wb-page-scaler-inner${
+              mobileLayoutMode === 'overview' ? ' is-overview' : ''
+            }`}
+            style={
+              mobileLayoutMode === 'overview'
+                ? {
+                    width: OVERVIEW_PAGE_WIDTH,
+                    transform: `scale(${overviewScale})`,
+                    transformOrigin: 'top left'
+                  }
+                : undefined
+            }
+          >
 
         <div className="wb-topbar">
           {isSharedView ? (
@@ -2694,6 +2804,8 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
           ) : null}
         </div>
         ) : null}
+          </div>
+        </div>
 
         <WorkboardAccessGrantModal
           open={Boolean(grantTarget)}

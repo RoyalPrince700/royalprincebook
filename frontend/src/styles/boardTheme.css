@@ -788,6 +788,7 @@ body:has([data-board-theme='dark'].admin-workspace-shell--immersive) {
 
 .wb-board-chrome--theme-only {
   position: fixed;
+  inset: auto;
   top: max(0.65rem, env(safe-area-inset-top));
   right: max(0.65rem, env(safe-area-inset-right));
   left: auto;
@@ -796,6 +797,12 @@ body:has([data-board-theme='dark'].admin-workspace-shell--immersive) {
   justify-content: flex-end;
   width: auto;
   height: auto;
+  pointer-events: none;
+}
+
+.wb-board-chrome--theme-only .wb-board-chrome-slot {
+  pointer-events: auto;
+  padding: 0;
 }
 
 .wb-theme-corner {
@@ -807,6 +814,7 @@ body:has([data-board-theme='dark'].admin-workspace-shell--immersive) {
 }
 
 @media (max-width: 639px) {
+  .wb-board-chrome--theme-only,
   .wb-theme-corner {
     top: max(0.5rem, env(safe-area-inset-top));
     right: max(0.5rem, env(safe-area-inset-right));

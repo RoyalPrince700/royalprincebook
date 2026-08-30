@@ -113,6 +113,31 @@ const SideIcon = ({ name }) => {
           <path d="M15 18l-6-6 6-6" />
         </svg>
       );
+    case 'taskboard':
+      return (
+        <svg {...props}>
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M3 10h18" />
+          <path d="M9 4v16" />
+        </svg>
+      );
+    case 'panel-expand':
+      return (
+        <svg {...props}>
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M15 4v16" />
+          <path d="M8.5 12h3" />
+          <path d="M10 10.5v3" />
+        </svg>
+      );
+    case 'panel-collapse':
+      return (
+        <svg {...props}>
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M15 4v16" />
+          <path d="M8.5 10l3 2-3 2" />
+        </svg>
+      );
     case 'rename':
       return (
         <svg {...props}>
@@ -246,7 +271,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     return saved === 'hand' || saved === 'select' ? saved : 'select';
   });
   const [zoom, setZoom] = useState(1);
-  const [railOpen, setRailOpen] = useState(() => readViewState()?.railOpen !== false);
+  const [railOpen, setRailOpen] = useState(() => readViewState()?.railOpen === true);
   const [sharePopoverBoardId, setSharePopoverBoardId] = useState('');
   const [shareUrl, setShareUrl] = useState('');
   const [shareLoading, setShareLoading] = useState(false);
@@ -334,16 +359,22 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     topZRef.current = topZ;
   }, [topZ]);
 
-  useEffect(() => {
-    toolRef.current = tool;
-    writeViewState({ tool });
-    dragRef.current = null;
-    if (tool === 'hand') {
+  const switchTool = useCallback((next) => {
+    if (toolRef.current === next) return;
+    toolRef.current = next;
+    setTool(next);
+    writeViewState({ tool: next });
+    if (next === 'hand' && !dragRef.current) {
       const active = document.activeElement;
       if (active?.closest?.('.ab-note') && typeof active.blur === 'function') {
         active.blur();
       }
     }
+  }, []);
+
+  useEffect(() => {
+    toolRef.current = tool;
+    writeViewState({ tool });
   }, [tool]);
 
   useEffect(() => {
@@ -402,16 +433,16 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       const key = event.key.toLowerCase();
       if (key === 'v') {
         event.preventDefault();
-        setTool('select');
+        switchTool('select');
       } else if (key === 'h') {
         event.preventDefault();
-        setTool('hand');
+        switchTool('hand');
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [switchTool]);
 
   const applyZoom = useCallback(
     (nextZoom) => {
@@ -959,22 +990,42 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     [queueNoteSave, updateNoteLocal]
   );
 
+  const focusNoteText = useCallback((id) => {
+    requestAnimationFrame(() => {
+      const textarea = noteEls.current[id]?.querySelector('.ab-note-text');
+      if (textarea && typeof textarea.focus === 'function') {
+        textarea.focus();
+      }
+    });
+  }, []);
+
+  const beginMoveGesture = useCallback(() => {
+    if (toolRef.current !== 'hand') {
+      switchTool('hand');
+    }
+    const active = document.activeElement;
+    if (active?.closest?.('.ab-note') && typeof active.blur === 'function') {
+      active.blur();
+    }
+  }, [switchTool]);
+
   useEffect(() => {
     const onMove = (event) => {
       const drag = dragRef.current;
       if (!drag || drag.pointerId !== event.pointerId) return;
 
       if (drag.type === 'pan') {
-        if (toolRef.current !== 'hand') {
-          dragRef.current = null;
-          return;
-        }
         const vp = viewportRef.current;
         if (!vp) return;
         const dx = event.clientX - drag.startX;
         const dy = event.clientY - drag.startY;
         if (!drag.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
-        drag.moved = true;
+
+        if (!drag.moved) {
+          drag.moved = true;
+          beginMoveGesture();
+        }
+
         event.preventDefault();
         vp.scrollLeft = drag.origScrollLeft - dx;
         vp.scrollTop = drag.origScrollTop - dy;
@@ -988,13 +1039,10 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
 
         if (!drag.moved) {
           drag.moved = true;
+          beginMoveGesture();
           bringToFront(drag.id);
-          const el = noteEls.current[drag.id];
-          el?.setPointerCapture?.(event.pointerId);
-          const active = document.activeElement;
-          if (active?.closest?.('.ab-note') && typeof active.blur === 'function') {
-            active.blur();
-          }
+          noteEls.current[drag.id]?.setPointerCapture?.(event.pointerId);
+          drag.deferCapture = false;
         }
 
         event.preventDefault();
@@ -1009,10 +1057,17 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       const drag = dragRef.current;
       if (!drag || drag.pointerId !== event.pointerId) return;
 
-      if (drag.type === 'note' && drag.moved) {
-        const current = notesRef.current.find((n) => noteId(n) === drag.id);
-        if (current) {
-          queueNoteSave(drag.id, { x: current.x, y: current.y, zIndex: current.zIndex });
+      if (drag.type === 'note') {
+        if (drag.moved) {
+          const current = notesRef.current.find((n) => noteId(n) === drag.id);
+          if (current) {
+            queueNoteSave(drag.id, { x: current.x, y: current.y, zIndex: current.zIndex });
+          }
+        } else {
+          switchTool('select');
+          if (!drag.deferCapture) {
+            focusNoteText(drag.id);
+          }
         }
       }
 
@@ -1027,11 +1082,10 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onUp);
     };
-  }, [bringToFront, queueNoteSave, updateNoteLocal]);
+  }, [beginMoveGesture, bringToFront, focusNoteText, queueNoteSave, switchTool, updateNoteLocal]);
 
   const onViewportPointerDown = (event) => {
     if (event.button !== 0) return;
-    if (toolRef.current !== 'hand') return;
     if (!(event.target instanceof Element)) return;
     if (event.target.closest('.ab-share-popover')) return;
     if (event.target.closest('.ab-note')) return;
@@ -1039,7 +1093,6 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     const vp = viewportRef.current;
     if (!vp) return;
 
-    event.preventDefault();
     vp.setPointerCapture?.(event.pointerId);
     dragRef.current = {
       type: 'pan',
@@ -1061,13 +1114,15 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
 
     const onText =
       event.target instanceof Element && event.target.closest('.ab-note-text');
-    if (toolRef.current === 'select' && onText) return;
+    const deferCapture = toolRef.current === 'select' && onText;
 
     event.stopPropagation();
-    if (toolRef.current === 'hand') {
-      event.preventDefault();
+    if (toolRef.current === 'hand' || !deferCapture) {
+      if (toolRef.current === 'hand') {
+        event.preventDefault();
+      }
+      event.currentTarget.setPointerCapture?.(event.pointerId);
     }
-    event.currentTarget.setPointerCapture?.(event.pointerId);
 
     dragRef.current = {
       type: 'note',
@@ -1077,7 +1132,8 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       origX: note.x,
       origY: note.y,
       moved: false,
-      pointerId: event.pointerId
+      pointerId: event.pointerId,
+      deferCapture
     };
   };
 
@@ -1115,206 +1171,222 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
       {error ? <p className="ab-error">{error}</p> : null}
 
       <aside
-        className={`ab-side-rail${railOpen ? ' is-open' : ''}${
+        className={`ab-side-rail${railOpen ? ' is-open' : ' is-collapsed'}${
           editingTitle ? ' has-flyout' : ''
         }`}
         aria-label="Noteboard controls"
       >
-        <div className={`ab-side-top ${railOpen ? '' : 'is-compact'}`}>
-          <button
-            type="button"
-            className="ab-side-btn ab-side-toggle"
-            onClick={() => {
-              setRailOpen((open) => {
-                const next = !open;
-                writeViewState({ railOpen: next });
-                return next;
-              });
-            }}
-            aria-label={railOpen ? 'Collapse panel' : 'Expand panel'}
-            aria-expanded={railOpen}
-            title={railOpen ? 'Collapse' : 'Expand'}
-          >
-            <SideIcon name="panel" />
-            {railOpen ? <span className="ab-side-btn-label">Panel</span> : null}
-          </button>
-        </div>
-
-        {!isSharedMode && onExit ? (
-          <button
-            type="button"
-            className={`ab-side-btn${railOpen ? ' ab-side-btn--row' : ''}`}
-            onClick={onExit}
-            aria-label="Back to taskboard"
-            title="Taskboard"
-          >
-            <SideIcon name="back" />
-            {railOpen ? <span className="ab-side-btn-label">Taskboard</span> : null}
-          </button>
-        ) : null}
-
-        {isSharedMode ? (
-          <div className={`ab-share-badge${railOpen ? '' : ' is-compact'}`} title={title || 'Shared board'}>
-            <SideIcon name="share" />
-            {railOpen ? (
-              <span className="ab-share-badge-copy">
-                <span className="ab-share-badge-title">{title || 'Shared board'}</span>
-                <span className="ab-share-badge-meta">
-                  Live edit{peerCount > 0 ? ` · ${peerCount} other` : ''}
-                </span>
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-
-        <div className="ab-side-divider" aria-hidden="true" />
-
-        {!isSharedMode ? (
-          <div className="ab-layers">
-            {railOpen ? <p className="ab-layers-heading">Boards</p> : null}
-            <div className="ab-layers-list" role="list" aria-label="Noteboards">
-              {boards.map((board, index) => {
-                const isActive = String(board.id) === String(activeId);
-                const shareOpen = sharePopoverBoardId === String(board.id);
-                return (
-                  <div
-                    key={board.id}
-                    role="listitem"
-                    className={`ab-layer${isActive ? ' is-active' : ''}${
-                      railOpen ? '' : ' is-compact'
-                    }`}
-                    style={{ zIndex: boards.length - index }}
-                  >
-                    <button
-                      type="button"
-                      className="ab-layer-main"
-                      onClick={() => handleSelectBoard(board.id)}
-                      aria-current={isActive ? 'true' : undefined}
-                      title={board.title || 'Untitled'}
-                    >
-                      <span className="ab-layer-icon" aria-hidden="true">
-                        <SideIcon name="layer" />
-                      </span>
-                      {railOpen ? (
-                        <span className="ab-layer-copy">
-                          <span className="ab-layer-title">{board.title || 'Untitled'}</span>
-                          <span className="ab-layer-meta">Layer {boards.length - index}</span>
-                        </span>
-                      ) : null}
-                    </button>
-
-                    <div className="ab-layer-actions">
-                      <button
-                        type="button"
-                        className={`ab-layer-share${shareOpen ? ' is-open' : ''}${
-                          shareOpen && shareCopied ? ' is-copied' : ''
-                        }`}
-                        onClick={(event) => handleShareBoard(board, event)}
-                        aria-label={`Share ${board.title || 'Untitled'}`}
-                        title={shareOpen && shareCopied ? 'Link copied' : 'Share board'}
-                        aria-expanded={shareOpen}
-                      >
-                        <SideIcon name="share" />
-                      </button>
-                      <span className="ab-layer-action-divider" aria-hidden="true" />
-                      <button
-                        type="button"
-                        className="ab-layer-delete"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          closeSharePopover();
-                          handleDeleteBoard(board);
-                        }}
-                        aria-label={`Delete ${board.title || 'Untitled'}`}
-                        title="Delete board"
-                      >
-                        <SideIcon name="trash" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ) : null}
-
-        {!isSharedMode ? <div className="ab-side-divider" aria-hidden="true" /> : null}
-
-        {!isSharedMode ? (
-          <button
-            type="button"
-            className={`ab-side-btn${railOpen ? ' ab-side-btn--row' : ''}${
-              editingTitle ? ' is-active' : ''
-            }`}
-            onClick={() => {
-              if (isGuest) {
-                requireSignIn();
-                return;
-              }
-              closeSharePopover();
-              setTitleDraft(title);
-              setEditingTitle(true);
-            }}
-            aria-label="Rename noteboard"
-            title={title || 'Untitled'}
-          >
-            <SideIcon name="rename" />
-            {railOpen ? <span className="ab-side-btn-label">Rename</span> : null}
-          </button>
-        ) : null}
-
-        {!isSharedMode ? (
-          <button
-            type="button"
-            className={`ab-side-btn${railOpen ? ' ab-side-btn--row' : ''}`}
-            onClick={handleCreateBoard}
-            disabled={creating}
-            aria-label="New noteboard"
-            title="New board"
-          >
-            <SideIcon name="new" />
-            {railOpen ? (
-              <span className="ab-side-btn-label">{creating ? 'Creating…' : 'New board'}</span>
-            ) : null}
-          </button>
-        ) : null}
-
-        <button
-          type="button"
-          className={`ab-side-btn ab-side-btn--add${railOpen ? ' ab-side-btn--row' : ''}`}
-          onClick={addNote}
-          aria-label="Add sticky note"
-          title="Add sticky note"
-        >
-          <SideIcon name="note" />
-          {railOpen ? <span className="ab-side-btn-label">Add note</span> : null}
-        </button>
-
-        {editingTitle && !isSharedMode ? (
-          <div className="ab-side-panel">
-            <p className="ab-side-panel-label">Board title</p>
-            <input
-              ref={titleInputRef}
-              className="ab-title-input"
-              value={titleDraft}
-              maxLength={120}
-              onChange={(e) => setTitleDraft(e.target.value)}
-              onBlur={saveTitle}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  saveTitle();
-                }
-                if (e.key === 'Escape') {
+        {railOpen ? (
+          <>
+            <div className="ab-side-top">
+              <button
+                type="button"
+                className="ab-side-btn ab-side-toggle ab-side-btn--row"
+                onClick={() => {
+                  setRailOpen(false);
                   setEditingTitle(false);
+                  writeViewState({ railOpen: false });
+                }}
+                aria-label="Collapse panel"
+                aria-expanded={true}
+                title="Collapse panel"
+              >
+                <SideIcon name="panel-collapse" />
+                <span className="ab-side-btn-label">Panel</span>
+              </button>
+            </div>
+
+            {!isSharedMode && onExit ? (
+              <button
+                type="button"
+                className="ab-side-btn ab-side-btn--taskboard ab-side-btn--row"
+                onClick={onExit}
+                aria-label="Back to taskboard"
+                title="Back to taskboard"
+              >
+                <SideIcon name="taskboard" />
+                <span className="ab-side-btn-label">Taskboard</span>
+              </button>
+            ) : null}
+
+            {isSharedMode ? (
+              <div className="ab-share-badge" title={title || 'Shared board'}>
+                <SideIcon name="share" />
+                <span className="ab-share-badge-copy">
+                  <span className="ab-share-badge-title">{title || 'Shared board'}</span>
+                  <span className="ab-share-badge-meta">
+                    Live edit{peerCount > 0 ? ` · ${peerCount} other` : ''}
+                  </span>
+                </span>
+              </div>
+            ) : null}
+
+            <div className="ab-side-divider" aria-hidden="true" />
+
+            {!isSharedMode ? (
+              <div className="ab-layers">
+                <p className="ab-layers-heading">Boards</p>
+                <div className="ab-layers-list" role="list" aria-label="Noteboards">
+                  {boards.map((board, index) => {
+                    const isActive = String(board.id) === String(activeId);
+                    const shareOpen = sharePopoverBoardId === String(board.id);
+                    return (
+                      <div
+                        key={board.id}
+                        role="listitem"
+                        className={`ab-layer${isActive ? ' is-active' : ''}`}
+                        style={{ zIndex: boards.length - index }}
+                      >
+                        <button
+                          type="button"
+                          className="ab-layer-main"
+                          onClick={() => handleSelectBoard(board.id)}
+                          aria-current={isActive ? 'true' : undefined}
+                          title={board.title || 'Untitled'}
+                        >
+                          <span className="ab-layer-icon" aria-hidden="true">
+                            <SideIcon name="layer" />
+                          </span>
+                          <span className="ab-layer-copy">
+                            <span className="ab-layer-title">{board.title || 'Untitled'}</span>
+                            <span className="ab-layer-meta">Layer {boards.length - index}</span>
+                          </span>
+                        </button>
+
+                        <div className="ab-layer-actions">
+                          <button
+                            type="button"
+                            className={`ab-layer-share${shareOpen ? ' is-open' : ''}${
+                              shareOpen && shareCopied ? ' is-copied' : ''
+                            }`}
+                            onClick={(event) => handleShareBoard(board, event)}
+                            aria-label={`Share ${board.title || 'Untitled'}`}
+                            title={shareOpen && shareCopied ? 'Link copied' : 'Share board'}
+                            aria-expanded={shareOpen}
+                          >
+                            <SideIcon name="share" />
+                          </button>
+                          <span className="ab-layer-action-divider" aria-hidden="true" />
+                          <button
+                            type="button"
+                            className="ab-layer-delete"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              closeSharePopover();
+                              handleDeleteBoard(board);
+                            }}
+                            aria-label={`Delete ${board.title || 'Untitled'}`}
+                            title="Delete board"
+                          >
+                            <SideIcon name="trash" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
+            {!isSharedMode ? <div className="ab-side-divider" aria-hidden="true" /> : null}
+
+            {!isSharedMode ? (
+              <button
+                type="button"
+                className={`ab-side-btn ab-side-btn--row${editingTitle ? ' is-active' : ''}`}
+                onClick={() => {
+                  if (isGuest) {
+                    requireSignIn();
+                    return;
+                  }
+                  closeSharePopover();
                   setTitleDraft(title);
-                }
+                  setEditingTitle(true);
+                }}
+                aria-label="Rename noteboard"
+                title={title || 'Untitled'}
+              >
+                <SideIcon name="rename" />
+                <span className="ab-side-btn-label">Rename</span>
+              </button>
+            ) : null}
+
+            {!isSharedMode ? (
+              <button
+                type="button"
+                className="ab-side-btn ab-side-btn--row"
+                onClick={handleCreateBoard}
+                disabled={creating}
+                aria-label="New noteboard"
+                title="New board"
+              >
+                <SideIcon name="new" />
+                <span className="ab-side-btn-label">{creating ? 'Creating…' : 'New board'}</span>
+              </button>
+            ) : null}
+
+            <button
+              type="button"
+              className="ab-side-btn ab-side-btn--add ab-side-btn--row"
+              onClick={addNote}
+              aria-label="Add sticky note"
+              title="Add sticky note"
+            >
+              <SideIcon name="note" />
+              <span className="ab-side-btn-label">Add note</span>
+            </button>
+
+            {editingTitle && !isSharedMode ? (
+              <div className="ab-side-panel">
+                <p className="ab-side-panel-label">Board title</p>
+                <input
+                  ref={titleInputRef}
+                  className="ab-title-input"
+                  value={titleDraft}
+                  maxLength={120}
+                  onChange={(e) => setTitleDraft(e.target.value)}
+                  onBlur={saveTitle}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      saveTitle();
+                    }
+                    if (e.key === 'Escape') {
+                      setEditingTitle(false);
+                      setTitleDraft(title);
+                    }
+                  }}
+                  aria-label="Noteboard title"
+                  placeholder="Name this board"
+                />
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <div className="ab-side-collapsed">
+            <button
+              type="button"
+              className="ab-side-collapsed-expand"
+              onClick={() => {
+                setRailOpen(true);
+                writeViewState({ railOpen: true });
               }}
-              aria-label="Noteboard title"
-              placeholder="Name this board"
-            />
+              aria-label="Expand panel"
+              title="Expand panel"
+            >
+              <SideIcon name="panel-expand" />
+            </button>
+            <button
+              type="button"
+              className="ab-side-btn ab-side-btn--add"
+              onClick={addNote}
+              aria-label="Add sticky note"
+              title="Add sticky note"
+            >
+              <SideIcon name="note" />
+            </button>
           </div>
-        ) : null}
+        )}
       </aside>
 
       {sharePopoverBoardId ? (
@@ -1442,20 +1514,20 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
         <button
           type="button"
           className={`ab-tool-btn${tool === 'select' ? ' is-active' : ''}`}
-          onClick={() => setTool('select')}
+          onClick={() => switchTool('select')}
           aria-label="Select / Type"
           aria-pressed={tool === 'select'}
-          title="Select / Type — drag the bar on a sticky to move it (V)"
+          title="Select / Type — click a sticky to type (V)"
         >
           <ToolIcon name="select" />
         </button>
         <button
           type="button"
           className={`ab-tool-btn${tool === 'hand' ? ' is-active' : ''}`}
-          onClick={() => setTool('hand')}
+          onClick={() => switchTool('hand')}
           aria-label="Hand"
           aria-pressed={tool === 'hand'}
-          title="Hand — move the board, or drag a sticky (H)"
+          title="Hand — drag to move stickies or pan the board (H)"
         >
           <ToolIcon name="hand" />
         </button>

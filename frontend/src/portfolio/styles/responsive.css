@@ -19,7 +19,6 @@
   }
 
   .pf-hero-portrait-wrap {
-    order: -1;
     width: min(100%, 18rem);
     margin-inline: auto;
   }

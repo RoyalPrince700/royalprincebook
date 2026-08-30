@@ -22,12 +22,14 @@ const HeroSection = () => (
       ))}
     </div>
 
-    <div className="pf-container pf-hero-content">
-      <motion.div
-        initial={{ opacity: 0, y: 32 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      >
+    <div className="pf-container">
+      <div className="pf-hero-content">
+        <motion.div
+          className="pf-hero-copy"
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        >
         <div className="pf-hero-intro">
           <h1 className="pf-hero-title">
             {heroContent.lines.map((line, index) => (
@@ -64,22 +66,23 @@ const HeroSection = () => (
             </span>
           ))}
         </div>
-      </motion.div>
+        </motion.div>
 
-      <motion.div
-        className="pf-hero-portrait-wrap"
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.25, duration: 0.8 }}
-      >
-        <div className="pf-hero-portrait-glow" />
-        <img
-          src={heroContent.portrait}
-          alt="Royal Prince"
-          className="pf-hero-portrait"
-          loading="eager"
-        />
-      </motion.div>
+        <motion.div
+          className="pf-hero-portrait-wrap"
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.25, duration: 0.8 }}
+        >
+          <div className="pf-hero-portrait-glow" />
+          <img
+            src={heroContent.portrait}
+            alt="Royal Prince"
+            className="pf-hero-portrait"
+            loading="eager"
+          />
+        </motion.div>
+      </div>
     </div>
   </section>
 );
