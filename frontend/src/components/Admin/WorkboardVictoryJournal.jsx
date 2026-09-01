@@ -160,7 +160,7 @@ const WorkboardVictoryJournal = ({
               maxLength={500}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
-              placeholder="Completed the growth proposal. Shipped the hard thing."
+              placeholder="e.g. Finished the main deliverable on time."
             />
             {localError ? (
               <p className="wb-report-error" role="alert">

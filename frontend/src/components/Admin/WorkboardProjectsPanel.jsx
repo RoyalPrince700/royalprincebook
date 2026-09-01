@@ -81,7 +81,7 @@ const WorkboardProjectsPanel = ({
               <input
                 value={projectTitle}
                 onChange={(event) => setProjectTitle(event.target.value)}
-                placeholder="Launch Accessible Summer Competition"
+                placeholder="e.g. Launch a product campaign"
                 maxLength={160}
               />
               <button type="submit" disabled={saving || !projectTitle.trim()}>
@@ -154,7 +154,7 @@ const WorkboardProjectsPanel = ({
                 onChange={(event) =>
                   setObjectiveForm((prev) => ({ ...prev, title: event.target.value }))
                 }
-                placeholder="Increase Smipay ambassador signups"
+                placeholder="e.g. Hit 50 weekly signups"
                 maxLength={160}
                 required
               />
@@ -164,7 +164,7 @@ const WorkboardProjectsPanel = ({
                   onChange={(event) =>
                     setObjectiveForm((prev) => ({ ...prev, category: event.target.value }))
                   }
-                  placeholder="Category"
+                  placeholder="e.g. Marketing"
                   maxLength={60}
                 />
                 <input
@@ -174,7 +174,7 @@ const WorkboardProjectsPanel = ({
                   onChange={(event) =>
                     setObjectiveForm((prev) => ({ ...prev, target: event.target.value }))
                   }
-                  placeholder="Target"
+                  placeholder="e.g. 50"
                   required
                 />
                 <input
@@ -184,7 +184,7 @@ const WorkboardProjectsPanel = ({
                   onChange={(event) =>
                     setObjectiveForm((prev) => ({ ...prev, current: event.target.value }))
                   }
-                  placeholder="Current"
+                  placeholder="e.g. 0"
                 />
               </div>
               <button type="submit" disabled={saving}>
