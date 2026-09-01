@@ -826,7 +826,7 @@ export const DiyEcomPhase3Backend = () => (
     step="Phase 3"
     trackLabel="Track 3 · Phase 3 — Backend"
     title="Express API + MongoDB products"
-    importantNote="Create a sibling folder my-store-api next to my-store. Never commit .env files."
+    importantNote="Create a sibling folder my-store-api next to my-store. Set up MongoDB Atlas first — see Chapter 6 Phase 3 steps above. Never commit .env files."
     expectedFiles={[
       'my-store-api/package.json',
       'my-store-api/server.js',
@@ -872,22 +872,22 @@ export const DiyEcomPhase4Connect = () => (
       'my-store/src/services/api.js',
       'my-store/src/pages/Shop.jsx (fetch products)',
       'my-store/src/pages/ProductDetail.jsx (fetch by slug)',
-      'my-store/.env.example (VITE_API_URL)'
+      'my-store/.env.example (VITE_API_BASE_URL)'
     ]}
     verifyBeforeNext={[
       'Shop page loads products from http://localhost:5000/api/products',
       'Loading and error states shown while fetching',
       'Product detail fetches by slug from API',
-      'VITE_API_URL in .env.local — not committed'
+      'VITE_API_BASE_URL in .env.local — not committed'
     ]}
     prompt={`Connect my-store frontend to my-store-api.
 
 Tasks:
-1. Create src/services/api.js — axios instance with baseURL from import.meta.env.VITE_API_URL
+1. Create src/services/api.js — axios instance with baseURL from import.meta.env.VITE_API_BASE_URL (default http://localhost:5000/api)
 2. Shop.jsx — useEffect fetch products, show loading spinner, error message on failure
 3. ProductDetail.jsx — fetch /api/products/:slug
 4. Remove dependency on src/data/products.js for listing (keep as fallback comment only)
-5. Add .env.example: VITE_API_URL=http://localhost:5000
+5. Add .env.example: VITE_API_BASE_URL=http://localhost:5000/api
 
 Add proxy or CORS is already on backend. Handle empty shop state.
 
@@ -900,6 +900,7 @@ export const DiyEcomPhase5Auth = () => (
     step="Phase 5"
     trackLabel="Track 3 · Phase 5 — Auth"
     title="Google OAuth + JWT (like Royal Prince Hub)"
+    importantNote="Complete Chapter 8 Google OAuth Setup Step by Step BEFORE this prompt. Add your Gmail as a test user on the OAuth consent screen."
     expectedFiles={[
       'my-store-api/models/User.js',
       'my-store-api/routes/auth.js',

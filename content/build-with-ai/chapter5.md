@@ -14,11 +14,13 @@ Every preview is embedded right here in the chapter — scroll, study, copy the 
 
 1. **Look** at the UI preview embedded below each section
 2. **Notice** what makes it professional — spacing, hierarchy, one clear action
-3. **Copy** the Cursor prompt under the preview
-4. **Paste** into Cursor and build that one component
+3. **Copy** the Cursor prompt under the preview (use the **Copy prompt** button in the reader)
+4. **Paste** into Cursor Agent mode and build that one component
 5. **Compare** your result to the preview — use the Critique Pattern from Chapter 3
 
-You do not need to understand the code on this page. You need to **see** what good looks like, then let AI help you build it.
+**This chapter is for studying and practice.** When you are ready to build a **full project** from scratch, go to **Chapter 6** — it has step-by-step prompts with file checklists for every stage.
+
+You do not need to understand every line of code on this page. You need to **see** what good looks like, then let AI help you build it.
 
 ---
 

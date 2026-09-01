@@ -12,6 +12,7 @@ import chapter11Md from '../../../../content/build-with-ai/chapter11.md?raw';
 import chapter12Md from '../../../../content/build-with-ai/chapter12.md?raw';
 import chapter13Md from '../../../../content/build-with-ai/chapter13.md?raw';
 import chapter14Md from '../../../../content/build-with-ai/chapter14.md?raw';
+import glossaryMd from '../../../../content/build-with-ai/GLOSSARY.md?raw';
 import { markdownToHtml, countWords } from '../../utils/markdownToHtml';
 import { parseChapterSegments } from './chapterSegments';
 import { chapter4DemoMap } from './demos/Chapter4Demos';
@@ -91,7 +92,8 @@ export const buildWithAiBookData = {
     createChapter(11, 'Chapter 11: When Things Break — Debug Like a Builder', chapter11Md),
     createChapter(12, 'Chapter 12: Admin Dashboard — Manage What You Built', chapter12Md),
     createChapter(13, 'Chapter 13: Custom Domain & Cloudflare — Look Professional Online', chapter13Md),
-    createChapter(14, 'Chapter 14: Your Next Build — Portfolio, Freelance & Keep Building', chapter14Md)
+    createChapter(14, 'Chapter 14: Your Next Build — Portfolio, Freelance & Keep Building', chapter14Md),
+    createChapter(15, 'Appendix: Glossary — Terms Explained', glossaryMd)
   ]
 };
 

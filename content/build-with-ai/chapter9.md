@@ -192,7 +192,7 @@ Click the terminal and press `Ctrl + C`. Confirm if asked.
 | `EADDRINUSE port 5000` | Something else uses port 5000 — stop it or change `PORT` in `.env` |
 | `Cannot find module` | Run `npm install` in that folder |
 | `MONGODB_URI undefined` | Create `.env` in backend — see Part 3 |
-| Frontend cannot reach API | Check `VITE_API_URL` in frontend `.env.local` points to `http://localhost:5000` |
+| Frontend cannot reach API | Check `VITE_API_BASE_URL` in frontend `.env.local` points to `http://localhost:5000/api` |
 
 ---
 
@@ -213,7 +213,7 @@ When you build an e-commerce store, you are not using one tool — you are conne
 │  VERCEL — hosts your React frontend (HTML, JS, CSS)         │
 │  • Builds from GitHub when you push                         │
 │  • Serves the shop UI, cart, login button                   │
-│  • Only knows PUBLIC env vars (VITE_API_URL, VITE_GOOGLE…)  │
+│  • Only knows PUBLIC env vars (VITE_API_BASE_URL, VITE_GOOGLE…)  │
 └──────────────────────────┬──────────────────────────────────┘
                            │ API calls (Axios/fetch)
                            ▼
@@ -356,6 +356,8 @@ MONGODB_URI=mongodb+srv://myuser:myPass123@cluster0.xxxxx.mongodb.net/mystore?re
 
 ### Google OAuth — login (Track 3)
 
+> **Full walkthrough:** See **Chapter 8 — Google OAuth Setup Step by Step** for every click in Google Cloud Console. Summary below for deploy checklist.
+
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
 2. Create a project → **APIs & Services → Credentials**
 3. **Create Credentials → OAuth client ID → Web application**
@@ -397,12 +399,24 @@ BACKEND_URL=http://localhost:5000
 Create `my-store/.env.local`:
 
 ```
-VITE_API_URL=http://localhost:5000
+VITE_API_BASE_URL=http://localhost:5000/api
 VITE_GOOGLE_CLIENT_ID=...
 VITE_FLW_PUBLIC_KEY=FLWPUBK_TEST-...
 ```
 
-Copy `.env.example` to `.env` — commit **only** `.env.example` to Git.
+**Important:** The URL must include `/api` at the end if your axios base URL expects it — same pattern as Royal Prince Hub.
+
+Copy `.env.example` to `.env.local` — commit **only** `.env.example` to Git.
+
+### How to create a `.env` file (first time)
+
+1. In Cursor's file explorer, right-click your backend folder (`my-store-api`)
+2. **New File** → name it exactly `.env` (the dot matters)
+3. Paste your key=value pairs — one per line, no quotes unless the value contains spaces
+4. Save (`Ctrl + S`)
+5. **Restart the backend server** after any `.env` change — env vars load at startup only
+
+Do the same for frontend: `my-store/.env.local` (Vite prefers `.env.local` for local secrets).
 
 ---
 
@@ -512,6 +526,26 @@ git push -u origin main
 
 GitHub may ask you to log in — use browser authentication or a **Personal Access Token** as password.
 
+### GitHub login on Windows (first push)
+
+If `git push` asks for a password and rejects your GitHub password, GitHub no longer accepts account passwords in the terminal. Use one of these:
+
+**Option A — Browser login (easiest):**
+
+1. When Git asks to authenticate, choose **Sign in with your browser**
+2. Complete login in the browser window that opens
+3. Return to Cursor — push should complete
+
+**Option B — Personal Access Token (PAT):**
+
+1. GitHub.com → your profile picture → **Settings**
+2. **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+3. **Generate new token (classic)** → name it `my-laptop` → check **repo** scope → Generate
+4. Copy the token immediately (you will not see it again)
+5. When `git push` asks for password, **paste the token** — not your GitHub password
+
+Store the token somewhere safe (password manager). Treat it like a password.
+
 ### Git commands you will use every day
 
 | Command | What it does |
@@ -568,7 +602,7 @@ Vercel hosts your React app. It connects to GitHub and rebuilds on every push.
 
 | Name | Value | Notes |
 |------|-------|-------|
-| `VITE_API_URL` | `https://my-store-api.onrender.com` | Your Render URL *(add after backend deploy)* |
+| `VITE_API_BASE_URL` | `https://my-store-api.onrender.com/api` | Your Render URL + `/api` *(add after backend deploy)* |
 | `VITE_GOOGLE_CLIENT_ID` | `....apps.googleusercontent.com` | Public — safe in Vercel |
 | `VITE_FLW_PUBLIC_KEY` | `FLWPUBK_TEST-...` | Public Flutterwave key |
 
@@ -578,7 +612,7 @@ First deploy takes 1–3 minutes. You get: `https://my-store-abc123.vercel.app`
 
 ### Step 3 — Redeploy after backend is live
 
-When Render gives you an API URL, update `VITE_API_URL` in Vercel → **Settings → Environment Variables** → **Redeploy**.
+When Render gives you an API URL, update `VITE_API_BASE_URL` in Vercel → **Settings → Environment Variables** → **Redeploy**.
 
 ### Vercel + GitHub link — how it works
 
@@ -668,7 +702,7 @@ Render free services **sleep** after ~15 minutes of no traffic. First visit wake
 
 After both are live:
 
-1. **Vercel** `VITE_API_URL` = your Render URL
+1. **Vercel** `VITE_API_BASE_URL` = your Render URL + `/api` (e.g. `https://my-store-api.onrender.com/api`)
 2. **Render** `FRONTEND_URL` = your Vercel URL
 3. **Backend CORS** must allow your Vercel domain:
 

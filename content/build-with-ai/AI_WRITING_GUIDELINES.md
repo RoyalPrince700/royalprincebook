@@ -44,10 +44,11 @@ Each chapter follows this pattern:
 ## Content Location
 
 - Authoring drafts: `content/build-with-ai/chapter*.md`
+- Glossary: `content/build-with-ai/GLOSSARY.md`
 - App integration: `frontend/src/chapters/build-with-ai/`
 - Reference project: root monorepo (`frontend/` + `backend/`)
 
-## Published Chapters (Complete — 14 chapters)
+## Published Chapters (Complete — 14 chapters + Glossary appendix)
 
 1. The New Way to Build
 2. Your Toolkit & The MERN Stack
@@ -63,3 +64,4 @@ Each chapter follows this pattern:
 12. Admin Dashboard — manage products, orders, protected admin pattern
 13. Custom Domain & Cloudflare — professional URLs, DNS, OAuth updates
 14. Your Next Build — portfolio, freelance, project ladder, finale
+15. **Appendix: Glossary** — plain-English term definitions

@@ -39,9 +39,15 @@ const sendWelcomeEmail = async (user) => {
     return null;
   }
 
+  const platformUrl = getFrontendUrl();
   const template = getWelcomeEmailTemplate({
     email: user.email,
-    loginUrl: getFrontendUrl()
+    platformUrl,
+    booksUrl: `${platformUrl}/all-books`,
+    blogUrl: `${platformUrl}/blog`,
+    taskboardUrl: `${platformUrl}/taskboard`,
+    noteboardUrl: `${platformUrl}/noteboard`,
+    dashboardUrl: `${platformUrl}/dashboard`
   });
 
   return sendEmail({

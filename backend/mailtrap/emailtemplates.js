@@ -109,64 +109,116 @@ const renderEmailShell = ({
   </html>
 `;
 
-const getWelcomeEmailTemplate = ({ email, loginUrl }) => {
+const getWelcomeEmailTemplate = ({
+  email,
+  platformUrl,
+  booksUrl,
+  blogUrl,
+  taskboardUrl,
+  noteboardUrl,
+  dashboardUrl
+}) => {
   const safeUsername = escapeHtml(getEmailHandle(email));
-  const safeLoginUrl = escapeHtml(loginUrl);
+  const safePlatformUrl = escapeHtml(platformUrl);
+  const safeBooksUrl = escapeHtml(booksUrl);
+  const safeBlogUrl = escapeHtml(blogUrl);
+  const safeTaskboardUrl = escapeHtml(taskboardUrl);
+  const safeNoteboardUrl = escapeHtml(noteboardUrl);
+  const safeDashboardUrl = escapeHtml(dashboardUrl);
 
   return {
-    subject: `A personal welcome to ${APP_NAME}`,
+    subject: `Welcome to ${APP_NAME} — your account is ready`,
     text: `Hi ${getEmailHandle(email)},
 
 Welcome to ${APP_NAME}.
 
-I am Royal Prince, and I want to personally thank you for joining us. It truly means a lot to have you here.
+I am Royal Prince, and I am glad you joined. ${APP_NAME} is my personal hub — not just for books, but for everything I publish and build in one place.
 
-I created ${APP_NAME} to be more than just a platform for books. My desire is for it to feel like a place where you can learn, grow, and stay connected to ideas that truly matter.
+With your account, you can:
 
-As you begin your journey with us, please know that you are not just another user here. You are part of a community I deeply care about, and I am genuinely glad to welcome you personally.
+Portfolio — explore my work, projects, and leadership journey
+${platformUrl}
 
-Open ${APP_NAME}: ${loginUrl}
+Books — browse, purchase, and read digital books
+${booksUrl}
+
+Blog — read essays, ideas, and updates
+${blogUrl}
+
+Taskboard — plan tasks, track streaks, earn XP, and collaborate
+${taskboardUrl}
+
+Noteboard — capture notes and organize ideas
+${noteboardUrl}
+
+Dashboard — your home base across the platform
+${dashboardUrl}
+
+Thank you for being here. You are part of a community I genuinely care about.
 
 With gratitude,
 Royal Prince
 CEO, ${APP_NAME}`,
     html: renderEmailShell({
-      badge: 'First Book Release',
-      eyebrow: `Welcome to ${APP_NAME}`,
-      title: `Leadership that starts within, ${safeUsername}.`,
+      badge: APP_NAME,
+      eyebrow: 'Account ready',
+      title: `Glad you're here, ${safeUsername}.`,
       subtitle:
-        'A clean start, practical wisdom, and a reading experience designed to feel as intentional as the message itself.',
+        'One account unlocks my portfolio, books, blog, taskboard, noteboard, and the tools I am building in public.',
       primaryAction: {
-        href: safeLoginUrl,
+        href: safePlatformUrl,
         label: `Open ${APP_NAME}`
       },
       secondaryAction: {
-        href: safeLoginUrl,
-        label: 'Start Reading'
+        href: safeDashboardUrl,
+        label: 'Go to dashboard'
       },
       contentHtml: `
         <h2 style="${baseStyles.sectionTitle}">A personal welcome from Royal Prince</h2>
         <p style="${baseStyles.bodyCopy}">Hi ${safeUsername},</p>
-        <p style="${baseStyles.bodyCopy}">Thank you for joining ${APP_NAME}. I built this platform to feel more like a modern reading home than a plain storefront, a place where thoughtful ideas, growth, and leadership can live together.</p>
+        <p style="${baseStyles.bodyCopy}">Thank you for joining ${APP_NAME}. I built this platform to be a real home for my work — not just a bookstore. It is where my portfolio, writing, books, and productivity tools live together.</p>
         <p style="${baseStyles.bodyCopy}">You are not just another signup here. You are part of a community I genuinely care about, and I am glad to welcome you personally.</p>
-        <div style="${baseStyles.quoteCard}">
-          <p style="${baseStyles.quoteMark}">"</p>
-          <p style="margin:10px 0 0;font-size:15px;line-height:1.8;color:#334155;">Leadership is first shaped in private, through the choices you make every day.</p>
-        </div>
         <table role="presentation" style="${baseStyles.statGrid}">
           <tr>
             <td style="${baseStyles.statCard}">
-              <p style="${baseStyles.statLabel}">Your next step</p>
-              <p style="${baseStyles.statValue}">Explore the platform</p>
+              <p style="${baseStyles.statLabel}">Portfolio</p>
+              <p style="${baseStyles.statValue}">Explore my work</p>
+              <p style="${baseStyles.note}">Projects, leadership journey, and what I am building now.</p>
             </td>
           </tr>
           <tr>
             <td style="${baseStyles.statCard}">
-              <p style="${baseStyles.statLabel}">What to expect</p>
-              <p style="margin:0;font-size:15px;line-height:1.7;color:#475569;">Practical books, clearer direction, and a more intentional reading journey.</p>
+              <p style="${baseStyles.statLabel}">Books</p>
+              <p style="${baseStyles.statValue}">Read &amp; purchase</p>
+              <p style="${baseStyles.note}"><a href="${safeBooksUrl}" style="color:#0f172a;font-weight:600;text-decoration:none;">Browse the library</a> — practical books on leadership, growth, and building.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="${baseStyles.statCard}">
+              <p style="${baseStyles.statLabel}">Blog</p>
+              <p style="${baseStyles.statValue}">Essays &amp; updates</p>
+              <p style="${baseStyles.note}"><a href="${safeBlogUrl}" style="color:#0f172a;font-weight:600;text-decoration:none;">Read the blog</a> — ideas, lessons, and writing in public.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="${baseStyles.statCard}">
+              <p style="${baseStyles.statLabel}">Taskboard</p>
+              <p style="${baseStyles.statValue}">Plan &amp; collaborate</p>
+              <p style="${baseStyles.note}"><a href="${safeTaskboardUrl}" style="color:#0f172a;font-weight:600;text-decoration:none;">Open the taskboard</a> — tasks, streaks, XP, focus mode, and shared boards.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="${baseStyles.statCard}">
+              <p style="${baseStyles.statLabel}">Noteboard</p>
+              <p style="${baseStyles.statValue}">Capture ideas</p>
+              <p style="${baseStyles.note}"><a href="${safeNoteboardUrl}" style="color:#0f172a;font-weight:600;text-decoration:none;">Use the noteboard</a> — notes, sketches, and visual thinking in one place.</p>
             </td>
           </tr>
         </table>
+        <div style="${baseStyles.quoteCard}">
+          <p style="${baseStyles.quoteMark}">"</p>
+          <p style="margin:10px 0 0;font-size:15px;line-height:1.8;color:#334155;">I built ${APP_NAME} so you could learn, create, and stay connected to my work without jumping between scattered tools.</p>
+        </div>
         <hr style="${baseStyles.divider}" />
         <p style="${baseStyles.bodyCopy};margin-bottom:0;">With gratitude,<br /><strong style="color:#020617;">Royal Prince</strong><br />CEO, ${APP_NAME}</p>
       `,

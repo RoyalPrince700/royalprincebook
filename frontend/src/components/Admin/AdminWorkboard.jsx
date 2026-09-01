@@ -12,6 +12,7 @@ import WorkboardProjectsPanel from './WorkboardProjectsPanel';
 import WorkboardAnalytics from './WorkboardAnalytics';
 import WorkboardVictoryJournal from './WorkboardVictoryJournal';
 import WorkboardLeaderboard from './WorkboardLeaderboard';
+import TaskboardPlayerName from './TaskboardPlayerName';
 import WorkboardAccessGrantModal, {
   WORKBOARD_PERMISSION_OPTIONS
 } from './WorkboardAccessGrantModal';
@@ -1761,6 +1762,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
       <AdminLayout chrome="minimal" standalone={layoutStandalone}>
         <BoardShell>
           <WorkboardDashboard
+            user={user}
             todayKey={todayKey}
             weekStart={weekStart}
             weekIndex={activeWeekIndex}
@@ -2243,7 +2245,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
           aria-label="Productivity summary"
         >
           <div className="wb-level-card">
-            <p className="wb-game-kicker">Royal Prince</p>
+            <TaskboardPlayerName user={user} editable={canEdit} />
             <p className="wb-level-title">Level {levelProgress.level}</p>
             <div className="wb-xp-track" aria-hidden="true">
               <span

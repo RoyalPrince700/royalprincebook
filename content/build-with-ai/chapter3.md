@@ -112,6 +112,60 @@ Be aware of the limits:
 
 ---
 
+## How to Use Cursor Agent Mode — Step by Step
+
+Chapter 6 gives you copy-paste prompts. This section teaches **how to paste them and what to do when Cursor responds** — so you are not staring at the screen wondering what happened.
+
+### 1. Open your project folder
+
+In Cursor: **File → Open Folder** → select your empty project folder (e.g. `my-landing-page`). The folder name should appear at the top of the left sidebar.
+
+### 2. Open the AI chat panel
+
+- Click the chat icon in the sidebar, or press `Ctrl + L` (Windows) / `Cmd + L` (Mac)
+- For building files, use **Agent mode** (sometimes labeled "Agent" or with a tool icon) — it can create and edit files, not just answer questions
+
+### 3. Paste one prompt at a time
+
+Copy the prompt from Chapter 5 or 6. Paste it into the chat. Press Enter.
+
+**Do not** paste Step 2 while Step 1 is still running or broken.
+
+### 4. Review before you accept
+
+Cursor will propose **changes** (a "diff") — red lines removed, green lines added.
+
+Before clicking **Accept** or **Apply**:
+
+- Scan the file list on the left — did it create files in the **right folder**?
+- Check `package.json` — did it add libraries you did not ask for?
+- If something looks wrong, type: *"Move those files into my-landing-page/src/components/ instead"*
+
+### 5. Run the verify checklist
+
+Every Chapter 6 step lists **"Verify before the next prompt."** Do every item:
+
+```bash
+npm install
+npm run dev
+```
+
+Open the browser URL shown in the terminal (usually `http://localhost:5173`).
+
+### 6. When Cursor asks for permission
+
+Agent mode may ask to run terminal commands or create files. **Allow** for commands like `npm install` and `npm create vite` inside **your** project folder. **Deny** if it tries to modify files outside your project.
+
+### 7. When the agent stops mid-task
+
+Type: *"Continue from where you stopped. Step X is not complete yet — [say what's missing]."*
+
+### 8. Save the constraint prompt
+
+At the start of every build session, paste the Architecture Constraints block from Chapter 8. It stops AI from switching your stack to Next.js or Firebase without warning.
+
+---
+
 ## Prompt Engineering — How to Write Prompts That Work
 
 **Prompt engineering** simply means writing instructions to AI in a way that gets useful, accurate results. You do not need a computer science degree for this. You need clarity, context, and structure.

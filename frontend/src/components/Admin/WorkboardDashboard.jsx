@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import TaskboardPlayerName from './TaskboardPlayerName';
 import {
   buildTodaysMission,
   calculateDailyScore,
@@ -21,6 +22,7 @@ const formatLongDate = (dateKey) => {
  * Compact command center — answers "what should I do today?"
  */
 const WorkboardDashboard = ({
+  user,
   todayKey,
   weekStart,
   weekIndex,
@@ -59,7 +61,8 @@ const WorkboardDashboard = ({
       <header className="wb-dash-hero">
         <p className="wb-game-kicker">Command Center</p>
         <h1 className="wb-dash-greeting">
-          {greeting}, Royal Prince <span aria-hidden="true">👑</span>
+          {greeting},{' '}
+          <TaskboardPlayerName user={user} variant="greeting" />
         </h1>
         <p className="wb-dash-date">{formatLongDate(todayKey)}</p>
 

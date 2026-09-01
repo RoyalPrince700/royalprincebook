@@ -250,7 +250,140 @@ Royal Prince Hub uses roles like `user`, `admin`, and extended roles for specifi
 
 Store role on the User document in MongoDB. Check role in middleware — not on the frontend alone. **Frontend hiding the Admin link is UX. Backend blocking the route is security.**
 
-### Google Cloud Console — what you configure
+### Google OAuth Setup — Step by Step (Google Cloud Console)
+
+This is where most beginners get stuck on Track 3. Follow every step **before** running the Chapter 6 Phase 5 auth prompt. Budget 20–30 minutes.
+
+#### What you are creating
+
+You need two values for your backend `.env`:
+
+- `GOOGLE_CLIENT_ID` — public identifier (also used on frontend)
+- `GOOGLE_CLIENT_SECRET` — **backend only**, never in React
+
+You also configure **exact URLs** Google is allowed to redirect to after login.
+
+---
+
+#### Step 1 — Create a Google Cloud project
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Sign in with the Google account you want to use for development
+3. Top bar → click the **project dropdown** → **New Project**
+4. Name: `my-store-dev` (or your project name) → **Create**
+5. Make sure the new project is **selected** in the top bar
+
+---
+
+#### Step 2 — Configure OAuth consent screen
+
+1. Left menu → **APIs & Services** → **OAuth consent screen**
+2. User type: **External** → **Create**
+3. Fill required fields:
+   - **App name:** My Store (or your app name)
+   - **User support email:** your email
+   - **Developer contact email:** your email
+4. **Save and Continue**
+5. **Scopes** — click **Save and Continue** (defaults are fine for learning)
+6. **Test users** — add **your own Gmail address** as a test user → Save
+7. **Summary** → Back to Dashboard
+
+**Important:** While app is in "Testing" mode, only test users you add can log in. That is fine for development.
+
+---
+
+#### Step 3 — Create OAuth Client ID
+
+1. Left menu → **APIs & Services** → **Credentials**
+2. **+ Create Credentials** → **OAuth client ID**
+3. Application type: **Web application**
+4. Name: `my-store-web`
+
+**Authorized JavaScript origins** — add these (one per line):
+
+```
+http://localhost:5173
+```
+
+Add your Vercel URL later when you deploy, e.g.:
+
+```
+https://my-store.vercel.app
+```
+
+**Authorized redirect URIs** — add **exactly** (copy-paste, no trailing spaces):
+
+```
+http://localhost:5000/api/auth/google/callback
+```
+
+Add production later:
+
+```
+https://my-store-api.onrender.com/api/auth/google/callback
+```
+
+5. Click **Create**
+6. A popup shows **Client ID** and **Client secret** — copy both immediately
+
+---
+
+#### Step 4 — Add to your `.env` files
+
+**Backend** (`my-store-api/.env`):
+
+```
+GOOGLE_CLIENT_ID=123456789-xxxxx.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-xxxxxxxx
+GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+FRONTEND_URL=http://localhost:5173
+```
+
+**Frontend** (`my-store/.env.local`):
+
+```
+VITE_GOOGLE_CLIENT_ID=123456789-xxxxx.apps.googleusercontent.com
+```
+
+Use the **same Client ID** on frontend. **Never** put `GOOGLE_CLIENT_SECRET` in frontend files.
+
+Restart both servers after saving `.env`.
+
+---
+
+#### Step 5 — Test login locally
+
+1. Both terminals running (frontend :5173, backend :5000)
+2. Click **Continue with Google** on your login page
+3. Choose the **test user** Google account you added in Step 2
+4. You should return to your app with your name visible
+
+**If it fails**, check this table:
+
+| Symptom | Fix |
+|---------|-----|
+| `redirect_uri_mismatch` | Redirect URI in Google Console must **character-match** `GOOGLE_CALLBACK_URL` |
+| `access_blocked` | Add your Gmail as a **test user** on OAuth consent screen |
+| Redirects to wrong page | Check `FRONTEND_URL` in backend `.env` |
+| Works in Google popup but no user in app | Check backend terminal for errors; JWT or MongoDB issue |
+
+---
+
+#### Step 6 — Update for production (after Chapter 9 deploy)
+
+When Vercel and Render URLs are live:
+
+1. Google Console → Credentials → edit your OAuth client
+2. Add production **JavaScript origins** and **redirect URIs**
+3. Update Render env vars: `GOOGLE_CALLBACK_URL`, `FRONTEND_URL`, `BACKEND_URL`
+4. Update Vercel: `VITE_GOOGLE_CLIENT_ID` (same client ID is fine)
+5. Redeploy both services
+
+Do **not** delete localhost URLs until you no longer need local dev with this client.
+
+---
+
+### Google Cloud Console — quick reference
 
 When you set up Google OAuth, you need:
 
@@ -452,3 +585,5 @@ Build wild. Build a lot. But build with your eyes open.
 7. **If you have payments**, confirm verification happens in a backend controller — not only in the React success callback.
 
 8. **Complete the Pre-Ship Security Checklist** before deploying — Chapter 9 assumes you have.
+
+9. **When you start Track 3 Phase 5**, complete the **Google OAuth Setup — Step by Step** section in this chapter first — do not skip it.

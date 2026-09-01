@@ -25,9 +25,9 @@ const formatUsername = (value) => {
   return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
 };
 
-const buildUniqueUsername = async (profile, email) => {
+const buildUniqueUsername = async (email) => {
   const emailPrefix = email.split('@')[0];
-  const baseUsername = formatUsername(profile.displayName || emailPrefix);
+  const baseUsername = formatUsername(emailPrefix);
 
   let candidate = baseUsername;
   let suffix = 1;
@@ -67,7 +67,7 @@ const configurePassport = () => {
           });
 
           if (!user) {
-            const username = await buildUniqueUsername(profile, email);
+            const username = await buildUniqueUsername(email);
             user = await User.create({
               username,
               email,
@@ -89,7 +89,7 @@ const configurePassport = () => {
             }
 
             if (!user.username) {
-              user.username = await buildUniqueUsername(profile, email);
+              user.username = await buildUniqueUsername(email);
               shouldSave = true;
             }
 

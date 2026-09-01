@@ -31,6 +31,47 @@ Royal Prince Hub exists because I built it this way — piece by piece, with AI 
 | **30–60 minutes per session** | Focus beats marathon coding |
 | **Chapter 3 fresh in mind** | Prompt quality still matters — these prompts are pre-written for you |
 
+### Chapter 5 vs Chapter 6 — which prompts to use?
+
+| Chapter | Purpose |
+|---------|---------|
+| **Chapter 5** | Study **what good UI looks like** — navbar, hero, cards. Prompts recreate **one section** for practice. |
+| **Chapter 6** | **Build a complete project** — step-by-step from empty folder to finished site. |
+
+**Start here in Chapter 6.** Use Chapter 5 previews as a visual reference while you build, not as a separate project.
+
+### Before Step 0 — create your workspace (do this manually)
+
+These steps are **not** a Cursor prompt — you do them yourself once:
+
+1. Open **File Explorer** (Windows) or **Finder** (Mac)
+2. Go to `Documents` (or Desktop)
+3. Create folder: `my-projects`
+4. Inside it, create folder: `my-landing-page` (leave it **empty**)
+5. Open **Cursor** → **File → Open Folder** → select `my-landing-page`
+6. Confirm the left sidebar shows the folder name and is empty (or nearly empty)
+
+**Wrong:** Opening the Royal Prince Hub book repo and building inside it.  
+**Right:** Your own empty folder on your computer.
+
+### How to run commands after each step
+
+When a step says "run `npm run dev`":
+
+1. In Cursor: **Terminal → New Terminal** (panel opens at the bottom)
+2. Check you are in the right folder — the path should end with `my-landing-page`
+3. If not, type: `cd path/to/my-landing-page` (use your actual path)
+4. Type: `npm install` (first time only, or when packages change)
+5. Type: `npm run dev`
+6. **Leave this terminal open** — closing it stops the site
+7. Click the `http://localhost:5173` link in the terminal, or paste it in your browser
+
+**First time `npm install` runs:** It may take 1–3 minutes. That is normal.
+
+### Track 3 — read Chapter 10 before Phase 3
+
+Track 3 Phase 3 creates your Express backend. If words like "model," "route," and "controller" feel foreign, **read Chapter 10 first** (30 minutes). You can read Chapters 8 and 10 while finishing Track 2 — do not wait until you are stuck.
+
 ### Three tracks — pick your path
 
 | Track | What you build | Difficulty | When to start |
@@ -269,6 +310,40 @@ Create `my-store-api` as a **sibling folder** next to `my-store`. Open both in C
 
 > **Read Chapter 10 (Backend Anatomy) before Phase 3** if backend files feel mysterious.
 
+#### Before Phase 3 — set up MongoDB Atlas (15 minutes)
+
+Your backend needs a database **before** the Phase 3 prompt. Do this manually once:
+
+1. Go to [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas) → **Sign up free**
+2. Create an **organization** (default name is fine)
+3. Create a **project** — name it `my-store`
+4. **Build a Database** → choose **M FREE** (free tier)
+5. Pick a **region** close to you → **Create**
+6. **Database Access** → **Add New Database User**
+   - Username: `mystoreuser` (or any name)
+   - Password: generate a strong password → **save it somewhere safe**
+   - Privileges: **Read and write to any database**
+7. **Network Access** → **Add IP Address** → **Allow Access from Anywhere** (`0.0.0.0/0`)
+   - Fine for learning; tighten later for production
+8. **Database** → **Connect** → **Drivers** → copy the connection string
+9. Replace `<password>` with your real password (URL-encode special characters: `@` → `%40`)
+10. Add database name before the `?`:
+
+```
+mongodb+srv://mystoreuser:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/mystore?retryWrites=true&w=majority
+```
+
+11. Create `my-store-api/.env` (after Cursor creates the folder in Phase 3):
+
+```
+PORT=5000
+MONGODB_URI=mongodb+srv://mystoreuser:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/mystore?retryWrites=true&w=majority
+```
+
+12. **Never commit `.env` to GitHub.**
+
+**Verify Atlas works:** After Phase 3 prompt completes, backend terminal should say `MongoDB connected`. If not, see Chapter 11 — `MongooseServerSelectionError`.
+
 [[DEMO:diy-ecom-phase3-backend]]
 
 **Check:** `curl http://localhost:5000/api/products` returns JSON. Seed script populated MongoDB.
@@ -287,6 +362,8 @@ Create `my-store-api` as a **sibling folder** next to `my-store`. Open both in C
 
 ### Phase 5 — Authentication
 
+> **Before Phase 5:** Complete **Google OAuth Setup — Step by Step** in **Chapter 8**. You need `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and test users configured in Google Cloud Console before pasting this prompt.
+
 [[DEMO:diy-ecom-phase5-auth]]
 
 **Check:** Login with Google works in test mode. `/api/auth/me` returns your user when logged in.
@@ -294,6 +371,8 @@ Create `my-store-api` as a **sibling folder** next to `my-store`. Open both in C
 ---
 
 ### Phase 6 — Flutterwave payments (test mode)
+
+> **Before Phase 6:** Create a Flutterwave account, enable **Test mode**, and copy your public + secret keys into `.env` files. See **Chapter 9 Part 3 — Flutterwave**. Never put the secret key in frontend code.
 
 [[DEMO:diy-ecom-phase6-payments]]
 

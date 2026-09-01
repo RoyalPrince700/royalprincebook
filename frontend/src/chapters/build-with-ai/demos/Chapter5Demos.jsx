@@ -9,16 +9,33 @@ import NavIcon from '../../../components/NavIcon';
 import { chapter5SampleBooks } from '../data/chapter5ReferenceData';
 import '../../../portfolio/styles/portfolio.css';
 
-const CursorPrompt = ({ title = 'Recreate in Cursor', prompt }) => (
-  <div className="c5-cursor-prompt">
-    <div className="c5-cursor-prompt-header">
-      <NavIcon name="spark" className="c5-cursor-prompt-icon" />
-      <strong>{title}</strong>
+const CursorPrompt = ({ title = 'Recreate in Cursor', prompt }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(prompt.trim());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div className="c5-cursor-prompt">
+      <div className="c5-cursor-prompt-header">
+        <NavIcon name="spark" className="c5-cursor-prompt-icon" />
+        <strong>{title}</strong>
+        <button type="button" className="c5-copy-btn" onClick={handleCopy}>
+          {copied ? 'Copied!' : 'Copy prompt'}
+        </button>
+      </div>
+      <p className="c5-cursor-prompt-note">Paste into Cursor Agent mode after studying the UI above.</p>
+      <pre className="c5-cursor-prompt-text">{prompt.trim()}</pre>
     </div>
-    <p className="c5-cursor-prompt-note">Copy this prompt into Cursor after studying the UI above.</p>
-    <pre className="c5-cursor-prompt-text">{prompt.trim()}</pre>
-  </div>
-);
+  );
+};
 
 const AnnotatedList = ({ items }) => (
   <ul className="c5-annotate-list">

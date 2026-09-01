@@ -200,6 +200,8 @@ Pin Chapter 11. You will use it more than any syntax cheat sheet.
 | 13 | Custom domain + Cloudflare |
 | 14 | Portfolio, freelance, what's next |
 
+**Appendix — Glossary:** Plain-English definitions for JWT, API, CORS, middleware, components, and every key term in this book.
+
 You have a **complete training path** from zero to professional builder. Not theory — a workflow.
 
 ---
@@ -238,8 +240,10 @@ Let us build.
 
 5. **Re-read Chapter 7** when motivation drops. Re-read Chapter 11 when errors spike.
 
-6. **Start project #2 before you over-polish project #1** — momentum beats perfection.
+6. **Bookmark the Glossary appendix** — when a term confuses you, look it up before guessing.
 
-7. **Share your build** — post the deploy screenshot. Someone in your network needs what you learned.
+7. **Start project #2 before you over-polish project #1** — momentum beats perfection.
 
-8. **Come back to Royal Prince Hub's codebase** as your reference — compare, improve, outbuild.
+8. **Share your build** — post the deploy screenshot. Someone in your network needs what you learned.
+
+9. **Come back to Royal Prince Hub's codebase** as your reference — compare, improve, outbuild.

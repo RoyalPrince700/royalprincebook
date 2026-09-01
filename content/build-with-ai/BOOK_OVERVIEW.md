@@ -40,6 +40,10 @@ The author teaches from lived experience: the same stack used to build **Royal P
 13. **Custom Domain & Cloudflare — Look Professional Online** — DNS, SSL, domain + OAuth + CORS updates for production
 14. **Your Next Build — Portfolio, Freelance & Keep Building** — Project ladder, show your work, earn in Naira, finale
 
+## Appendix
+
+- **GLOSSARY.md** — Plain-English definitions (API, JWT, CORS, middleware, components, etc.)
+
 ## Reference Project
 
 All tools and patterns in this book map to the **Royal Prince Hub** codebase:

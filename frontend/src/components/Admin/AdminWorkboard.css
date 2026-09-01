@@ -2122,6 +2122,105 @@
   color: var(--wb-ink-soft);
 }
 
+.wb-player-name-kicker {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: default;
+}
+
+.wb-player-name-kicker.is-editable {
+  cursor: pointer;
+  border-radius: 0.35rem;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.wb-player-name-kicker.is-editable:hover,
+.wb-player-name-kicker.is-editable:focus-visible {
+  color: var(--wb-ink);
+  background: rgba(61, 52, 44, 0.06);
+  outline: none;
+}
+
+.wb-player-name-greeting {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  cursor: default;
+}
+
+.wb-player-name-greeting.is-editable {
+  cursor: pointer;
+  border-radius: 0.35rem;
+  text-decoration: underline dotted rgba(61, 52, 44, 0.35);
+  text-underline-offset: 0.2em;
+}
+
+.wb-player-name-greeting.is-editable:hover,
+.wb-player-name-greeting.is-editable:focus-visible {
+  text-decoration-color: var(--wb-ink);
+  outline: none;
+}
+
+.wb-player-name-edit {
+  margin: 0;
+}
+
+.wb-player-name-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--wb-board-line);
+  border-radius: 0.45rem;
+  background: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--wb-ink);
+}
+
+.wb-player-name-actions {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.wb-player-name-save,
+.wb-player-name-cancel {
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.wb-player-name-save {
+  border: 1px solid var(--wb-ink);
+  background: var(--wb-ink);
+  color: #fffaf3;
+}
+
+.wb-player-name-cancel {
+  border: 1px solid var(--wb-board-line);
+  background: transparent;
+  color: var(--wb-ink-soft);
+}
+
+.wb-player-name-error {
+  margin: 0.25rem 0 0;
+  font-size: 0.65rem;
+  color: #b42318;
+}
+
 .wb-level-title,
 .wb-royal-score,
 .wb-streak-value {

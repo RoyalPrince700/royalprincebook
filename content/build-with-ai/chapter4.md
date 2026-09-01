@@ -55,6 +55,22 @@ Each nav link pairs an SVG icon with a text label:
 
 The `<span>` is plain text. Font size, weight, and colour come from CSS classes — not from typing bigger letters in HTML.
 
+### What is JSX? (If you have never seen code like this)
+
+In React projects, HTML-looking code inside JavaScript files is called **JSX**. It lets you write structure and logic in the same file:
+
+```jsx
+// This is JSX — looks like HTML, but it is JavaScript
+const greeting = "Welcome";
+return <h1>{greeting}</h1>;
+```
+
+- **`className`** = React's word for HTML's `class` (because `class` is reserved in JavaScript)
+- **`{greeting}`** = insert a JavaScript variable into the page
+- **`<NavIcon />`** = a custom component (your own reusable building block)
+
+You do not need to write JSX from memory. Cursor generates it. You **do** need to recognize: *this file controls what appears on screen.*
+
 ---
 
 ## Section 2: Font Weight — Same Size, Different Emphasis

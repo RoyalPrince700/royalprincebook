@@ -63,6 +63,20 @@ npm --version
 
 You should see version numbers (e.g., `v22.x.x` and `10.x.x`). If you do, you are good.
 
+### Your first terminal commands (Windows & Mac)
+
+The **terminal** is a text window where you type commands instead of clicking icons. In Cursor it opens at the bottom of the screen.
+
+| Command | What it does |
+|---------|--------------|
+| `cd Documents` | Move into your Documents folder |
+| `cd my-projects` | Move into a subfolder |
+| `cd ..` | Go up one folder level |
+| `dir` (Windows) or `ls` (Mac) | List files in the current folder |
+| `Ctrl + C` | Stop a running server (e.g. stop `npm run dev`) |
+
+**Tip:** If a command says "not found," you are probably in the wrong folder. Check the path shown in the terminal prompt before running `npm install` or `npm run dev`.
+
 **What you will use npm for:**
 - Creating new React projects
 - Installing packages like Axios, React Router, Tailwind CSS
@@ -525,32 +539,28 @@ FRONTEND_URL=http://localhost:5173
 
 ## Your Complete Toolkit Checklist
 
-Use this checklist before moving to Chapter 3:
+Do **not** create every account on day one. That overwhelms beginners. Use this phased plan instead.
 
-### Install on Your Computer
-- [ ] **Cursor** — [cursor.com](https://cursor.com)
-- [ ] **Node.js (LTS)** — [nodejs.org](https://nodejs.org)
-- [ ] **Git** — [git-scm.com](https://git-scm.com)
+### Phase A — Install today (before Chapter 3)
 
-### Create Accounts (Free Tiers)
-- [ ] **MongoDB Atlas** — [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
-- [ ] **GitHub** — [github.com](https://github.com)
-- [ ] **Cloudinary** — [cloudinary.com](https://cloudinary.com)
-- [ ] **Flutterwave** — [flutterwave.com](https://flutterwave.com) *(for e-commerce project)*
-- [ ] **Google Cloud Console** — for OAuth credentials *(when we build auth)*
-- [ ] **Vercel** — [vercel.com](https://vercel.com)
-- [ ] **Render** — [render.com](https://render.com)
-- [ ] **Cloudflare** — [cloudflare.com](https://cloudflare.com) *(when you add a custom domain)*
-- [ ] **ChatGPT / Gemini / DeepSeek** — create free accounts for learning support
+You need these on your computer to start building Track 1:
 
-### Verify Node Works
+| Tool | Action | Link |
+|------|--------|------|
+| **Cursor** | Download and sign in | [cursor.com](https://cursor.com) |
+| **Node.js (LTS)** | Download and install | [nodejs.org](https://nodejs.org) |
+| **Git** | Download and install | [git-scm.com](https://git-scm.com) |
+
+**Verify in terminal:**
+
 ```bash
 node --version
 npm --version
 git --version
 ```
 
-### Create a Test React App
+**Optional test** — confirm React tooling works:
+
 ```bash
 npm create vite@latest test-app -- --template react
 cd test-app
@@ -558,7 +568,99 @@ npm install
 npm run dev
 ```
 
-If you see a page at `localhost:5173`, your frontend toolchain is working.
+If you see a page at `localhost:5173`, delete the `test-app` folder and move on. You will create your real project in Chapter 6.
+
+Also create **one folder** on your computer: `my-web-projects` (or `Documents/my-projects`).
+
+---
+
+### Phase B — Before Track 1 deploy (Chapter 9)
+
+Create these when you finish your landing page and are ready to go live:
+
+| Account | Why now |
+|---------|---------|
+| **GitHub** | Store code online |
+| **Vercel** | Host your React site free |
+
+You do **not** need MongoDB, Render, or Flutterwave for a landing page.
+
+---
+
+### Phase C — Before Track 3 Phase 3 (backend)
+
+Create when you start the e-commerce backend:
+
+| Account | Why now |
+|---------|---------|
+| **MongoDB Atlas** | Cloud database for products, users, orders |
+
+Follow the step-by-step setup in **Chapter 6 (Phase 3)** or **Chapter 9 Part 3**.
+
+---
+
+### Phase D — Before Track 3 Phase 5 (Google login)
+
+| Account | Why now |
+|---------|---------|
+| **Google Cloud Console** | OAuth credentials for "Continue with Google" |
+
+Follow the full walkthrough in **Chapter 8 — Google OAuth Setup Step by Step**.
+
+---
+
+### Phase E — Before Track 3 Phase 6 (payments)
+
+| Account | Why now |
+|---------|---------|
+| **Flutterwave** | Test-mode payment keys |
+
+Use **test mode only** until you are ready for real money.
+
+---
+
+### Phase F — Before Track 3 deploy (full stack live)
+
+| Account | Why now |
+|---------|---------|
+| **Render** | Host Express API 24/7 |
+| **Cloudinary** | Product image uploads (if not using placeholder URLs) |
+
+---
+
+### Phase G — When you want a custom domain (Chapter 13)
+
+| Account | Why now |
+|---------|---------|
+| **Cloudflare** | DNS, SSL, security in front of your site |
+| **Domain registrar** | Buy `yourname.com` (Namecheap, GoDaddy, etc.) |
+
+---
+
+### AI assistants — anytime (recommended by Chapter 3)
+
+| Tool | Link |
+|------|------|
+| **ChatGPT** | [chat.openai.com](https://chat.openai.com) |
+| **Gemini** | [gemini.google.com](https://gemini.google.com) |
+| **DeepSeek** | [deepseek.com](https://www.deepseek.com) |
+
+---
+
+### Quick reference — full list (for later)
+
+When you are ready for everything:
+
+- [ ] Cursor, Node.js, Git *(Phase A)*
+- [ ] GitHub, Vercel *(Phase B)*
+- [ ] MongoDB Atlas *(Phase C)*
+- [ ] Google Cloud Console *(Phase D)*
+- [ ] Flutterwave test account *(Phase E)*
+- [ ] Render, Cloudinary *(Phase F)*
+- [ ] Cloudflare + domain *(Phase G)*
+- [ ] ChatGPT / Gemini / DeepSeek *(anytime)*
+
+**Stuck on a term?** See **GLOSSARY.md** in this book's content folder — plain-English definitions for JWT, API, CORS, middleware, and more.
 
 ---
 
@@ -589,13 +691,13 @@ You now have a complete map of the tools you need. The MERN stack (MongoDB, Expr
 
 Do not feel overwhelmed. You do not need to master every tool today. We will introduce each one **when you need it** during the project walkthroughs.
 
-For now: install Cursor, Node.js, and Git. Create your MongoDB Atlas and GitHub accounts. Run the test Vite app. Confirm everything works. Then read Chapter 3 — it will teach you how to actually work with AI so these tools become your advantage, not your crutch.
+For now: complete **Phase A only** — install Cursor, Node.js, and Git. Run the version checks. Create your `my-web-projects` folder. Then read Chapter 3 — it will teach you how to actually work with AI so these tools become your advantage, not your crutch. Create other accounts when each phase tells you to.
 
 ---
 
 ### Action Points
 
-1. **Complete the checklist above.** Do not skip verification steps — finding out Node is not installed during a project is frustrating.
+1. **Complete Phase A of the checklist** (Cursor, Node, Git + version checks). Do not create every account today — follow the phased plan.
 
 2. **Create a folder on your computer** called `my-web-projects`. This is where all your work for this training will live.
 

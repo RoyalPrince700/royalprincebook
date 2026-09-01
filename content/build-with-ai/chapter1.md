@@ -51,6 +51,65 @@ Web development is not magic. It is a set of skills — and like any skill, it c
 
 ---
 
+## If You Have Never Written Code Before
+
+If terms like "terminal," "localhost," or "save the file" sound unfamiliar, read this section once. It takes five minutes and prevents confusion in Chapter 2 and Chapter 6.
+
+### Files and folders
+
+Everything you build lives in **files** on your computer — like Word documents, but for code.
+
+- A **folder** (directory) holds related files together — e.g. `my-landing-page/`
+- A **file** has a name and extension — e.g. `App.jsx`, `index.html`, `package.json`
+- The **extension** tells the computer what kind of file it is (`.jsx` = React component, `.css` = styles)
+
+When this book says *"open the folder in Cursor,"* it means: create a folder on your Desktop or in Documents, then in Cursor choose **File → Open Folder** and select it.
+
+### The browser is your preview screen
+
+You write code in **Cursor**. You **view** the result in a **web browser** (Chrome, Edge, Firefox).
+
+When you run `npm run dev`, a local address appears — usually `http://localhost:5173`. That is your site running **on your own computer**, not on the internet yet. Only you can see it until you deploy (Chapter 9).
+
+**localhost** = "this computer." **5173** = the port number (like a door the app uses).
+
+### Save, then look
+
+After you or Cursor change a file:
+
+1. **Save** the file (`Ctrl + S` on Windows, `Cmd + S` on Mac)
+2. Check the browser — Vite often refreshes automatically when you save
+3. If nothing changes, click refresh in the browser or restart `npm run dev`
+
+### You do not need to memorize syntax
+
+Beginners worry about memorizing code. You do not need to. You need to understand **concepts** (navbar, database, login) and know **where things live** (which folder, which file). Cursor helps with syntax. This book helps with concepts.
+
+---
+
+## How to Read This Book (Recommended Path)
+
+You can read cover to cover, but if you want to **build as you read**, follow this order:
+
+| Step | Chapters | What you do |
+|------|----------|-------------|
+| 1 | **1–3** | Understand web dev, install tools, learn AI workflow |
+| 2 | **4–5** | Study visual elements and UI sections (look at live previews) |
+| 3 | **6 Track 1** | Build your first landing page — copy prompts, verify each step |
+| 4 | **9** | Deploy Track 1 to Vercel — get a live URL |
+| 5 | **6 Track 2** | Multi-page site (optional but recommended) |
+| 6 | **8, 10** | Read before Track 3 — secrets, auth, backend anatomy |
+| 7 | **6 Track 3** | Full e-commerce — one phase at a time |
+| 8 | **11–14** | Debug, admin, custom domain, portfolio and freelance |
+
+**Chapter 7** is mindset — read it whenever you feel like procrastinating.
+
+**Rule:** Do not jump to Track 3 until Track 1 runs on your machine and deploys. Building confidence on small wins matters.
+
+**Unfamiliar term?** Open the **Glossary appendix** (last chapter in this book) — JWT, API, CORS, middleware, and more explained in plain English.
+
+---
+
 ## How AI Has Made Building Faster
 
 Let me be direct: **AI has not replaced developers. It has removed excuses.**
@@ -152,6 +211,36 @@ If HTML is the skeleton and CSS is the skin, JavaScript is the nervous system.
 ### React — Building Interfaces the Smart Way
 
 **React** is a JavaScript library created by Facebook (now Meta). Instead of writing one giant HTML file for your entire website, React lets you break your interface into **reusable components**.
+
+### What is a component?
+
+A **component** is a self-contained piece of UI — one file (or small group of files) that does one job and can be reused.
+
+Think of a component like a **custom LEGO brick** you design once and snap into many places:
+
+| Component | What it does | Where it appears |
+|-----------|--------------|------------------|
+| `Navbar` | Top navigation with links | Every page |
+| `Hero` | Big headline + call-to-action | Home page only |
+| `BookCard` | Shows one book's cover, title, price | Shop page — repeated for each book |
+| `Footer` | Links and copyright | Every page |
+
+In code, a component often looks like a function that returns HTML-like structure (JSX):
+
+```jsx
+function Navbar() {
+  return (
+    <nav>
+      <a href="/">Home</a>
+      <a href="/shop">Shop</a>
+    </nav>
+  );
+}
+```
+
+You use it elsewhere like this: `<Navbar />` — that is React "snapping the brick in."
+
+**Why this matters for you:** When Chapter 6 says *"build the Navbar component,"* it means create one file (`Navbar.jsx`) that holds the top bar, then import it into your main app. You are not rebuilding the navbar from scratch on every page.
 
 Think of components like LEGO blocks:
 
