@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "node utils/workboardLeaderboardXp.test.js & node utils/bookAliases.test.js"
+    "test": "node utils/workboardLeaderboardXp.test.js & node utils/bookAliases.test.js & node utils/flutterwave.test.js"
   },
   "keywords": [],
   "author": "",

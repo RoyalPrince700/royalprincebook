@@ -19,9 +19,21 @@ import {
 } from 'recharts';
 import AdminLayout from './AdminLayout';
 import PageLoader from '../PageLoader';
+import { useTheme } from '../../contexts/ThemeContext';
 import { formatDateTime, formatDuration, formatNumber } from './adminUtils';
 
-const chartPalette = ['#0f172a', '#2563eb', '#7c3aed', '#f97316', '#06b6d4', '#10b981'];
+const getChartTheme = (theme) => {
+  const isDark = theme === 'dark';
+  return {
+    gold: isDark ? '#e8d48b' : '#c9a227',
+    ink: isDark ? '#fafafa' : '#0a0a0a',
+    muted: isDark ? '#a3a3a3' : '#525252',
+    grid: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(10, 10, 10, 0.08)',
+    palette: isDark
+      ? ['#e8d48b', '#fafafa', '#c9a227', '#a3a3a3', '#d4af37', '#737373']
+      : ['#0a0a0a', '#c9a227', '#525252', '#a68520', '#171717', '#e8d48b']
+  };
+};
 
 const deviceLabel = (value) => {
   if (!value) return 'Unknown';
@@ -29,6 +41,8 @@ const deviceLabel = (value) => {
 };
 
 const AdminTraffic = () => {
+  const { theme } = useTheme();
+  const chart = getChartTheme(theme);
   const [traffic, setTraffic] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -123,15 +137,15 @@ const AdminTraffic = () => {
               <AreaChart data={dailyTraffic}>
                 <defs>
                   <linearGradient id="pageviewsFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.28} />
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0.03} />
+                    <stop offset="5%" stopColor={chart.gold} stopOpacity={0.28} />
+                    <stop offset="95%" stopColor={chart.gold} stopOpacity={0.03} />
                   </linearGradient>
                   <linearGradient id="visitorsFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0f172a" stopOpacity={0.18} />
-                    <stop offset="95%" stopColor="#0f172a" stopOpacity={0.02} />
+                    <stop offset="5%" stopColor={chart.ink} stopOpacity={0.18} />
+                    <stop offset="95%" stopColor={chart.ink} stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 4" />
+                <CartesianGrid stroke={chart.grid} strokeDasharray="4 4" />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} />
                 <YAxis tickLine={false} axisLine={false} allowDecimals={false} />
                 <Tooltip formatter={(value) => formatNumber(value)} />
@@ -140,7 +154,7 @@ const AdminTraffic = () => {
                   type="monotone"
                   dataKey="pageviews"
                   name="Page views"
-                  stroke="#2563eb"
+                  stroke={chart.gold}
                   fill="url(#pageviewsFill)"
                   strokeWidth={2}
                 />
@@ -148,7 +162,7 @@ const AdminTraffic = () => {
                   type="monotone"
                   dataKey="visitors"
                   name="Visitors"
-                  stroke="#0f172a"
+                  stroke={chart.ink}
                   fill="url(#visitorsFill)"
                   strokeWidth={2}
                 />
@@ -184,7 +198,7 @@ const AdminTraffic = () => {
                     paddingAngle={3}
                   >
                     {deviceBreakdown.map((entry, index) => (
-                      <Cell key={entry.name} fill={chartPalette[index % chartPalette.length]} />
+                      <Cell key={entry.name} fill={chart.palette[index % chart.palette.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => formatNumber(value)} />
@@ -210,14 +224,14 @@ const AdminTraffic = () => {
           <div className="mt-6 h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={performanceTrend}>
-                <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 4" />
+                <CartesianGrid stroke={chart.grid} strokeDasharray="4 4" />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} />
                 <YAxis tickLine={false} axisLine={false} />
                 <Tooltip formatter={(value) => formatDuration(Number(value))} />
                 <Legend />
-                <Line type="monotone" dataKey="avgPageLoadMs" name="Avg load" stroke="#2563eb" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="avgFirstContentfulPaintMs" name="Avg FCP" stroke="#7c3aed" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="avgRouteRenderMs" name="Avg route render" stroke="#0f172a" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="avgPageLoadMs" name="Avg load" stroke={chart.gold} strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="avgFirstContentfulPaintMs" name="Avg FCP" stroke={chart.muted} strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="avgRouteRenderMs" name="Avg route render" stroke={chart.ink} strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -241,7 +255,7 @@ const AdminTraffic = () => {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={topPages} layout="vertical" margin={{ left: 8, right: 8 }}>
-                  <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 4" />
+                  <CartesianGrid stroke={chart.grid} strokeDasharray="4 4" />
                   <XAxis type="number" tickLine={false} axisLine={false} allowDecimals={false} />
                   <YAxis
                     type="category"
@@ -251,7 +265,7 @@ const AdminTraffic = () => {
                     width={120}
                   />
                   <Tooltip formatter={(value) => formatNumber(value)} />
-                  <Bar dataKey="views" name="Views" fill="#0f172a" radius={[0, 12, 12, 0]} />
+                  <Bar dataKey="views" name="Views" fill={chart.ink} radius={[0, 12, 12, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}

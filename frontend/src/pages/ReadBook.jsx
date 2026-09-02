@@ -127,13 +127,17 @@ const ReadBook = () => {
   // Payment Configuration
   const config = {
     public_key: flwPublicKey,
-    tx_ref: Date.now(),
+    tx_ref: `${Date.now()}-${book?._id || 'book'}`,
     amount: book?.price || 0,
     currency: 'NGN',
     payment_options: 'card,mobilemoney,ussd',
     customer: {
       email: user?.email,
       name: user?.username,
+    },
+    meta: {
+      bookId: book?._id || '',
+      userId: user?.id || user?._id || ''
     },
     customizations: {
       title: `Purchase ${book?.title}`,
@@ -169,10 +173,10 @@ const ReadBook = () => {
         paymentHandledRef.current = true;
 
         closePaymentModal();
-        if (response.status === "successful") {
+        if (['successful', 'success', 'completed'].includes(String(response.status || '').toLowerCase())) {
            try {
              const verifyResponse = await axios.post('/payment/verify', {
-               transaction_id: response.transaction_id,
+               transaction_id: response.transaction_id || response.id,
                bookId: book._id
              });
 

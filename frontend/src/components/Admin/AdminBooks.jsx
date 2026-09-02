@@ -1,31 +1,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import AdminLayout from './AdminLayout';
 import PageLoader from '../PageLoader';
 import { formatCurrency, formatDate } from './adminUtils';
 import { mergeBooksForCatalog } from '../../utils/localBookService';
+import useAdminResource from '../../hooks/useAdminResource';
 
 const AdminBooks = () => {
+  const { data, loading, error } = useAdminResource('/admin/books');
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await axios.get('/admin/books');
-        setBooks(mergeBooksForCatalog(response.data.books || []));
-      } catch (fetchError) {
-        console.error('Failed to load admin books:', fetchError);
-        setError('Failed to load admin books.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBooks();
-  }, []);
+    setBooks(mergeBooksForCatalog(data?.books || []));
+  }, [data]);
 
   const stats = useMemo(() => {
     const totalRevenue = books.reduce((sum, book) => sum + (book.revenue || 0), 0);
@@ -62,11 +49,7 @@ const AdminBooks = () => {
         { label: 'Revenue', value: formatCurrency(stats.totalRevenue), helper: 'Combined verified sales by title' }
       ]}
       actions={
-        <Link
-          to="/all-books"
-          className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-          style={{ color: 'white' }}
-        >
+        <Link to="/all-books" className="pf-btn pf-btn-primary pf-btn-sm">
           Open Storefront
         </Link>
       }

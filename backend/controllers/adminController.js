@@ -74,6 +74,8 @@ const getBooksUnlockedCount = (user, userStats) => (
 
 const hasPaidActivity = (user, userStats) => getBooksUnlockedCount(user, userStats) > 0;
 
+const SUCCESSFUL_PAYMENT = { status: { $in: ['successful', 'success'] } };
+
 const getAdminOverview = async (_req, res) => {
   try {
     const [
@@ -98,7 +100,7 @@ const getAdminOverview = async (_req, res) => {
       ]),
       User.find({}, 'purchasedBooks').lean(),
       PaymentTransaction.aggregate([
-        { $match: { status: 'successful' } },
+        { $match: SUCCESSFUL_PAYMENT },
         {
           $group: {
             _id: '$user',
@@ -107,7 +109,7 @@ const getAdminOverview = async (_req, res) => {
         }
       ]),
       PaymentTransaction.aggregate([
-        { $match: { status: 'successful' } },
+        { $match: SUCCESSFUL_PAYMENT },
         {
           $group: {
             _id: null,
@@ -116,7 +118,7 @@ const getAdminOverview = async (_req, res) => {
           }
         }
       ]),
-      PaymentTransaction.find({ status: 'successful' })
+      PaymentTransaction.find(SUCCESSFUL_PAYMENT)
         .populate('user', 'username email')
         .populate('book', 'title')
         .sort({ paidAt: -1, createdAt: -1 })
@@ -184,7 +186,7 @@ const getAdminBooks = async (_req, res) => {
         .populate('author', 'username email')
         .sort({ updatedAt: -1 }),
       PaymentTransaction.aggregate([
-        { $match: { status: 'successful' } },
+        { $match: SUCCESSFUL_PAYMENT },
         {
           $group: {
             _id: '$book',
@@ -224,7 +226,7 @@ const getAdminUsers = async (_req, res) => {
     const [users, transactionStats] = await Promise.all([
       User.find({}, '-password').sort({ createdAt: -1 }),
       PaymentTransaction.aggregate([
-        { $match: { status: 'successful' } },
+        { $match: SUCCESSFUL_PAYMENT },
         {
           $group: {
             _id: '$user',
@@ -268,7 +270,7 @@ const getAdminFinance = async (_req, res) => {
   try {
     const [financeAggregate, transactions, users, transactionStats] = await Promise.all([
       PaymentTransaction.aggregate([
-        { $match: { status: 'successful' } },
+        { $match: SUCCESSFUL_PAYMENT },
         {
           $group: {
             _id: null,
@@ -278,14 +280,14 @@ const getAdminFinance = async (_req, res) => {
           }
         }
       ]),
-      PaymentTransaction.find({ status: 'successful' })
+      PaymentTransaction.find(SUCCESSFUL_PAYMENT)
         .populate('user', 'username email')
         .populate('book', 'title')
         .sort({ paidAt: -1, createdAt: -1 })
         .limit(50),
       User.find({}, '-password').sort({ createdAt: -1 }),
       PaymentTransaction.aggregate([
-        { $match: { status: 'successful' } },
+        { $match: SUCCESSFUL_PAYMENT },
         {
           $group: {
             _id: '$user',

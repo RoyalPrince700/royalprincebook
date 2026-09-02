@@ -1,30 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import AdminLayout from './AdminLayout';
 import PageLoader from '../PageLoader';
 import { formatCurrency, formatDateTime } from './adminUtils';
+import useAdminResource from '../../hooks/useAdminResource';
 
 const AdminOverview = () => {
-  const [overview, setOverview] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchOverview = async () => {
-      try {
-        const response = await axios.get('/admin/overview');
-        setOverview(response.data);
-      } catch (fetchError) {
-        console.error('Failed to load admin overview:', fetchError);
-        setError('Failed to load admin overview.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOverview();
-  }, []);
+  const { data: overview, loading, error } = useAdminResource('/admin/overview');
 
   if (loading) {
     return (
@@ -53,23 +35,13 @@ const AdminOverview = () => {
       ]}
       actions={
         <>
-          <Link
-            to="/admin/traffic"
-            className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
-          >
+          <Link to="/admin/traffic" className="pf-btn pf-btn-secondary pf-btn-sm">
             View Traffic
           </Link>
-          <Link
-            to="/admin/books"
-            className="inline-flex items-center justify-center rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50"
-          >
+          <Link to="/admin/books" className="pf-btn pf-btn-secondary pf-btn-sm">
             View Books
           </Link>
-          <Link
-            to="/admin/finance"
-            className="inline-flex items-center justify-center rounded-full bg-slate-950 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-            style={{ color: 'white' }}
-          >
+          <Link to="/admin/finance" className="pf-btn pf-btn-primary pf-btn-sm">
             Open Finance
           </Link>
         </>

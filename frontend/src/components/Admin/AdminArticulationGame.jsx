@@ -883,12 +883,12 @@ const AdminArticulationGame = () => {
               onClick={() => setActiveTab(segment.id)}
               className={`rounded-2xl border px-3 py-3 text-left transition active:scale-95 ${
                 activeTab === segment.id
-                  ? 'border-slate-950 bg-slate-950 text-white shadow-sm'
-                  : 'border-transparent bg-white/70 text-slate-600 hover:text-slate-950'
+                  ? 'border-[rgba(201,162,39,0.45)] bg-[rgba(201,162,39,0.14)] text-[var(--pf-text)] shadow-sm'
+                  : 'border-transparent bg-[var(--pf-bg)] text-[var(--pf-text-muted)] hover:text-[var(--pf-text)]'
               }`}
             >
               <span className="block text-xs font-semibold">{segment.label}</span>
-              <span className={`mt-1 block text-[11px] leading-snug ${activeTab === segment.id ? 'text-white/70' : 'text-slate-400'}`}>
+              <span className={`mt-1 block text-[11px] leading-snug ${activeTab === segment.id ? 'text-[var(--pf-text-muted)]' : 'text-[var(--pf-text-soft)]'}`}>
                 {segment.helper}
               </span>
             </button>

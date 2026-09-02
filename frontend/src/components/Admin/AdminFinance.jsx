@@ -1,29 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 import AdminLayout from './AdminLayout';
 import PageLoader from '../PageLoader';
 import { formatCurrency, formatDate, formatDateTime } from './adminUtils';
+import useAdminResource from '../../hooks/useAdminResource';
 
 const AdminFinance = () => {
-  const [finance, setFinance] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const fetchFinance = async () => {
-      try {
-        const response = await axios.get('/admin/finance');
-        setFinance(response.data);
-      } catch (fetchError) {
-        console.error('Failed to load admin finance:', fetchError);
-        setError('Failed to load finance data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFinance();
-  }, []);
+  const { data: finance, loading, error } = useAdminResource('/admin/finance');
 
   if (loading) {
     return (

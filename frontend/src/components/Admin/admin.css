@@ -1,0 +1,448 @@
+/* Admin workspace — same black / white / gold language as the website */
+
+.admin-workspace-shell--standard {
+  background: var(--pf-bg);
+  color: var(--pf-text);
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark {
+  --pf-bg: #0a0a0a;
+  --pf-bg-elevated: #141414;
+  --pf-text: #fafafa;
+  --pf-text-muted: #a3a3a3;
+  --pf-text-soft: #737373;
+  --pf-border: rgba(255, 255, 255, 0.08);
+  --pf-border-strong: rgba(255, 255, 255, 0.14);
+  --pf-card: rgba(20, 20, 20, 0.88);
+  --pf-card-hover: rgba(26, 26, 26, 0.96);
+  --pf-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  --pf-shadow-lg: 0 32px 100px rgba(0, 0, 0, 0.5);
+  --pf-nav-bg: rgba(10, 10, 10, 0.88);
+}
+
+body:has(.admin-workspace-shell--standard) {
+  background: var(--pf-bg);
+  color: var(--pf-text);
+}
+
+.admin-workspace-bg-standard {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(201, 162, 39, 0.1), transparent 34%),
+    radial-gradient(circle at 82% 8%, rgba(10, 10, 10, 0.04), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), var(--pf-bg) 55%) !important;
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark .admin-workspace-bg-standard,
+[data-theme='dark'] .admin-workspace-bg-standard {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(201, 162, 39, 0.08), transparent 34%),
+    radial-gradient(circle at 82% 8%, rgba(255, 255, 255, 0.03), transparent 30%),
+    linear-gradient(180deg, rgba(10, 10, 10, 0.98), var(--pf-bg) 55%) !important;
+}
+
+.admin-workspace-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.32;
+  background-image:
+    linear-gradient(rgba(10, 10, 10, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 10, 10, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at center, black, transparent 78%);
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark .admin-workspace-grid,
+[data-theme='dark'] .admin-workspace-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  opacity: 0.2;
+}
+
+.admin-workspace-glow {
+  position: absolute;
+  left: 50%;
+  top: 5rem;
+  width: 20rem;
+  height: 20rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: rgba(201, 162, 39, 0.16);
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+[data-theme='dark'] .admin-workspace-glow,
+.admin-workspace-shell--standard.portfolio-page-dark .admin-workspace-glow {
+  background: rgba(201, 162, 39, 0.12);
+}
+
+.admin-sidebar {
+  border: 1px solid var(--pf-border) !important;
+  background: var(--pf-nav-bg) !important;
+  box-shadow: var(--pf-shadow) !important;
+  backdrop-filter: blur(20px);
+}
+
+.admin-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  text-decoration: none;
+  color: var(--pf-text) !important;
+}
+
+.admin-sidebar-brand-text {
+  overflow: hidden;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--pf-text);
+}
+
+.admin-sidebar-toggle {
+  border: 1px solid var(--pf-border) !important;
+  background: rgba(201, 162, 39, 0.08) !important;
+  color: var(--pf-text) !important;
+  box-shadow: none !important;
+}
+
+.admin-sidebar-toggle:hover {
+  background: rgba(201, 162, 39, 0.14) !important;
+  border-color: rgba(201, 162, 39, 0.45) !important;
+}
+
+.admin-nav-link {
+  border: none !important;
+  background: transparent !important;
+  color: var(--pf-text-muted) !important;
+  box-shadow: none !important;
+}
+
+.admin-nav-link:hover {
+  background: rgba(201, 162, 39, 0.08) !important;
+  color: var(--pf-text) !important;
+}
+
+.admin-nav-link.is-active {
+  background: rgba(201, 162, 39, 0.14) !important;
+  color: var(--pf-text) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.admin-nav-icon {
+  background: rgba(201, 162, 39, 0.1) !important;
+  color: inherit !important;
+}
+
+.admin-nav-link.is-active .admin-nav-icon {
+  background: rgba(201, 162, 39, 0.22) !important;
+  color: var(--pf-gold-dark) !important;
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark .admin-nav-link.is-active .admin-nav-icon,
+[data-theme='dark'] .admin-nav-link.is-active .admin-nav-icon {
+  color: var(--pf-gold-light) !important;
+}
+
+.admin-nav-label {
+  color: inherit !important;
+}
+
+.admin-panel-btn {
+  border: 1px solid var(--pf-border-strong) !important;
+  background: var(--pf-card) !important;
+  color: var(--pf-text) !important;
+}
+
+.admin-panel-btn:hover {
+  border-color: var(--pf-gold) !important;
+  background: var(--pf-card-hover) !important;
+}
+
+.admin-panel-btn-primary {
+  border: 1px solid transparent !important;
+  background: var(--pf-text) !important;
+  color: var(--pf-bg) !important;
+}
+
+.admin-panel-btn-primary:hover {
+  filter: brightness(0.92);
+}
+
+.admin-hero-card {
+  border: 1px solid var(--pf-border) !important;
+  background: var(--pf-card) !important;
+  box-shadow: var(--pf-shadow-lg) !important;
+  color: var(--pf-text);
+}
+
+.admin-hero-eyebrow {
+  color: var(--pf-gold-dark) !important;
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark .admin-hero-eyebrow,
+[data-theme='dark'] .admin-hero-eyebrow {
+  color: var(--pf-gold-light) !important;
+}
+
+.admin-hero-title {
+  color: var(--pf-text) !important;
+}
+
+.admin-hero-copy {
+  color: var(--pf-text-muted) !important;
+}
+
+.admin-hero-stats {
+  background: var(--pf-dark-section) !important;
+  color: #fafafa;
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark .admin-hero-stats,
+[data-theme='dark'] .admin-hero-stats {
+  background: rgba(201, 162, 39, 0.08) !important;
+  border: 1px solid rgba(201, 162, 39, 0.2);
+}
+
+.admin-hero-stat {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark .admin-hero-stat,
+[data-theme='dark'] .admin-hero-stat {
+  background: rgba(10, 10, 10, 0.35) !important;
+}
+
+.admin-hero-stat-label {
+  color: rgba(250, 250, 250, 0.5) !important;
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark .admin-hero-stat-label,
+[data-theme='dark'] .admin-hero-stat-label {
+  color: var(--pf-gold-light) !important;
+}
+
+.admin-hero-stat-value {
+  color: #fafafa !important;
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark .admin-hero-stat-value,
+[data-theme='dark'] .admin-hero-stat-value {
+  color: var(--pf-text) !important;
+}
+
+.admin-hero-stat-helper {
+  color: rgba(250, 250, 250, 0.55) !important;
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark .admin-hero-stat-helper,
+[data-theme='dark'] .admin-hero-stat-helper {
+  color: var(--pf-text-muted) !important;
+}
+
+.admin-theme-toggle-mobile {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .admin-theme-toggle-mobile {
+    display: inline-flex;
+  }
+}
+
+.admin-stat-card {
+  border: 1px solid var(--pf-border) !important;
+  background: rgba(201, 162, 39, 0.05) !important;
+}
+
+.admin-stat-card .admin-stat-label,
+.admin-stat-card p:first-child {
+  color: var(--pf-text-muted) !important;
+}
+
+.admin-stat-card .admin-stat-value,
+.admin-stat-card p:nth-child(2) {
+  color: var(--pf-text) !important;
+}
+
+.admin-stat-card .admin-stat-helper,
+.admin-stat-card p:nth-child(3) {
+  color: var(--pf-text-muted) !important;
+}
+
+.admin-workspace-mobile-nav {
+  border-top: 1px solid var(--pf-border) !important;
+  background: var(--pf-nav-bg) !important;
+  box-shadow: var(--pf-shadow) !important;
+}
+
+.admin-mobile-link {
+  color: var(--pf-text-muted) !important;
+}
+
+.admin-mobile-link:hover {
+  background: rgba(201, 162, 39, 0.08) !important;
+  color: var(--pf-text) !important;
+}
+
+.admin-mobile-link.is-active {
+  background: rgba(201, 162, 39, 0.16) !important;
+  color: var(--pf-text) !important;
+  box-shadow: none !important;
+}
+
+.admin-btn-primary,
+.admin-workspace-shell--standard a.bg-slate-950,
+.admin-workspace-shell--standard button.bg-slate-950 {
+  background: var(--pf-text) !important;
+  color: var(--pf-bg) !important;
+  border-color: transparent !important;
+}
+
+.admin-btn-secondary,
+.admin-workspace-shell--standard a.border-slate-300.bg-white,
+.admin-workspace-shell--standard button.border-slate-300.bg-white {
+  background: var(--pf-card) !important;
+  border-color: var(--pf-border-strong) !important;
+  color: var(--pf-text) !important;
+}
+
+.admin-workspace-shell--standard a.border-slate-300.bg-white:hover,
+.admin-workspace-shell--standard button.border-slate-300.bg-white:hover {
+  border-color: var(--pf-gold) !important;
+}
+
+/* Map leftover Tailwind slate utilities inside admin pages to website tokens */
+.admin-workspace-shell--standard :is(
+  .text-slate-950,
+  .text-slate-900,
+  .text-slate-800,
+  .text-black
+) {
+  color: var(--pf-text) !important;
+}
+
+.admin-workspace-shell--standard :is(
+  .text-slate-700,
+  .text-slate-600,
+  .text-slate-500,
+  .text-slate-400
+) {
+  color: var(--pf-text-muted) !important;
+}
+
+.admin-workspace-shell--standard :is(
+  .bg-white,
+  .bg-white\/80,
+  .bg-white\/90,
+  .bg-white\/70,
+  .bg-white\/95
+) {
+  background-color: var(--pf-card) !important;
+}
+
+.admin-workspace-shell--standard :is(
+  .bg-slate-50,
+  .bg-slate-50\/90,
+  .bg-slate-50\/80,
+  .bg-slate-100
+) {
+  background-color: var(--pf-bg) !important;
+}
+
+.admin-workspace-shell--standard :is(
+  .border-slate-200,
+  .border-slate-300,
+  .border-slate-200\/80,
+  .border-white\/70,
+  .border-dashed.border-slate-300
+) {
+  border-color: var(--pf-border) !important;
+}
+
+.admin-workspace-shell--standard :is(
+  .shadow-\[0_18px_50px_rgba\(15\,23\,42\,0\.08\)\],
+  .shadow-sm
+) {
+  box-shadow: var(--pf-shadow) !important;
+}
+
+.admin-workspace-shell--standard :is(input, textarea, select):not([type='checkbox']):not([type='radio']) {
+  background-color: var(--pf-bg-elevated) !important;
+  color: var(--pf-text) !important;
+  border-color: var(--pf-border-strong) !important;
+}
+
+.admin-workspace-shell--standard :is(input, textarea, select)::placeholder {
+  color: var(--pf-text-soft) !important;
+}
+
+.admin-workspace-shell--standard :is(input, textarea, select):focus {
+  border-color: rgba(201, 162, 39, 0.55) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.12);
+}
+
+.admin-workspace-shell--standard .border-slate-950.bg-slate-950,
+.admin-workspace-shell--standard .bg-slate-950.text-white,
+.admin-workspace-shell--standard .border-slate-950.bg-slate-950 *,
+.admin-workspace-shell--standard button.bg-slate-950,
+.admin-workspace-shell--standard a.bg-slate-950 {
+  background: var(--pf-text) !important;
+  border-color: var(--pf-text) !important;
+  color: var(--pf-bg) !important;
+}
+
+.admin-workspace-shell--standard .border-slate-950.bg-slate-950 .text-white\/70 {
+  color: color-mix(in srgb, var(--pf-bg) 70%, transparent) !important;
+}
+
+.admin-workspace-shell--standard .h-2.bg-slate-950,
+.admin-workspace-shell--standard .rounded-full.bg-slate-950:not(button):not(a):not(span) {
+  background: var(--pf-gold) !important;
+}
+
+.admin-workspace-shell--standard span.bg-slate-950,
+.admin-workspace-shell--standard span.bg-slate-900 {
+  background: var(--pf-text) !important;
+  color: var(--pf-bg) !important;
+}
+
+.admin-workspace-shell--standard a:not(.admin-panel-btn):not(.admin-panel-btn-primary):not(.bg-slate-950):not(.border-slate-300):not(.pf-btn) {
+  color: var(--pf-text);
+}
+
+.admin-workspace-shell--standard a:not(.admin-panel-btn):not(.admin-panel-btn-primary):not(.bg-slate-950):not(.pf-btn):hover {
+  color: var(--pf-gold-dark);
+}
+
+.admin-workspace-shell--standard.portfolio-page-dark a:not(.admin-panel-btn):not(.admin-panel-btn-primary):not(.bg-slate-950):not(.pf-btn):hover,
+[data-theme='dark'] .admin-workspace-shell--standard a:not(.admin-panel-btn):not(.admin-panel-btn-primary):not(.bg-slate-950):not(.pf-btn):hover {
+  color: var(--pf-gold-light);
+}
+
+.admin-workspace-shell--standard table {
+  color: var(--pf-text);
+}
+
+.admin-workspace-shell--standard th {
+  color: var(--pf-text-muted) !important;
+}
+
+.recharts-cartesian-axis-tick-value,
+.recharts-legend-item-text {
+  fill: var(--pf-text-muted) !important;
+}
+
+.recharts-default-tooltip {
+  background: var(--pf-bg-elevated) !important;
+  border: 1px solid var(--pf-border) !important;
+  color: var(--pf-text) !important;
+  border-radius: 1rem !important;
+}

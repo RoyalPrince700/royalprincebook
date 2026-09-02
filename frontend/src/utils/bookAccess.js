@@ -22,7 +22,16 @@ export const userHasBookAccess = (user, book) => {
   const bookId = normalizeBookId(book._id);
   const accessIds = (user.purchasedBooks || []).map(normalizeBookId);
 
-  return accessIds.includes(bookId);
+  if (accessIds.includes(bookId)) {
+    return true;
+  }
+
+  const localBook = isLocalBookId(bookId) ? null : getLocalBookForApiBook(book);
+  if (localBook && accessIds.includes(normalizeBookId(localBook._id))) {
+    return true;
+  }
+
+  return false;
 };
 
 export const getReadBookId = (book) => {

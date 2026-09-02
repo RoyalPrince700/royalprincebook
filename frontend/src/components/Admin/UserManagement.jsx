@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import AdminLayout from './AdminLayout';
 import PageLoader from '../PageLoader';
 import { formatCurrency, formatDate } from './adminUtils';
+import useAdminResource from '../../hooks/useAdminResource';
 
 const roleLabels = {
   user: 'User',
@@ -12,33 +13,16 @@ const roleLabels = {
 };
 
 const roleBadgeClass = (role) => {
-  if (role === 'admin') return 'border-blue-200 bg-blue-50 text-blue-700';
-  if (role === 'superior') return 'border-sky-200 bg-sky-50 text-sky-700';
-  return 'border-slate-200 bg-white text-slate-600';
+  if (role === 'admin') return 'border-[rgba(201,162,39,0.35)] bg-[rgba(201,162,39,0.1)] text-[var(--pf-gold-dark)]';
+  if (role === 'superior') return 'border-[rgba(201,162,39,0.25)] bg-[rgba(201,162,39,0.06)] text-[var(--pf-text)]';
+  return 'border-[var(--pf-border)] bg-[var(--pf-bg)] text-[var(--pf-text-muted)]';
 };
 
 const UserManagement = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { data, loading, error, setData, setError } = useAdminResource('/admin/users');
   const [success, setSuccess] = useState('');
   const { user: currentUser } = useAuth();
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get('/admin/users');
-        setUsers(response.data.users || []);
-      } catch (fetchError) {
-        console.error('Failed to fetch users:', fetchError);
-        setError('Failed to load users');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, []);
+  const users = data?.users || [];
 
   const stats = useMemo(() => {
     const totalAdmins = users.filter((user) => user.role === 'admin').length;
@@ -58,9 +42,12 @@ const UserManagement = () => {
       setSuccess('');
       await axios.put(`/auth/users/${userId}/role`, { role: newRole });
 
-      setUsers(users.map((user) => (
-        user._id === userId ? { ...user, role: newRole } : user
-      )));
+      setData((current) => ({
+        ...(current || {}),
+        users: (current?.users || []).map((user) => (
+          user._id === userId ? { ...user, role: newRole } : user
+        ))
+      }));
 
       setSuccess('User role updated successfully');
       setTimeout(() => setSuccess(''), 3000);

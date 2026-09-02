@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useBoardTheme } from '../../contexts/BoardThemeContext';
+import BrandMark from '../BrandMark';
+import SiteNavIcon from '../NavIcon';
+import '../../portfolio/styles/portfolio.css';
+import './admin.css';
 
-const NavIcon = ({ name, className = 'h-5 w-5' }) => {
+const AdminNavIcon = ({ name, className = 'h-5 w-5' }) => {
   const props = {
     className,
     viewBox: '0 0 24 24',
@@ -141,6 +146,7 @@ const AdminLayout = ({
   standalone = false
 }) => {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { boardTheme } = useBoardTheme();
   const navItems = allNavItems.filter((item) => item.roles.includes(user?.role));
   const mobileCols = Math.min(Math.max(navItems.length, 1), 7);
@@ -149,6 +155,7 @@ const AdminLayout = ({
   const isImmersive = chrome === 'immersive';
   const hideNav = isImmersive || standalone;
   const isSplitHero = hero === 'split' && stats.length > 0;
+  const isDark = theme === 'dark';
 
   return (
     <div
@@ -158,28 +165,43 @@ const AdminLayout = ({
           : `admin-workspace-shell--default min-h-screen ${hideNav ? 'pb-4' : 'pb-28'} lg:pb-0 ${
               isMinimal
                 ? 'admin-workspace-shell--minimal bg-[var(--wb-board,#f7f1e8)]'
-                : 'admin-workspace-shell--standard bg-slate-50'
+                : `admin-workspace-shell--standard portfolio-page ${isDark ? 'portfolio-page-dark' : ''}`
             }`
       }`}
       data-board-theme={isMinimal || isImmersive ? boardTheme : undefined}
     >
       {!hideNav ? (
       <aside
-        className={`fixed bottom-4 left-4 top-4 z-40 hidden flex-col overflow-hidden rounded-4xl border border-white/70 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur transition-[width,padding] duration-300 ease-out lg:flex ${
+        className={`admin-sidebar fixed bottom-4 left-4 top-4 z-40 hidden flex-col overflow-hidden rounded-4xl backdrop-blur transition-[width,padding] duration-300 ease-out lg:flex ${
           sidebarOpen ? 'w-[280px] p-5' : 'w-[76px] p-3'
         }`}
       >
-        <div className={`mb-4 flex ${sidebarOpen ? 'justify-end' : 'justify-center'}`}>
-          <button
-            type="button"
-            onClick={() => setSidebarOpen((open) => !open)}
-            className="admin-sidebar-toggle inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 active:scale-95"
-            title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-            aria-expanded={sidebarOpen}
-          >
-            <PanelIcon open={sidebarOpen} />
-          </button>
+        <div className={`mb-4 flex items-center gap-2 ${sidebarOpen ? 'justify-between' : 'flex-col'}`}>
+          <Link to="/" className={`admin-sidebar-brand ${sidebarOpen ? '' : 'justify-center'}`} aria-label="Royal Prince Hub home">
+            <BrandMark />
+            {sidebarOpen ? <span className="admin-sidebar-brand-text">Admin</span> : null}
+          </Link>
+          <div className={`flex items-center gap-2 ${sidebarOpen ? '' : 'flex-col'}`}>
+            <button
+              type="button"
+              className="pf-desktop-section-nav-theme"
+              onClick={toggleTheme}
+              title={isDark ? 'Light mode' : 'Dark mode'}
+              aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              <SiteNavIcon name={isDark ? 'sun' : 'moon'} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((open) => !open)}
+              className="admin-sidebar-toggle inline-flex h-9 w-9 items-center justify-center rounded-2xl transition active:scale-95"
+              title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+              aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+              aria-expanded={sidebarOpen}
+            >
+              <PanelIcon open={sidebarOpen} />
+            </button>
+          </div>
         </div>
 
         <nav className="flex flex-1 flex-col gap-2 overflow-y-auto">
@@ -190,33 +212,21 @@ const AdminLayout = ({
               end={item.to === '/admin'}
               title={item.label}
               className={({ isActive }) =>
-                `admin-nav-link rounded-3xl border transition-all active:scale-[0.985] lg:active:scale-100 ${
+                `admin-nav-link rounded-3xl transition-all active:scale-[0.985] lg:active:scale-100 ${
                   sidebarOpen ? 'px-3.5 py-3' : 'flex h-12 w-12 items-center justify-center self-center p-0'
-                } ${
-                  isActive
-                    ? 'is-active border-slate-950 bg-slate-950 text-white shadow-lg'
-                    : 'border-white/70 bg-white/70 text-slate-700 hover:border-slate-200 hover:bg-white'
-                }`
+                } ${isActive ? 'is-active' : ''}`
               }
             >
-              {({ isActive }) =>
-                sidebarOpen ? (
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`admin-nav-icon inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl ${
-                        isActive ? 'bg-white/15 text-white' : 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      <NavIcon name={item.icon} />
-                    </span>
-                    <p className={`text-sm font-semibold ${isActive ? 'text-white' : 'text-slate-900'}`}>
-                      {item.label}
-                    </p>
-                  </div>
-                ) : (
-                  <NavIcon name={item.icon} className="h-5 w-5" />
-                )
-              }
+              {sidebarOpen ? (
+                <div className="flex items-center gap-3">
+                  <span className="admin-nav-icon inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl">
+                    <AdminNavIcon name={item.icon} />
+                  </span>
+                  <p className="admin-nav-label text-sm font-semibold">{item.label}</p>
+                </div>
+              ) : (
+                <AdminNavIcon name={item.icon} className="h-5 w-5" />
+              )}
             </NavLink>
           ))}
         </nav>
@@ -225,21 +235,20 @@ const AdminLayout = ({
           <Link
             to="/dashboard"
             title="Dashboard"
-            className={`admin-panel-btn inline-flex items-center justify-center rounded-3xl border border-slate-300 bg-white text-sm font-medium text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 active:scale-95 ${
+            className={`admin-panel-btn inline-flex items-center justify-center rounded-3xl text-sm font-medium transition active:scale-95 ${
               sidebarOpen ? 'px-5 py-3' : 'h-12 w-12'
             }`}
           >
-            {sidebarOpen ? '← Dashboard' : <NavIcon name="dashboard" />}
+            {sidebarOpen ? '← Dashboard' : <AdminNavIcon name="dashboard" />}
           </Link>
           <Link
             to="/all-books"
             title="Browse Books"
-            className={`admin-panel-btn inline-flex items-center justify-center rounded-3xl bg-slate-950 text-sm font-medium text-white transition hover:bg-slate-800 active:scale-95 ${
+            className={`admin-panel-btn-primary inline-flex items-center justify-center rounded-3xl text-sm font-medium transition active:scale-95 ${
               sidebarOpen ? 'px-5 py-3' : 'h-12 w-12'
             }`}
-            style={{ color: 'white' }}
           >
-            {sidebarOpen ? 'Browse Books' : <NavIcon name="browse" />}
+            {sidebarOpen ? 'Browse Books' : <AdminNavIcon name="browse" />}
           </Link>
         </div>
       </aside>
@@ -258,9 +267,9 @@ const AdminLayout = ({
       >
         {isImmersive ? null : !isMinimal ? (
           <>
-            <div className="admin-workspace-bg-standard absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(241,245,249,0.92)_45%,rgba(226,232,240,0.7)_100%)]" />
-            <div className="absolute inset-x-0 top-0 h-64 sm:h-80 bg-linear-to-b from-white via-white/80 to-transparent" />
-            <div className="absolute left-1/2 top-20 sm:top-28 h-64 w-64 sm:h-80 sm:w-80 -translate-x-1/2 rounded-full bg-blue-200/25 blur-3xl" />
+            <div className="admin-workspace-bg-standard absolute inset-0" />
+            <div className="admin-workspace-grid" />
+            <div className="admin-workspace-glow" />
           </>
         ) : (
           <div className="admin-workspace-bg-minimal absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,252,245,0.9),rgba(247,241,232,0.95)_50%,rgba(240,230,214,0.85)_100%)]" />
@@ -273,7 +282,16 @@ const AdminLayout = ({
         >
           <main className={isImmersive ? 'h-full min-w-0' : 'min-w-0'}>
             {!isMinimal && !isImmersive ? (
-              <div className="admin-hero-card rounded-[1.75rem] border border-white/70 bg-white/80 p-4 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur sm:rounded-4xl sm:p-6 lg:p-8">
+              <div className="admin-hero-card relative rounded-[1.75rem] p-4 backdrop-blur sm:rounded-4xl sm:p-6 lg:p-8">
+                <button
+                  type="button"
+                  className="admin-theme-toggle-mobile pf-desktop-section-nav-theme absolute right-4 top-4 z-10"
+                  onClick={toggleTheme}
+                  title={isDark ? 'Light mode' : 'Dark mode'}
+                  aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  <SiteNavIcon name={isDark ? 'sun' : 'moon'} />
+                </button>
                 <div
                   className={
                     isSplitHero
@@ -281,12 +299,12 @@ const AdminLayout = ({
                       : 'flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between'
                   }
                 >
-                  <div className="min-w-0">
-                    <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  <div className="min-w-0 pr-12 lg:pr-0">
+                    <p className="admin-hero-eyebrow pf-eyebrow pf-eyebrow-gold">
                       {eyebrow}
                     </p>
                     <h1
-                      className={`mt-3 font-semibold leading-[1.12] tracking-[-0.04em] text-balance text-slate-950 ${
+                      className={`admin-hero-title mt-3 font-semibold leading-[1.12] tracking-[-0.04em] text-balance ${
                         isSplitHero
                           ? 'max-w-xl text-3xl sm:text-4xl lg:text-[2.75rem]'
                           : 'text-2xl sm:text-3xl lg:text-5xl'
@@ -295,7 +313,7 @@ const AdminLayout = ({
                       {title}
                     </h1>
                     <p
-                      className={`mt-4 text-sm leading-relaxed text-slate-600 sm:text-base ${
+                      className={`admin-hero-copy mt-4 text-sm leading-relaxed sm:text-base ${
                         isSplitHero ? 'max-w-lg' : 'max-w-3xl'
                       }`}
                     >
@@ -307,17 +325,17 @@ const AdminLayout = ({
                   </div>
 
                   {isSplitHero ? (
-                    <div className="grid grid-cols-2 gap-3 rounded-[1.5rem] bg-slate-950 p-3 text-white sm:gap-4 sm:p-4">
+                    <div className="admin-hero-stats grid grid-cols-2 gap-3 rounded-[1.5rem] p-3 sm:gap-4 sm:p-4">
                       {stats.map((stat) => (
-                        <div key={stat.label} className="min-w-0 rounded-2xl bg-white/10 px-3.5 py-4 sm:px-4 sm:py-5">
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50 sm:text-[11px]">
+                        <div key={stat.label} className="admin-hero-stat min-w-0 rounded-2xl px-3.5 py-4 sm:px-4 sm:py-5">
+                          <p className="admin-hero-stat-label text-[10px] font-semibold uppercase tracking-[0.2em] sm:text-[11px]">
                             {stat.label}
                           </p>
-                          <p className="mt-2 wrap-break-word text-xl font-semibold tracking-tight sm:text-2xl lg:text-[1.7rem]">
+                          <p className="admin-hero-stat-value mt-2 wrap-break-word text-xl font-semibold tracking-tight sm:text-2xl lg:text-[1.7rem]">
                             {stat.value}
                           </p>
                           {stat.helper ? (
-                            <p className="mt-2 text-xs leading-tight text-white/55">{stat.helper}</p>
+                            <p className="admin-hero-stat-helper mt-2 text-xs leading-tight">{stat.helper}</p>
                           ) : null}
                         </div>
                       ))}
@@ -334,16 +352,16 @@ const AdminLayout = ({
                     {stats.map((stat) => (
                       <div
                         key={stat.label}
-                        className="admin-stat-card rounded-3xl border border-slate-200 bg-slate-50/90 p-4 transition-all hover:shadow-sm sm:p-6"
+                        className="admin-stat-card rounded-3xl p-4 transition-all hover:shadow-sm sm:p-6"
                       >
-                        <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                        <p className="admin-stat-label text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.2em]">
                           {stat.label}
                         </p>
-                        <p className="mt-3 wrap-break-word text-2xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                        <p className="admin-stat-value mt-3 wrap-break-word text-2xl font-semibold tracking-tight sm:text-4xl">
                           {stat.value}
                         </p>
                         {stat.helper ? (
-                          <p className="mt-3 text-xs sm:text-sm text-slate-600 leading-tight">{stat.helper}</p>
+                          <p className="admin-stat-helper mt-3 text-xs sm:text-sm leading-tight">{stat.helper}</p>
                         ) : null}
                       </div>
                     ))}
@@ -368,7 +386,7 @@ const AdminLayout = ({
       </section>
 
       {!hideNav ? (
-      <nav className="admin-workspace-mobile-nav fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 shadow-[0_-14px_30px_rgba(15,23,42,0.12)] backdrop-blur lg:hidden">
+      <nav className="admin-workspace-mobile-nav fixed inset-x-0 bottom-0 z-50 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] pt-2 backdrop-blur lg:hidden">
         <div
           className="mx-auto grid max-w-lg gap-1"
           style={{ gridTemplateColumns: `repeat(${mobileCols}, minmax(0, 1fr))` }}
@@ -379,15 +397,13 @@ const AdminLayout = ({
               to={item.to}
               end={item.to === '/admin'}
               className={({ isActive }) =>
-                `flex min-w-0 flex-col items-center justify-center rounded-2xl px-1.5 py-2 text-[10px] font-semibold transition active:scale-95 ${
-                  isActive
-                    ? 'bg-slate-950 text-white shadow-lg'
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                `admin-mobile-link flex min-w-0 flex-col items-center justify-center rounded-2xl px-1.5 py-2 text-[10px] font-semibold transition active:scale-95 ${
+                  isActive ? 'is-active' : ''
                 }`
               }
             >
               <span className="mb-0.5 flex h-6 w-6 items-center justify-center rounded-full text-sm leading-none">
-                <NavIcon name={item.icon} className="h-4 w-4" />
+                <AdminNavIcon name={item.icon} className="h-4 w-4" />
               </span>
               <span className="max-w-full truncate">{item.shortLabel}</span>
             </NavLink>

@@ -54,6 +54,10 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
         email: user?.email || '',
         name: user?.username || ''
       },
+      meta: {
+        bookId: selectedBook?._id || '',
+        userId: user?.id || user?._id || ''
+      },
       customizations: {
         title: selectedBook ? `Purchase ${selectedBook.title}` : 'Purchase Book',
         description: 'Payment for book access'
@@ -99,7 +103,7 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
 
         closePaymentModal();
 
-        if (response.status !== 'successful') {
+        if (!['successful', 'success', 'completed'].includes(String(response.status || '').toLowerCase())) {
           resetCheckoutState();
           notifyRef.current({
             title: 'Payment failed',
@@ -111,7 +115,7 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
 
         try {
           const verifyResponse = await axios.post('/payment/verify', {
-            transaction_id: response.transaction_id,
+            transaction_id: response.transaction_id || response.id,
             bookId: currentBook._id
           });
 

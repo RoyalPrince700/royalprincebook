@@ -11,6 +11,7 @@ const passport = require('passport');
 const { Server } = require('socket.io');
 const configurePassport = require('./config/passport');
 const { initArtboardSocket } = require('./realtime/artboardSocket');
+const { ensureCatalogBooks } = require('./utils/catalogBooks');
 
 const app = express();
 const server = http.createServer(app);
@@ -76,7 +77,14 @@ app.use(passport.initialize());
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bookwriter')
-.then(() => console.log('Connected to MongoDB'))
+.then(async () => {
+  console.log('Connected to MongoDB');
+  try {
+    await ensureCatalogBooks();
+  } catch (error) {
+    console.error('Catalog book sync error:', error.message);
+  }
+})
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
