@@ -2,6 +2,7 @@ const { sendEmail } = require('./mailtrap.config');
 const {
   getWelcomeEmailTemplate,
   getBookPurchaseEmailTemplate,
+  getAdminBookPurchaseNotificationTemplate,
   getLeaderboardInviteEmailTemplate,
   getWorkboardAccessRequestEmailTemplate,
   getWorkboardAccessGrantedEmailTemplate
@@ -78,6 +79,30 @@ const sendBookPurchaseEmail = async ({ user, book, paymentData }) => {
   });
 };
 
+const sendAdminBookPurchaseNotification = async ({ user, book, paymentData }) => {
+  if (!book) {
+    return null;
+  }
+
+  const adminEmail =
+    process.env.ADMIN_NOTIFICATION_EMAIL || 'royalprincecube@gmail.com';
+  const template = getAdminBookPurchaseNotificationTemplate({
+    buyerName: user?.username,
+    buyerEmail: user?.email,
+    bookTitle: book.title,
+    amount: paymentData?.amount ?? book.price,
+    currency: paymentData?.currency || 'NGN',
+    transactionId: paymentData?.id || paymentData?.tx_ref,
+    dashboardUrl: `${getFrontendUrl()}/admin/finance`
+  });
+
+  return sendEmail({
+    to: [{ email: adminEmail }],
+    category: 'admin-book-purchase-notification',
+    ...template
+  });
+};
+
 const sendLeaderboardInviteEmail = async ({ invitedUser, inviter, leaderboardName }) => {
   if (!invitedUser?.email) {
     return null;
@@ -148,6 +173,7 @@ const sendWorkboardAccessGrantedEmail = async ({
 module.exports = {
   sendWelcomeEmail,
   sendBookPurchaseEmail,
+  sendAdminBookPurchaseNotification,
   sendLeaderboardInviteEmail,
   sendWorkboardAccessRequestEmail,
   sendWorkboardAccessGrantedEmail

@@ -88,6 +88,7 @@ app.use('/api/workboard', taskboardRoutes);
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/books', require('./routes/books'));
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/events', require('./routes/events'));
 app.use('/api/export', require('./routes/export'));
 
 // Health check

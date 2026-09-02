@@ -14,7 +14,9 @@ import BookEditor from './components/Book/BookEditor';
 import BookList from './components/Book/BookList';
 import BookInsightPage from './pages/BookInsightPage';
 import ReadBook from './pages/ReadBook';
+import EventPage from './pages/EventPage';
 import PrivateRoute from './components/Auth/PrivateRoute';
+import PremiumRoute from './components/Auth/PremiumRoute';
 import AdminRoute from './components/Auth/AdminRoute';
 import AdminOverview from './components/Admin/AdminOverview';
 import AdminTraffic from './components/Admin/AdminTraffic';
@@ -22,6 +24,7 @@ import AdminBooks from './components/Admin/AdminBooks';
 import UserManagement from './components/Admin/UserManagement';
 import AdminFinance from './components/Admin/AdminFinance';
 import AdminGame from './components/Admin/AdminArticulationGame';
+import AdminEvent from './components/Admin/AdminEvent';
 import AdminWorkboard from './components/Admin/AdminWorkboard';
 import AdminWorkboardShare from './components/Admin/AdminWorkboardShare';
 import AdminArtboardShare from './components/Admin/AdminArtboardShare';
@@ -65,6 +68,7 @@ const Layout = ({ children }) => {
   const isThemedContentPage =
     location.pathname.startsWith('/blog') ||
     location.pathname === '/all-books' ||
+    location.pathname === '/event' ||
     location.pathname === '/login' ||
     /^\/books\/[^/]+\/details$/.test(location.pathname);
   const isAdmin = location.pathname.startsWith('/admin');
@@ -183,6 +187,22 @@ function App() {
                     <AdminRoute>
                       <AdminGame />
                     </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/event"
+                  element={
+                    <AdminRoute>
+                      <AdminEvent />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/event"
+                  element={
+                    <PremiumRoute>
+                      <EventPage />
+                    </PremiumRoute>
                   }
                 />
                 <Route

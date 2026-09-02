@@ -167,14 +167,30 @@ export const AuthProvider = ({ children }) => {
 
     setUser((prevUser) => {
       if (!prevUser) return prevUser;
-      const purchasedBooks = Array.isArray(prevUser.purchasedBooks) ? prevUser.purchasedBooks : [];
-      if (purchasedBooks.includes(bookId)) {
+      const purchasedBooks = Array.isArray(prevUser.purchasedBooks)
+        ? prevUser.purchasedBooks.map((id) => String(id))
+        : [];
+      const normalizedBookId = String(bookId);
+      if (purchasedBooks.includes(normalizedBookId)) {
         return prevUser;
       }
 
       return {
         ...prevUser,
-        purchasedBooks: [...purchasedBooks, bookId]
+        purchasedBooks: [...purchasedBooks, normalizedBookId]
+      };
+    });
+  }, []);
+
+  const syncPurchasedBooks = useCallback((purchasedBooks = []) => {
+    setUser((prevUser) => {
+      if (!prevUser) return prevUser;
+
+      return {
+        ...prevUser,
+        purchasedBooks: Array.isArray(purchasedBooks)
+          ? purchasedBooks.map((id) => String(id))
+          : []
       };
     });
   }, []);
@@ -189,6 +205,7 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     refreshProfile,
     addPurchasedBook,
+    syncPurchasedBooks,
     isAuthenticated: !!user
   };
 

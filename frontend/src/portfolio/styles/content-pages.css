@@ -732,6 +732,11 @@
   color: var(--pf-gold-dark);
 }
 
+.pf-event-session-card {
+  display: flex;
+  flex-direction: column;
+}
+
 [data-theme='dark'] .pf-tag-cart {
   color: var(--pf-gold-light);
 }

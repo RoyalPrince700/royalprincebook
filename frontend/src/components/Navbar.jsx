@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getRedirectPath } from '../utils/authRedirect';
 import { buildLoginPath } from '../utils/requireAuth';
+import { isPremiumUser } from '../utils/bookAccess';
 import NavIcon from './NavIcon';
 import BrandMark from './BrandMark';
 import '../portfolio/styles/portfolio.css';
@@ -28,6 +29,7 @@ const Navbar = () => {
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   const isAdmin = user?.role === 'admin';
+  const isPremium = isPremiumUser(user);
   const redirectPath = getRedirectPath(location);
   const loginHref = buildLoginPath(redirectPath);
 
@@ -41,6 +43,10 @@ const Navbar = () => {
 
   if (user) {
     navLinks.push({ to: '/dashboard', label: 'Dashboard', icon: 'dashboard' });
+  }
+
+  if (isPremium) {
+    navLinks.push({ to: '/event', label: 'Event', icon: 'event' });
   }
 
   if (isAdmin) {
@@ -138,7 +144,10 @@ const Navbar = () => {
 
           {user ? (
             <>
-              <p className="pf-site-nav-mobile-user">{user.username}</p>
+              <div className="pf-site-nav-mobile-user-row">
+                <p className="pf-site-nav-mobile-user">{user.username}</p>
+                {isPremium ? <span className="pf-premium-badge">Premium</span> : null}
+              </div>
               <button type="button" onClick={handleLogout} className="pf-site-nav-auth-btn pf-site-nav-auth-btn-full">
                 Log out
               </button>
@@ -161,6 +170,7 @@ const Navbar = () => {
       <div className="pf-container pf-desktop-section-nav-inner">
         <Link to="/" className="pf-desktop-section-nav-brand" onClick={closeMenu} aria-label="Royal Prince Hub home">
           <BrandMark />
+          <span className="pf-site-nav-brand-text">Royal Prince Hub</span>
         </Link>
 
         <nav className="pf-desktop-section-nav-scroll" aria-label="Main navigation">
@@ -182,7 +192,10 @@ const Navbar = () => {
         <div className="pf-site-nav-end">
           {user ? (
             <div className="pf-site-nav-auth pf-site-nav-auth-desktop">
-              <span className="pf-site-nav-user">{user.username}</span>
+              <div className="pf-site-nav-user-row">
+                <span className="pf-site-nav-user">{user.username}</span>
+                {isPremium ? <span className="pf-premium-badge">Premium</span> : null}
+              </div>
               <button type="button" onClick={handleLogout} className="pf-site-nav-auth-btn">
                 Log out
               </button>

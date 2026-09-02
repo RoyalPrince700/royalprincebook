@@ -7,6 +7,7 @@ import ThemeToggle from '../ThemeToggle';
 import NavIcon from '../NavIcon';
 import PageLoader from '../PageLoader';
 import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
+import { getReadBookId } from '../../utils/bookAccess';
 import './dashboard.css';
 
 const DestinationCard = ({ to, label, description, icon, accent = 'slate' }) => (
@@ -323,7 +324,7 @@ const Dashboard = () => {
                     key={book._id}
                     book={book}
                     isOwned
-                    onRead={() => navigate(`/books/${book._id}/read`)}
+                    onRead={() => navigate(`/books/${getReadBookId(book)}/read`)}
                     onDelete={handleDeleteBook}
                     showActions
                     showAdminActions={user?.role === 'admin'}

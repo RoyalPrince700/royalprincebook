@@ -1,6 +1,7 @@
 const passport = require('passport');
 const User = require('../models/User');
 const { getAvatarEmoji, isValidAvatarId } = require('../utils/workboardAvatars');
+const { expandBookAccessIds } = require('../utils/bookAliases');
 
 const getFrontendUrl = () => {
   const isProdLike =
@@ -43,10 +44,15 @@ const googleAuthCallback = (req, res, next) => {
 // Get current user profile
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id).populate('purchasedBooks', 'title');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    const purchasedBooks = expandBookAccessIds(
+      (user.purchasedBooks || []).map((book) => book._id),
+      user.purchasedBooks || []
+    );
 
     res.json({
       user: {
@@ -55,7 +61,7 @@ const getProfile = async (req, res) => {
         email: user.email,
         role: user.role,
         createdAt: user.createdAt,
-        purchasedBooks: user.purchasedBooks || [],
+        purchasedBooks,
         workboardXp: user.workboardXp || 0,
         workboardAvatar: user.workboardAvatar || 'royal-crown',
         avatarEmoji: getAvatarEmoji(user.workboardAvatar)
@@ -103,11 +109,16 @@ const updateProfile = async (req, res) => {
       userId,
       updates,
       { new: true, runValidators: true }
-    );
+    ).populate('purchasedBooks', 'title');
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    const purchasedBooks = expandBookAccessIds(
+      (user.purchasedBooks || []).map((book) => book._id),
+      user.purchasedBooks || []
+    );
 
     res.json({
       message: 'Profile updated successfully',
@@ -116,7 +127,7 @@ const updateProfile = async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        purchasedBooks: user.purchasedBooks || [],
+        purchasedBooks,
         workboardXp: user.workboardXp || 0,
         workboardAvatar: user.workboardAvatar || 'royal-crown',
         avatarEmoji: getAvatarEmoji(user.workboardAvatar)

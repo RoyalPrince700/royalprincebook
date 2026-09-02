@@ -308,6 +308,73 @@ CEO, ${APP_NAME}`,
   };
 };
 
+const getAdminBookPurchaseNotificationTemplate = ({
+  buyerName,
+  buyerEmail,
+  bookTitle,
+  amount,
+  currency,
+  transactionId,
+  dashboardUrl
+}) => {
+  const safeBuyerName = escapeHtml(buyerName || 'A reader');
+  const safeBuyerEmail = escapeHtml(buyerEmail || '');
+  const safeBookTitle = escapeHtml(bookTitle || 'Untitled book');
+  const safeDashboardUrl = escapeHtml(dashboardUrl);
+  const paymentAmount = formatPrice(amount, currency) || 'Paid purchase';
+  const safeTransactionId = transactionId ? escapeHtml(String(transactionId)) : null;
+
+  return {
+    subject: `New book purchase: ${bookTitle || 'Untitled book'}`,
+    text: `A new book purchase was completed on ${APP_NAME}.
+
+Book: ${bookTitle || 'Untitled book'}
+Buyer: ${buyerName || 'A reader'} (${buyerEmail || 'no email'})
+Amount: ${paymentAmount}
+${transactionId ? `Transaction ID: ${transactionId}\n` : ''}Open admin dashboard: ${dashboardUrl}`,
+    html: renderEmailShell({
+      badge: 'New Purchase',
+      eyebrow: `${APP_NAME} Store`,
+      title: 'A book was just purchased.',
+      subtitle: 'You are receiving this because a reader completed a paid checkout on Royal Prince Hub.',
+      primaryAction: {
+        href: safeDashboardUrl,
+        label: 'Open Admin Dashboard'
+      },
+      contentHtml: `
+        <h2 style="${baseStyles.sectionTitle}">Purchase details</h2>
+        <table role="presentation" style="${baseStyles.statGrid}">
+          <tr>
+            <td style="${baseStyles.statCard}">
+              <p style="${baseStyles.statLabel}">Book</p>
+              <p style="${baseStyles.statValue}">${safeBookTitle}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="${baseStyles.statCard}">
+              <p style="${baseStyles.statLabel}">Buyer</p>
+              <p style="${baseStyles.statValue}">${safeBuyerName}</p>
+              <p style="${baseStyles.note}">${safeBuyerEmail}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="${baseStyles.statCard}">
+              <p style="${baseStyles.statLabel}">Amount</p>
+              <p style="${baseStyles.statValue}">${escapeHtml(paymentAmount)}</p>
+              ${
+                safeTransactionId
+                  ? `<p style="${baseStyles.note}">Transaction ID: ${safeTransactionId}</p>`
+                  : ''
+              }
+            </td>
+          </tr>
+        </table>
+      `,
+      footerHtml: `Admin purchase notification from ${APP_NAME}.`
+    })
+  };
+};
+
 const workboardEmailStyles = {
   body: 'margin:0;padding:0;background-color:#f7f1e8;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#3d342c;',
   wrapper: 'width:100%;background:linear-gradient(180deg,#fffaf3 0%,#f7f1e8 100%);padding:32px 16px;',
@@ -589,6 +656,7 @@ You are receiving this because someone invited your email to a Taskboard leaderb
 module.exports = {
   getWelcomeEmailTemplate,
   getBookPurchaseEmailTemplate,
+  getAdminBookPurchaseNotificationTemplate,
   getLeaderboardInviteEmailTemplate,
   getWorkboardAccessRequestEmailTemplate,
   getWorkboardAccessGrantedEmailTemplate

@@ -5,6 +5,7 @@ import BookInsightDetails from '../components/Book/BookInsightDetails';
 import { useAuth } from '../contexts/AuthContext';
 import useBookPurchase from '../hooks/useBookPurchase';
 import { getLocalBook, isLocalBookId } from '../utils/localBookService';
+import { getReadBookId, userHasBookAccess } from '../utils/bookAccess';
 
 const BookInsightPage = () => {
   const { bookId } = useParams();
@@ -17,7 +18,7 @@ const BookInsightPage = () => {
 
   const { checkoutBook, buyingBookId } = useBookPurchase({
     onPurchaseSuccess: async (purchasedBook) => {
-      navigate(`/books/${purchasedBook._id}/read`);
+      navigate(`/books/${getReadBookId(purchasedBook)}/read`);
     }
   });
 
@@ -45,18 +46,11 @@ const BookInsightPage = () => {
     fetchBook();
   }, [bookId]);
 
-  const getIsOwned = (currentBook) => {
-    if (!currentBook) return false;
-    if (!user) return false;
-    if (user.role === 'admin') return true;
-
-    const purchasedBooks = Array.isArray(user.purchasedBooks) ? user.purchasedBooks : [];
-    return purchasedBooks.includes(currentBook._id) || !currentBook.price || currentBook.price === 0;
-  };
+  const getIsOwned = (currentBook) => userHasBookAccess(user, currentBook);
 
   const handleRead = () => {
     if (!book) return;
-    navigate(`/books/${book._id}/read`);
+    navigate(`/books/${getReadBookId(book)}/read`);
   };
 
   const handleBuy = () => {

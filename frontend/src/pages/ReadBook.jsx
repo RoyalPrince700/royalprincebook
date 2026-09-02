@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,11 +12,12 @@ import PageLoader from '../components/PageLoader';
 import { getRedirectPath } from '../utils/authRedirect';
 import { buildLoginPath } from '../utils/requireAuth';
 import './ReadBook.css';
-import { getLocalBook, isLocalBookId } from '../utils/localBookService';
+import { getLocalBook, getLocalBookForApiBook, isLocalBookId } from '../utils/localBookService';
+import { getReadBookId, userHasBookAccess } from '../utils/bookAccess';
 
 const ReadBook = () => {
   const { bookId } = useParams();
-  const { user, refreshProfile, addPurchasedBook } = useAuth();
+  const { user, refreshProfile, syncPurchasedBooks } = useAuth();
   const { notify } = usePlatformDialog();
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,6 +29,7 @@ const ReadBook = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [downloadDropdownOpen, setDownloadDropdownOpen] = useState(false);
   const [flwPublicKey, setFlwPublicKey] = useState('');
+  const paymentHandledRef = useRef(false);
 
   // Auto-close sidebar on mobile
   useEffect(() => {
@@ -68,7 +70,9 @@ const ReadBook = () => {
       }
 
       const response = await axios.get(`/books/details/${bookId}`);
-      setBook(response.data.book);
+      const apiBook = response.data.book;
+      const localBook = getLocalBookForApiBook(apiBook);
+      setBook(localBook || apiBook);
     } catch (error) {
       console.error('Failed to fetch book:', error);
       setError('Failed to load book');
@@ -155,18 +159,30 @@ const ReadBook = () => {
       return;
     }
     
+    paymentHandledRef.current = false;
+
     handleFlutterwavePayment({
       callback: async (response) => {
+        if (paymentHandledRef.current) {
+          return;
+        }
+        paymentHandledRef.current = true;
+
         closePaymentModal();
         if (response.status === "successful") {
            try {
-             // Verify payment on backend
-             await axios.post('/payment/verify', {
+             const verifyResponse = await axios.post('/payment/verify', {
                transaction_id: response.transaction_id,
                bookId: book._id
              });
-             addPurchasedBook(book._id);
-             await refreshProfile();
+
+             if (Array.isArray(verifyResponse.data?.purchasedBooks)) {
+               syncPurchasedBooks(verifyResponse.data.purchasedBooks);
+             } else {
+               await refreshProfile();
+             }
+
+             navigate(`/books/${getReadBookId(book)}/read`, { replace: true });
              notify({
                title: 'Payment successful',
                message: 'You can now read the book.',
@@ -220,7 +236,7 @@ const ReadBook = () => {
   // Check access
   const isAuthor = user && book.author && (user.id === book.author._id || user.id === book.author);
   const isAdmin = user && user.role === 'admin';
-  const hasPurchased = user && user.purchasedBooks && user.purchasedBooks.includes(book._id);
+  const hasPurchased = userHasBookAccess(user, book);
   const isFree = !book.price || book.price === 0;
   const originalPrice = getOriginalBookPrice(book?.title, book?.price);
 

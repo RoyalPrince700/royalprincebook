@@ -117,8 +117,22 @@
 
 .pf-desktop-section-nav-brand {
   display: inline-flex;
-  flex-shrink: 0;
+  align-items: center;
+  gap: 0.55rem;
+  flex-shrink: 1;
+  min-width: 0;
   text-decoration: none;
+}
+
+.pf-site-nav-brand-text {
+  display: none;
+  overflow: hidden;
+  color: var(--pf-text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .pf-desktop-section-nav-brand-mark {
@@ -233,16 +247,6 @@
   gap: 0.45rem;
 }
 
-.pf-site-nav-auth-desktop {
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .pf-site-nav-auth-desktop {
-    display: flex;
-  }
-}
-
 .pf-site-nav-user {
   max-width: 8rem;
   overflow: hidden;
@@ -255,6 +259,33 @@
   font-size: 0.76rem;
   font-weight: 500;
   color: var(--pf-text-muted);
+}
+
+.pf-site-nav-user-row,
+.pf-site-nav-mobile-user-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.pf-premium-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.18), rgba(201, 162, 39, 0.08));
+  color: var(--pf-gold-dark);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pf-site-nav-dark .pf-premium-badge {
+  color: var(--pf-gold-light);
 }
 
 .pf-site-nav-auth-btn {
@@ -276,6 +307,16 @@
 .pf-site-nav-auth-btn:hover {
   background: rgba(201, 162, 39, 0.14);
   border-color: rgba(201, 162, 39, 0.45);
+}
+
+.pf-site-nav-auth-desktop {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .pf-site-nav-auth-desktop {
+    display: flex;
+  }
 }
 
 .pf-site-nav-auth-btn-full {

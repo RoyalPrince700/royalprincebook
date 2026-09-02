@@ -79,6 +79,10 @@
     height: 2.1rem;
   }
 
+  .pf-site-nav .pf-site-nav-brand-text {
+    display: inline;
+  }
+
   .pf-section-title {
     font-size: clamp(1.65rem, 6.5vw, 2.35rem);
   }

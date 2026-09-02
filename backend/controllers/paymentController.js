@@ -2,8 +2,12 @@ const axios = require('axios');
 const Book = require('../models/Book');
 const User = require('../models/User');
 const PaymentTransaction = require('../models/PaymentTransaction');
-const { sendBookPurchaseEmail } = require('../mailtrap/emails');
+const { sendBookPurchaseEmail, sendAdminBookPurchaseNotification } = require('../mailtrap/emails');
 const { getEffectiveBookPrice } = require('../bookPricing');
+const {
+  expandBookAccessIds,
+  resolveBookByIdOrAlias
+} = require('../utils/bookAliases');
 
 // Verify payment
 const verifyPayment = async (req, res) => {
@@ -31,8 +35,7 @@ const verifyPayment = async (req, res) => {
       return res.status(400).json({ message: 'Payment verification failed' });
     }
 
-    // Find the book
-    const book = await Book.findById(bookId);
+    const book = await resolveBookByIdOrAlias(bookId, Book);
     if (!book) {
       return res.status(404).json({ message: 'Book not found' });
     }
@@ -76,15 +79,17 @@ const verifyPayment = async (req, res) => {
       }
     );
 
-    // Add book to the user's purchased list in a way that avoids duplicate writes.
-    const existingUser = await User.findById(userId).select('username email purchasedBooks');
+    const existingUser = await User.findById(userId)
+      .select('username email purchasedBooks')
+      .populate('purchasedBooks', 'title');
     const user = existingUser;
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    const resolvedBookId = book._id.toString();
     const alreadyPurchased = user.purchasedBooks.some(
-      (purchasedBookId) => purchasedBookId.toString() === bookId.toString()
+      (purchasedBook) => purchasedBook._id.toString() === resolvedBookId
     );
 
     if (!alreadyPurchased) {
@@ -92,7 +97,7 @@ const verifyPayment = async (req, res) => {
         $addToSet: { purchasedBooks: book._id }
       });
 
-      user.purchasedBooks.push(book._id);
+      user.purchasedBooks.push(book);
 
       sendBookPurchaseEmail({
         user,
@@ -101,14 +106,26 @@ const verifyPayment = async (req, res) => {
       }).catch((error) => {
         console.error('Book purchase email error:', error.message);
       });
+
+      sendAdminBookPurchaseNotification({
+        user,
+        book,
+        paymentData: data
+      }).catch((error) => {
+        console.error('Admin purchase notification email error:', error.message);
+      });
     }
+
+    const purchasedBooks = expandBookAccessIds(
+      user.purchasedBooks.map((purchasedBook) => purchasedBook._id),
+      user.purchasedBooks
+    );
 
     res.json({
       message: 'Payment verified and book purchased successfully',
-      bookId: bookId,
-      purchasedBooks: user.purchasedBooks
+      bookId: resolvedBookId,
+      purchasedBooks
     });
-
   } catch (error) {
     console.error('Payment verification error:', error);
     res.status(500).json({ message: 'Server error during payment verification' });

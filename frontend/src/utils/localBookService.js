@@ -48,3 +48,13 @@ export const mergeBooksForCatalog = (apiBooks = []) => {
 
   return [...localOnly, ...apiBooks];
 };
+
+export const getLocalBookForApiBook = (apiBook) => {
+  if (!apiBook) {
+    return null;
+  }
+
+  return getAllLocalBooks().find((localBook) => apiBookMatchesLocal(apiBook, localBook)) || null;
+};
+
+export { apiBookMatchesLocal };

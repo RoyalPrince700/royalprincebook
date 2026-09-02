@@ -55,6 +55,15 @@ const NavIcon = ({ name, className = 'h-5 w-5' }) => {
           <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         </svg>
       );
+    case 'event':
+      return (
+        <svg {...props}>
+          <rect x="3" y="4" width="18" height="18" rx="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+      );
     case 'game':
       return (
         <svg {...props}>
@@ -97,6 +106,7 @@ const allNavItems = [
   { to: '/admin/books', label: 'Books', shortLabel: 'Books', icon: 'books', roles: ['admin'] },
   { to: '/admin/users', label: 'Users', shortLabel: 'Users', icon: 'users', roles: ['admin'] },
   { to: '/admin/finance', label: 'Finance', shortLabel: 'Finance', icon: 'finance', roles: ['admin'] },
+  { to: '/admin/event', label: 'Event', shortLabel: 'Event', icon: 'event', roles: ['admin'] },
   { to: '/admin/game', label: 'Game', shortLabel: 'Game', icon: 'game', roles: ['admin'] },
   { to: '/taskboard', label: 'Taskboard', shortLabel: 'Board', icon: 'taskboard', roles: ['admin', 'superior'] }
 ];

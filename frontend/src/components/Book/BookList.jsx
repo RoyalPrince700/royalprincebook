@@ -9,6 +9,7 @@ import useBookPurchase from '../../hooks/useBookPurchase';
 import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
 import PageLoader from '../PageLoader';
 import { mergeBooksForCatalog } from '../../utils/localBookService';
+import { getReadBookId, userHasBookAccess } from '../../utils/bookAccess';
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -85,16 +86,10 @@ const BookList = () => {
   };
 
   const handleReadBook = (book) => {
-    navigate(`/books/${book._id}/read`);
+    navigate(`/books/${getReadBookId(book)}/read`);
   };
 
-  const getIsOwned = (book) => {
-    if (!user) return false;
-    if (user.role === 'admin') return true;
-
-    const purchasedBooks = Array.isArray(user.purchasedBooks) ? user.purchasedBooks : [];
-    return purchasedBooks.includes(book._id) || !book.price || book.price === 0;
-  };
+  const getIsOwned = (book) => userHasBookAccess(user, book);
 
   if (loading) {
     return (

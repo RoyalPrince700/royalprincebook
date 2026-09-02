@@ -22,6 +22,7 @@ const DesktopSectionNav = ({ active, progress, onScrollTo, theme, toggleTheme, v
       <div className="pf-desktop-section-nav-inner pf-desktop-section-nav-inner-full">
         <Link to="/" className="pf-desktop-section-nav-brand" aria-label="Royal Prince Hub home">
           <BrandMark theme={theme} />
+          <span className="pf-site-nav-brand-text">Royal Prince Hub</span>
         </Link>
 
         <div className="pf-desktop-section-nav-scroll">

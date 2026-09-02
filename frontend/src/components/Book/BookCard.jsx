@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBookCover, getOriginalBookPrice, isBuildWithAi } from '../../utils/bookUtils';
+import { getReadBookId } from '../../utils/bookAccess';
 import { useAuth } from '../../contexts/AuthContext';
 
 const BookCard = ({
@@ -34,7 +35,7 @@ const BookCard = ({
       onRead(book);
       return;
     }
-    navigate(`/books/${book._id}/read`);
+    navigate(`/books/${getReadBookId(book)}/read`);
   };
 
   const handleBuy = (e) => {
