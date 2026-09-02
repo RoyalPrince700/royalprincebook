@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import ContentPageShell from '../ContentPageShell';
 import PageHero from '../PageHero';
-import { getBookCover, getOriginalBookPrice } from '../../utils/bookUtils';
+import { getBookCover, getOriginalBookPrice, isBuildWithAi } from '../../utils/bookUtils';
 import PageLoader from '../PageLoader';
 
 const BookInsightDetails = ({
@@ -59,7 +59,8 @@ const BookInsightDetails = ({
             <div
               className="pf-book-cover-image"
               style={{
-                backgroundImage: `url(${getBookCover(book.title)})`
+                backgroundImage: `url(${getBookCover(book.title)})`,
+                backgroundPosition: isBuildWithAi(book.title) ? 'center top' : 'center'
               }}
               role="img"
               aria-label={`${book.title} cover`}

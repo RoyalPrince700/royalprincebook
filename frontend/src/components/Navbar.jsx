@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getRedirectPath } from '../utils/authRedirect';
+import { buildLoginPath } from '../utils/requireAuth';
 import NavIcon from './NavIcon';
 import BrandMark from './BrandMark';
 import '../portfolio/styles/portfolio.css';
@@ -28,9 +29,7 @@ const Navbar = () => {
 
   const isAdmin = user?.role === 'admin';
   const redirectPath = getRedirectPath(location);
-  const loginHref = redirectPath
-    ? `/login?redirect=${encodeURIComponent(redirectPath)}`
-    : '/login';
+  const loginHref = buildLoginPath(redirectPath);
 
   const navLinks = [
     { to: '/', label: 'Home', icon: 'home' },

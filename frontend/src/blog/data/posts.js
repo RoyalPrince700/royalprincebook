@@ -1,5 +1,77 @@
 export const blogPosts = [
   {
+    id: 'two-day-build-with-ai-workshop-this-weekend',
+    slug: 'two-day-build-with-ai-workshop-this-weekend',
+    title: 'Join Me This Weekend for a Friendly 2-Day Build with AI Workshop',
+    category: 'Build with AI',
+    author: 'RoyalPrince',
+    publishedAt: '2026-09-02',
+    readTime: '6 min read',
+    relatedBook: 'build-with-ai',
+    excerpt:
+      'People have been asking how I build full-stack projects so quickly. Join me live on Saturday 5th September and Sunday 6th September, both by 8pm, for a friendly 2-day workshop.',
+    intro:
+      'Over the past few months, I have gotten the same kind of message again and again: "How do you build these full-stack projects so fast?" People see the portfolio sites, the bookstore, the dashboards, and the little products that make it online, and they want to understand the process behind them. Not another vague tip. Not another endless playlist. A clear walkthrough they can follow. So I am hosting a warm, practical 2-day Build with AI workshop on Saturday, 5th September by 8pm, and Sunday, 6th September by 8pm, where we build together using the same stack and workflow I use every day.',
+    sections: [
+      {
+        heading: 'Why I decided to host this',
+        paragraphs: [
+          'I have been building in public for a while now: landing pages, multi-page sites, e-commerce flows, admin dashboards, auth, payments, and deployment. From the outside, it can look like magic. From the inside, it is a repeatable rhythm. You learn how the web works, choose the right tools, and use AI to move faster with clarity.',
+          'Friends and followers kept asking if I could walk them through it live. Can we build alongside you? Can you show how Cursor fits into a real project, not just short demos? Those questions stayed with me, and I realized a short reply could never do them justice.',
+          'So I put together a weekend workshop that feels welcoming and hands-on. Whether you are just getting curious about web development or you already have ideas waiting to become real projects, you will leave with more confidence and a clearer path forward.'
+        ]
+      },
+      {
+        heading: 'When we meet, and what we will do',
+        paragraphs: [
+          'We will meet across two evenings: Saturday, 5th September by 8pm, and Sunday, 6th September by 8pm. Mark both days so you can settle in, follow along, and build with us without rushing.',
+          'On Saturday, we start with the foundations most tutorials rush past. You will see how a real website is put together: navbar, hero, cards, forms, and footers. We will talk through the MERN mindset (MongoDB, Express, React, and Node.js), get your toolkit ready, and begin building something you can open in the browser before the session ends.',
+          'On Sunday, we go a little deeper. We connect frontend to backend, follow the data as it moves, work through the messy middle where many projects get stuck, and deploy so your work lives on the internet, not only on your laptop. I know what it feels like to want momentum without signing up for another long, expensive program. That is why these two evenings are focused and practical.',
+          'Across both days, I will build the way I actually build: prompting with care, noticing AI mistakes early, and making calm decisions like a developer. You get to watch, ask, and follow along at a pace that feels human.'
+        ]
+      },
+      {
+        heading: 'Who this workshop is for',
+        paragraphs: [
+          'This space is for you if web development has been on your mind for a while and you are ready for a gentle push. It is also for creators who want their own site, students who want projects instead of only certificates, and anyone curious about building with AI in a grounded way.',
+          'You do not need to be a genius, and you do not need a computer science degree. Bring curiosity, a laptop, and an open mind. Your first version does not have to be perfect. Showing up and building is already a beautiful start.',
+          'If you have been hoping someone would open the process and walk with you through it, I would love to have you there. We will build the way I build my own products, including Royal Prince Hub and this bookstore, and you will have a front-row seat.'
+        ]
+      },
+      {
+        heading: 'How to join, and why the book is ₦1,000',
+        paragraphs: [
+          'Workshop access comes with my book, Build with AI: From Zero to Full-Stack Developer with Cursor. Once you get the book, you will also receive the link for the live sessions on Saturday, 5th September by 8pm, and Sunday, 6th September by 8pm. Think of the book as your map and the workshop as the guided walk. You get fourteen practical chapters on the MERN stack and Cursor, plus two evenings of live building with me.',
+          'I want to be honest about the price. Part of me wanted to set it higher, not because I am chasing money, but because people often treat what costs more with greater care. My real goal has always been impact. I want as many willing learners as possible to walk away able to build.',
+          'I also understand real life. Data costs money. Some people will spend on fuel. Many of us are stretching what we already have. I do not want anyone who is ready to grow to feel left out or burdened by the door fee. That is why Build with AI is just ₦1,000. It is affordable on purpose, while still inviting you to take the commitment seriously.',
+          'There is no separate workshop ticket on top. If you already have the book, you are welcome. Watch out for the access details. If you do not have it yet, this is a gentle place to begin.'
+        ],
+        cta: {
+          eyebrow: 'Join the weekend',
+          text:
+            'Get Build with AI for ₦1,000 and unlock your invitation for Saturday 5th September by 8pm and Sunday 6th September by 8pm. Priced for access and impact, so more people can learn without being left behind.',
+          label: 'Get Build with AI for ₦1,000',
+          target: 'build-with-ai'
+        }
+      },
+      {
+        heading: 'I would love to see you there',
+        paragraphs: [
+          'This weekend is a special one for me, and I put it together because so many of you asked for it. By the week after, you could already have a project started and a workflow that feels clearer in your hands.',
+          'Two evenings. Live guidance. A book you can keep returning to long after the calls end. If that sounds like the support you have been looking for, I would be glad to have you with us.',
+          'Saturday, 5th September by 8pm. Sunday, 6th September by 8pm. We build with AI together. Get the book, receive your workshop link, and come as you are. I am excited to welcome you into the room.'
+        ],
+        cta: {
+          eyebrow: 'Save your spot',
+          text:
+            'If your heart feels a yes, take the next gentle step. Get Build with AI and join us on the 5th and 6th of September by 8pm for a warm, practical weekend of building.',
+          label: 'Get the Book and Join the Workshop',
+          target: 'build-with-ai'
+        }
+      }
+    ]
+  },
+  {
     id: 'lead-yourself-before-the-world-calls-your-name',
     slug: 'lead-yourself-before-the-world-calls-your-name',
     title: 'Lead Yourself Before the World Calls Your Name',

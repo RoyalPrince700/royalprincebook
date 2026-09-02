@@ -13,6 +13,7 @@ import chapter12Md from '../../../../content/build-with-ai/chapter12.md?raw';
 import chapter13Md from '../../../../content/build-with-ai/chapter13.md?raw';
 import chapter14Md from '../../../../content/build-with-ai/chapter14.md?raw';
 import glossaryMd from '../../../../content/build-with-ai/GLOSSARY.md?raw';
+import buildWithAiCover from '../../assets/buildwithai.png';
 import { markdownToHtml, countWords } from '../../utils/markdownToHtml';
 import { parseChapterSegments } from './chapterSegments';
 import { chapter4DemoMap } from './demos/Chapter4Demos';
@@ -61,7 +62,7 @@ export const buildWithAiBookData = {
   genre: 'Technology / Web Development',
   price: 1000,
   status: 'draft',
-  coverImage: 'https://placehold.co/300x450/1e3a5f/ffffff?text=Build+with+AI',
+  coverImage: buildWithAiCover,
   isLocal: true,
   pages: [
     createChapter(1, 'Chapter 1: The New Way to Build', chapter1Md),

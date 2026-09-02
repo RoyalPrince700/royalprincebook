@@ -5,6 +5,7 @@ import { closePaymentModal, useFlutterwave } from 'flutterwave-react-v3';
 import { useAuth } from '../contexts/AuthContext';
 import { usePlatformDialog } from '../contexts/PlatformDialogContext';
 import { getRedirectPath } from '../utils/authRedirect';
+import { buildLoginPath } from '../utils/requireAuth';
 
 const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
   const navigate = useNavigate();
@@ -51,11 +52,7 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
 
   const checkoutBook = (book) => {
     if (!user) {
-      const redirectPath = getRedirectPath(location);
-      const loginPath = redirectPath
-        ? `/login?redirect=${encodeURIComponent(redirectPath)}`
-        : '/login';
-      navigate(loginPath, { state: { from: location } });
+      navigate(buildLoginPath(getRedirectPath(location)), { state: { from: location } });
       return;
     }
 

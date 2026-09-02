@@ -1,6 +1,6 @@
 /* Footer */
 .pf-footer {
-  padding: 3rem 0 2rem;
+  padding: 3rem var(--pf-layout-gutter) 2rem;
   border-top: 1px solid var(--pf-border);
   background: var(--pf-bg-elevated);
 }

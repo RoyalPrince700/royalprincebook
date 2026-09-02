@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { saveAuthRedirect } from '../utils/authRedirect';
+import { getStoredAuthRedirect, normalizeRedirectPath, saveAuthRedirect } from '../utils/authRedirect';
 
 const AuthContext = createContext();
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -85,7 +85,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginWithGoogle = useCallback((redirectPath = '') => {
-    saveAuthRedirect(redirectPath);
+    const path = normalizeRedirectPath(redirectPath) || getStoredAuthRedirect();
+    saveAuthRedirect(path);
     window.location.href = `${apiBaseUrl}/auth/google`;
   }, []);
 

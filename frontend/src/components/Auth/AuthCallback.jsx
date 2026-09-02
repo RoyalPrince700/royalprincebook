@@ -1,7 +1,12 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { consumeStoredAuthRedirect, getStoredAuthRedirect } from '../../utils/authRedirect';
+import {
+  clearAuthRedirect,
+  DEFAULT_AUTH_REDIRECT,
+  getStoredAuthRedirect,
+  resolveAuthRedirect
+} from '../../utils/authRedirect';
 
 const AuthCallback = () => {
   const { completeGoogleAuth } = useAuth();
@@ -13,16 +18,16 @@ const AuthCallback = () => {
     const token = params.get('token');
 
     const finishGoogleAuth = async () => {
+      const redirectPath = resolveAuthRedirect(DEFAULT_AUTH_REDIRECT);
       const result = await completeGoogleAuth(token);
 
       if (result.success) {
-        const redirectPath = consumeStoredAuthRedirect() || '/dashboard';
+        clearAuthRedirect();
         navigate(redirectPath, { replace: true });
         return;
       }
 
-      const redirectPath = getStoredAuthRedirect();
-      const loginUrl = redirectPath
+      const loginUrl = redirectPath && redirectPath !== DEFAULT_AUTH_REDIRECT
         ? `/login?error=auth_failed&redirect=${encodeURIComponent(redirectPath)}`
         : '/login?error=auth_failed';
       navigate(loginUrl, { replace: true });

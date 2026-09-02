@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getBookCover, getOriginalBookPrice } from '../../utils/bookUtils';
+import { getBookCover, getOriginalBookPrice, isBuildWithAi } from '../../utils/bookUtils';
 import { useAuth } from '../../contexts/AuthContext';
 
 const BookCard = ({
@@ -71,7 +71,7 @@ const BookCard = ({
         style={{
           backgroundImage: `url(${getBookCover(book.title)})`,
           backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          backgroundPosition: isBuildWithAi(book?.title) ? 'center top' : 'center',
           backgroundRepeat: 'no-repeat'
         }}
       >

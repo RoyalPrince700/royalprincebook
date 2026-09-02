@@ -34,9 +34,12 @@ const BookList = () => {
     try {
       const response = await axios.get('/books');
       setBooks(mergeBooksForCatalog(response.data.books || []));
+      setError('');
     } catch (fetchError) {
       console.error('Failed to fetch books:', fetchError);
-      setError('Failed to load books');
+      // Still show locally authored titles when the API is offline.
+      setBooks(mergeBooksForCatalog([]));
+      setError('');
     } finally {
       setLoading(false);
     }

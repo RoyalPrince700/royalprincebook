@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import ContentPageShell from '../ContentPageShell';
 import BrandMark from '../BrandMark';
-import { getRedirectPath, normalizeRedirectPath } from '../../utils/authRedirect';
+import { getRedirectPath, normalizeRedirectPath, saveAuthRedirect } from '../../utils/authRedirect';
 
 const Register = () => {
   const { loginWithGoogle } = useAuth();
@@ -15,6 +15,12 @@ const Register = () => {
   const loginHref = redirectPath
     ? `/login?redirect=${encodeURIComponent(redirectPath)}`
     : '/login';
+
+  useEffect(() => {
+    if (redirectPath) {
+      saveAuthRedirect(redirectPath);
+    }
+  }, [redirectPath]);
 
   return (
     <ContentPageShell>

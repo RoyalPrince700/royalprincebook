@@ -10,6 +10,7 @@ import { useFlutterwave, closePaymentModal } from 'flutterwave-react-v3';
 import { getOriginalBookPrice } from '../utils/bookUtils';
 import PageLoader from '../components/PageLoader';
 import { getRedirectPath } from '../utils/authRedirect';
+import { buildLoginPath } from '../utils/requireAuth';
 import './ReadBook.css';
 import { getLocalBook, isLocalBookId } from '../utils/localBookService';
 
@@ -141,11 +142,7 @@ const ReadBook = () => {
 
   const handlePayment = () => {
     if (!user) {
-      const redirectPath = getRedirectPath(location);
-      const loginPath = redirectPath
-        ? `/login?redirect=${encodeURIComponent(redirectPath)}`
-        : '/login';
-      navigate(loginPath, { state: { from: location } });
+      navigate(buildLoginPath(getRedirectPath(location)), { state: { from: location } });
       return;
     }
 

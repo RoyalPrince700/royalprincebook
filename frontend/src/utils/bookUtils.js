@@ -1,4 +1,5 @@
 import leadingFromWithinImage from '../assets/leadershipfromwithin.jpg';
+import buildWithAiImage from '../assets/buildwithai.png';
 
 const normalizeTitle = (title = '') => title.toLowerCase().replace(/\s+/g, ' ').trim();
 const LEADERSHIP_FROM_WITHIN_ORIGINAL_PRICE = 2000;
@@ -25,7 +26,7 @@ export const getBookCover = (title) => {
   }
 
   if (isBuildWithAi(title)) {
-    return 'https://placehold.co/280x420/1e3a5f/ffffff?text=Build+with+AI';
+    return buildWithAiImage;
   }
 
   return `https://placehold.co/280x420/e9ecef/333333?text=${encodeURIComponent(title)}`;
