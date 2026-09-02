@@ -11,8 +11,13 @@
 .App.admin-mode,
 .App.taskboard-mode,
 .App.noteboard-mode,
-.App.artboard-mode {
+.App.artboard-mode,
+.App.read-book-mode {
   padding-top: 0;
+}
+
+.App.read-book-mode {
+  overflow-x: clip;
 }
 
 .App.noteboard-mode,
@@ -21,6 +26,11 @@
   max-height: 100dvh;
   min-height: 0;
   overflow: hidden;
+}
+
+html:has(.read-book-mode),
+body:has(.read-book-mode) {
+  overflow-x: clip;
 }
 
 html:has(.noteboard-mode),

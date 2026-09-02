@@ -80,8 +80,9 @@ const Layout = ({ children }) => {
     (location.pathname.startsWith('/taskboard') && !isNoteboard) ||
     location.pathname.startsWith('/workboard');
   const { sectionNavActive } = usePortfolioNav();
+  const isReadBook = /^\/books\/[^/]+\/read$/.test(location.pathname);
   const hideNavbar =
-    (isPortfolio && sectionNavActive) || isTaskboard || isNoteboard || isAdmin;
+    (isPortfolio && sectionNavActive) || isTaskboard || isNoteboard || isAdmin || isReadBook;
 
   return (
     <>
@@ -92,10 +93,10 @@ const Layout = ({ children }) => {
           isPortfolio && sectionNavActive ? 'portfolio-section-nav-active' : ''
         } ${isAdmin ? 'admin-mode' : ''} ${isTaskboard ? 'taskboard-mode' : ''} ${
           isNoteboard ? 'noteboard-mode' : ''
-        }`}
+        } ${isReadBook ? 'read-book-mode' : ''}`}
       >
         {children}
-        {!isPortfolio && !isAdmin && !isTaskboard && !isNoteboard && <Footer />}
+        {!isPortfolio && !isAdmin && !isTaskboard && !isNoteboard && !isReadBook && <Footer />}
       </div>
     </>
   );

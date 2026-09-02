@@ -38,7 +38,7 @@ const AdminFinance = () => {
         </div>
       ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+      <div className="grid gap-6">
         <section className="rounded-4xl border border-white/70 bg-white/80 p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">

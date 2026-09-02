@@ -49,6 +49,17 @@ const ReadBook = () => {
   }, []);
 
   useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile && sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+    return undefined;
+  }, [sidebarOpen]);
+
+  useEffect(() => {
     fetchBook();
     fetchPublicKey();
   }, [bookId]);
@@ -292,7 +303,29 @@ const ReadBook = () => {
     <div className="read-book-container">
       <header className="reader-header">
         <div className="header-left">
-          <div>
+          <Link
+            to={`/books/${bookId}/details`}
+            className="reader-back-button"
+            aria-label="Back to book details"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </Link>
+          <button
+            type="button"
+            className="reader-chapters-button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open table of contents"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+            <span>Chapters</span>
+          </button>
+          <div className="header-title-block">
             <p className="reader-header-label">Now Reading</p>
             <h1 className="book-title">{book.title}</h1>
           </div>
@@ -350,6 +383,15 @@ const ReadBook = () => {
            )}
         </div>
       </header>
+
+      {sidebarOpen && (
+        <button
+          type="button"
+          className="sidebar-overlay"
+          aria-label="Close table of contents"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       <div className="reader-body">
         <aside className={`sidebar-container ${sidebarOpen ? 'open' : 'closed'}`}>
@@ -422,23 +464,25 @@ const ReadBook = () => {
 
               <div className="nav-controls">
                 <button
-                  className="reader-secondary-button nav-button"
+                  className="reader-secondary-button nav-button nav-button-prev"
                   onClick={handlePrevPage}
                   disabled={currentPageNum <= 1}
                 >
-                  Previous Chapter
+                  <span className="nav-button-full">Previous Chapter</span>
+                  <span className="nav-button-short">Prev</span>
                 </button>
                 
                 <span className="reader-page-indicator">
-                  Page {currentPageNum} of {totalPages}
+                  {currentPageNum} / {totalPages}
                 </span>
 
                 <button
-                  className="reader-primary-button nav-button"
+                  className="reader-primary-button nav-button nav-button-next"
                   onClick={handleNextPage}
                   disabled={currentPageNum >= maxPageNumber}
                 >
-                  Next Chapter
+                  <span className="nav-button-full">Next Chapter</span>
+                  <span className="nav-button-short">Next</span>
                 </button>
               </div>
             </>
