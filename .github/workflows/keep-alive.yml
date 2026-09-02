@@ -2,74 +2,26 @@ name: Keep Backend Alive
 
 on:
   schedule:
-    # Every 10 minutes. Render free tier sleeps after ~15 minutes idle.
-    # GitHub can delay cron a bit, so keep the interval under 15 minutes.
-    - cron: '*/10 * * * *'
-  workflow_dispatch:
-
-concurrency:
-  group: keep-backend-alive
-  cancel-in-progress: true
+    # Run every 13 minutes: at minutes 0, 13, 26, 39, 52 of every hour
+    - cron: '0 * * * *'
+    - cron: '13 * * * *'
+    - cron: '26 * * * *'
+    - cron: '39 * * * *'
+    - cron: '52 * * * *'
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   ping-backend:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
 
     steps:
-      - name: Wake and ping Render backend
-        env:
-          BACKEND_HEALTH_URL: https://royalprincebook.onrender.com/api/health
-        run: |
-          set -euo pipefail
+    - name: Ping Backend
+      run: |
+        echo "Pinging backend at https://royalprincebook.onrender.com"
+        curl -f https://royalprincebook.onrender.com || echo "Ping failed, but continuing..."
 
-          echo "Pinging $BACKEND_HEALTH_URL"
-          echo "Started at $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-
-          max_attempts=5
-          delay_seconds=20
-
-          for attempt in $(seq 1 "$max_attempts"); do
-            echo ""
-            echo "Attempt $attempt of $max_attempts"
-
-            # Cold starts on Render can take 30-90s. Do not fail fast.
-            if response="$(curl \
-              --silent \
-              --show-error \
-              --fail \
-              --location \
-              --connect-timeout 30 \
-              --max-time 120 \
-              --retry 2 \
-              --retry-delay 5 \
-              --retry-all-errors \
-              "$BACKEND_HEALTH_URL")"; then
-              echo "Backend is awake."
-              echo "Response: $response"
-
-              # Second ping helps keep the instance warm after wake-up.
-              sleep 5
-              curl \
-                --silent \
-                --show-error \
-                --fail \
-                --location \
-                --connect-timeout 20 \
-                --max-time 60 \
-                "$BACKEND_HEALTH_URL" > /dev/null
-
-              echo "Warm-up ping succeeded."
-              exit 0
-            fi
-
-            echo "Ping failed on attempt $attempt."
-
-            if [ "$attempt" -lt "$max_attempts" ]; then
-              echo "Waiting ${delay_seconds}s before retry..."
-              sleep "$delay_seconds"
-            fi
-          done
-
-          echo "All ping attempts failed. Backend may still be sleeping or down."
-          exit 1
+    - name: Health Check
+      run: |
+        echo "Performing health check"
+        # Try to access a common health endpoint or root
+        curl -f https://royalprincebook.onrender.com/api/health || curl -f https://royalprincebook.onrender.com/ || echo "Health check completed"

@@ -233,11 +233,13 @@ const getBookPurchaseEmailTemplate = ({
   amount,
   currency,
   transactionId,
-  libraryUrl
+  libraryUrl,
+  eventUrl
 }) => {
   const safeUsername = escapeHtml(getEmailHandle(email));
   const safeBookTitle = escapeHtml(bookTitle || 'your book');
   const safeLibraryUrl = escapeHtml(libraryUrl);
+  const safeEventUrl = escapeHtml(eventUrl);
   const paymentAmount = formatPrice(amount, currency) || 'Your payment was received successfully';
   const safeTransactionId = transactionId ? escapeHtml(transactionId) : null;
 
@@ -251,8 +253,10 @@ I truly appreciate your support. Every time you choose a book through ${APP_NAME
 
 I hope this book brings you value, insight, and inspiration.
 
+As a paid reader, you now also have access to the Event page. You can attend the upcoming event here: ${eventUrl}
+
 Amount paid: ${paymentAmount}
-${transactionId ? `Transaction ID: ${transactionId}\n` : ''}You can continue reading here: ${libraryUrl}
+${transactionId ? `Transaction ID: ${transactionId}\n` : ''}Open your library here: ${libraryUrl}
 
 With gratitude,
 Royal Prince
@@ -261,15 +265,14 @@ CEO, ${APP_NAME}`,
       badge: 'Purchase Confirmed',
       eyebrow: `${APP_NAME} Library`,
       title: `Your book is ready, ${safeUsername}.`,
-      subtitle:
-        'A polished confirmation with the same premium, modern feel as the website and a direct path back to your library.',
+      subtitle: `Thank you for purchasing ${safeBookTitle}. Your library access is ready, and as a paid reader you can now attend the event.`,
       primaryAction: {
         href: safeLibraryUrl,
-        label: 'Continue Reading'
+        label: 'Open Library'
       },
       secondaryAction: {
-        href: safeLibraryUrl,
-        label: 'Open Library'
+        href: safeEventUrl,
+        label: 'View Event'
       },
       contentHtml: `
         <h2 style="${baseStyles.sectionTitle}">Thank you for your purchase</h2>
@@ -300,10 +303,13 @@ CEO, ${APP_NAME}`,
           }
         </table>
         <p style="${baseStyles.note}">Your purchase has been confirmed and your library access is ready right now.</p>
+        <h2 style="${baseStyles.sectionTitle}">Event access unlocked</h2>
+        <p style="${baseStyles.bodyCopy}">As a paid user, you now have access to the Event page and can attend the upcoming event. Head over anytime to view details and join.</p>
+        <p style="${baseStyles.bodyCopy}"><a href="${safeEventUrl}" style="color:#1d4ed8;text-decoration:underline;">Open the Event page</a></p>
         <hr style="${baseStyles.divider}" />
         <p style="${baseStyles.bodyCopy};margin-bottom:0;">With gratitude,<br /><strong style="color:#020617;">Royal Prince</strong><br />CEO, ${APP_NAME}</p>
       `,
-      footerHtml: `This receipt confirms access to your purchased book on ${APP_NAME}.`
+      footerHtml: `This receipt confirms your book purchase and paid-reader event access on ${APP_NAME}.`
     })
   };
 };

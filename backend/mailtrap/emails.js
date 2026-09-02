@@ -63,13 +63,15 @@ const sendBookPurchaseEmail = async ({ user, book, paymentData }) => {
     return null;
   }
 
+  const frontendUrl = getFrontendUrl();
   const template = getBookPurchaseEmailTemplate({
     email: user.email,
     bookTitle: book.title,
     amount: paymentData?.amount ?? book.price,
     currency: paymentData?.currency || 'NGN',
     transactionId: paymentData?.id || paymentData?.tx_ref,
-    libraryUrl: getFrontendUrl()
+    libraryUrl: `${frontendUrl}/all-books`,
+    eventUrl: `${frontendUrl}/event`
   });
 
   return sendEmail({
