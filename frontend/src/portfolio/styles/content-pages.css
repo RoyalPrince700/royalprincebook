@@ -737,6 +737,26 @@
   flex-direction: column;
 }
 
+.pf-btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  border-color: rgba(37, 211, 102, 0.35);
+  background: #25d366;
+  color: #ffffff !important;
+}
+
+.pf-btn-whatsapp:hover {
+  background: #1ebe57;
+  border-color: rgba(37, 211, 102, 0.5);
+}
+
+.pf-whatsapp-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
 [data-theme='dark'] .pf-tag-cart {
   color: var(--pf-gold-light);
 }

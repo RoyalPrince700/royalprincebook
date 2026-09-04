@@ -4,6 +4,8 @@ import axios from 'axios';
 import ContentPageShell from '../components/ContentPageShell';
 import PageHero from '../components/PageHero';
 import PageLoader from '../components/PageLoader';
+import WhatsAppIcon from '../components/WhatsAppIcon';
+import { WORKSHOP_WHATSAPP_GROUP_URL } from '../utils/workshop';
 
 const formatEventDate = (value, timezone = 'Africa/Lagos') => {
   if (!value) {
@@ -89,6 +91,17 @@ const EventPage = () => {
           {event.description ||
             'Your live workshop schedule is below. Join links appear here on the day of each session.'}
         </p>
+        <div className="pf-cta-panel-actions" style={{ marginTop: '1.5rem' }}>
+          <a
+            href={WORKSHOP_WHATSAPP_GROUP_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="pf-btn pf-btn-whatsapp"
+          >
+            <WhatsAppIcon />
+            Join Workshop WhatsApp Group
+          </a>
+        </div>
         <div className="pf-stat-grid" style={{ marginTop: '2rem' }}>
           <div className="pf-stat-card">
             <p className="pf-stat-label">Access</p>

@@ -1,11 +1,12 @@
-const { sendEmail } = require('./mailtrap.config');
+const { sendEmail, getFromAddress } = require('./mailtrap.config');
 const {
   getWelcomeEmailTemplate,
   getBookPurchaseEmailTemplate,
   getAdminBookPurchaseNotificationTemplate,
   getLeaderboardInviteEmailTemplate,
   getWorkboardAccessRequestEmailTemplate,
-  getWorkboardAccessGrantedEmailTemplate
+  getWorkboardAccessGrantedEmailTemplate,
+  getWorkshopWhatsAppInviteEmailTemplate
 } = require('./emailtemplates');
 
 const normalizeUrl = (url) => {
@@ -172,11 +173,37 @@ const sendWorkboardAccessGrantedEmail = async ({
   });
 };
 
+const sendWorkshopWhatsAppInviteEmail = async ({
+  user,
+  workshopTitle
+}) => {
+  if (!user?.email) {
+    return null;
+  }
+
+  const frontendUrl = getFrontendUrl();
+  const template = getWorkshopWhatsAppInviteEmailTemplate({
+    email: user.email,
+    workshopTitle,
+    eventUrl: `${frontendUrl}/event`
+  });
+
+  return sendEmail({
+    to: [{ email: user.email }],
+    from: {
+      email: getFromAddress().email,
+      name: 'Royal Prince'
+    },
+    ...template
+  });
+};
+
 module.exports = {
   sendWelcomeEmail,
   sendBookPurchaseEmail,
   sendAdminBookPurchaseNotification,
   sendLeaderboardInviteEmail,
   sendWorkboardAccessRequestEmail,
-  sendWorkboardAccessGrantedEmail
+  sendWorkboardAccessGrantedEmail,
+  sendWorkshopWhatsAppInviteEmail
 };

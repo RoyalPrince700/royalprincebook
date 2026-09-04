@@ -5,8 +5,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { getRedirectPath } from '../utils/authRedirect';
 import { buildLoginPath } from '../utils/requireAuth';
-import { isPremiumUser } from '../utils/bookAccess';
+import { isPremiumUser, userOwnsBuildWithAi } from '../utils/bookAccess';
+import { WORKSHOP_WHATSAPP_GROUP_URL } from '../utils/workshop';
 import NavIcon from './NavIcon';
+import WhatsAppIcon from './WhatsAppIcon';
 import BrandMark from './BrandMark';
 import '../portfolio/styles/portfolio.css';
 
@@ -30,6 +32,7 @@ const Navbar = () => {
 
   const isAdmin = user?.role === 'admin';
   const isPremium = isPremiumUser(user);
+  const ownsBuildWithAi = userOwnsBuildWithAi(user);
   const redirectPath = getRedirectPath(location);
   const loginHref = buildLoginPath(redirectPath);
 
@@ -134,6 +137,18 @@ const Navbar = () => {
               <span>{link.label}</span>
             </Link>
           ))}
+          {ownsBuildWithAi ? (
+            <a
+              href={WORKSHOP_WHATSAPP_GROUP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="pf-site-nav-mobile-link pf-site-nav-whatsapp-mobile"
+              onClick={closeMenu}
+            >
+              <WhatsAppIcon className="pf-site-nav-mobile-link-icon pf-whatsapp-icon" />
+              <span>Workshop group</span>
+            </a>
+          ) : null}
         </nav>
 
         <div className="pf-site-nav-mobile-footer">
@@ -190,6 +205,19 @@ const Navbar = () => {
         </nav>
 
         <div className="pf-site-nav-end">
+          {ownsBuildWithAi ? (
+            <a
+              href={WORKSHOP_WHATSAPP_GROUP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="pf-site-nav-whatsapp"
+              title="Workshop group"
+              aria-label="Open workshop WhatsApp group"
+            >
+              <WhatsAppIcon className="pf-whatsapp-icon" />
+            </a>
+          ) : null}
+
           {user ? (
             <div className="pf-site-nav-auth pf-site-nav-auth-desktop">
               <div className="pf-site-nav-user-row">

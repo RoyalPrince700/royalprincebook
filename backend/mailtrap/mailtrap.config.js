@@ -88,11 +88,11 @@ const getMailtrapClient = () => {
   return mailtrapClient;
 };
 
-const sendWithProductionApi = async ({ to, subject, text, html, category }) => {
+const sendWithProductionApi = async ({ to, subject, text, html, category, from }) => {
   const client = getMailtrapClient();
 
   return client.send({
-    from: getFromAddress(),
+    from: from || getFromAddress(),
     to,
     subject,
     text,
@@ -101,12 +101,12 @@ const sendWithProductionApi = async ({ to, subject, text, html, category }) => {
   });
 };
 
-const sendWithSandboxSmtp = async ({ to, subject, text, html, category }) => {
+const sendWithSandboxSmtp = async ({ to, subject, text, html, category, from }) => {
   const transporter = getSmtpTransporter();
-  const from = getFromAddress();
+  const sender = from || getFromAddress();
 
   return transporter.sendMail({
-    from: `"${from.name}" <${from.email}>`,
+    from: `"${sender.name}" <${sender.email}>`,
     to: to.map((recipient) => recipient.email).join(', '),
     subject,
     text,
@@ -133,7 +133,7 @@ const getConfiguredMode = () => {
   return null;
 };
 
-const sendEmail = async ({ to, subject, text, html, category }) => {
+const sendEmail = async ({ to, subject, text, html, category, from }) => {
   const recipients = normalizeRecipients(to);
 
   if (!recipients.length) {
@@ -154,7 +154,8 @@ const sendEmail = async ({ to, subject, text, html, category }) => {
       subject,
       text,
       html,
-      category
+      category,
+      from
     });
   }
 
@@ -163,7 +164,8 @@ const sendEmail = async ({ to, subject, text, html, category }) => {
     subject,
     text,
     html,
-    category
+    category,
+    from
   });
 };
 

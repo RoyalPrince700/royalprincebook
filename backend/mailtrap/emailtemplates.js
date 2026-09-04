@@ -659,11 +659,56 @@ You are receiving this because someone invited your email to a Taskboard leaderb
   };
 };
 
+const getWorkshopWhatsAppInviteEmailTemplate = ({
+  email,
+  eventUrl,
+  workshopTitle = 'Build with AI Weekend Workshop'
+}) => {
+  const handle = getEmailHandle(email);
+  const safeUsername = escapeHtml(handle);
+  const safeEventUrl = escapeHtml(eventUrl);
+  const safeWorkshopTitle = escapeHtml(workshopTitle);
+
+  // Gmail Primary signals (research-backed):
+  // - plain / text-first copy, not campaign HTML
+  // - one inline text link (styled buttons push Promotions)
+  // - conversational subject, no urgency / offer language
+  // - personal From name (set in sendWorkshopWhatsAppInviteEmail)
+  // Group CTA stays on the event page; do not include external chat-app links here.
+  return {
+    subject: `${handle}, a note about your ${workshopTitle}`,
+    text: `Hi ${handle},
+
+I wanted to write you directly.
+
+A group link for the ${workshopTitle} is now on your event page.
+
+Here is the page:
+${eventUrl}
+
+If you have any questions, just reply to this email.
+
+Royal Prince`,
+    html: `<!doctype html>
+<html lang="en">
+  <body style="margin:0;padding:24px;background:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#222222;">
+    <p style="margin:0 0 14px;">Hi ${safeUsername},</p>
+    <p style="margin:0 0 14px;">I wanted to write you directly.</p>
+    <p style="margin:0 0 14px;">A group link for the ${safeWorkshopTitle} is now on your event page.</p>
+    <p style="margin:0 0 14px;">Here is the page:<br /><a href="${safeEventUrl}" style="color:#1155cc;">${safeEventUrl}</a></p>
+    <p style="margin:0 0 14px;">If you have any questions, just reply to this email.</p>
+    <p style="margin:0;">Royal Prince</p>
+  </body>
+</html>`
+  };
+};
+
 module.exports = {
   getWelcomeEmailTemplate,
   getBookPurchaseEmailTemplate,
   getAdminBookPurchaseNotificationTemplate,
   getLeaderboardInviteEmailTemplate,
   getWorkboardAccessRequestEmailTemplate,
-  getWorkboardAccessGrantedEmailTemplate
+  getWorkboardAccessGrantedEmailTemplate,
+  getWorkshopWhatsAppInviteEmailTemplate
 };

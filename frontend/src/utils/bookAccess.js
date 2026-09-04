@@ -1,4 +1,5 @@
 import { getLocalBookForApiBook, isLocalBookId } from './localBookService';
+import { BUILD_WITH_AI_LOCAL_ID } from './workshop';
 
 export const normalizeBookId = (id) => String(id ?? '');
 
@@ -57,4 +58,17 @@ export const isPremiumUser = (user) => {
   }
 
   return Array.isArray(user.purchasedBooks) && user.purchasedBooks.length > 0;
+};
+
+export const userOwnsBuildWithAi = (user) => {
+  if (!user) {
+    return false;
+  }
+
+  if (user.role === 'admin') {
+    return true;
+  }
+
+  const accessIds = (user.purchasedBooks || []).map(normalizeBookId);
+  return accessIds.includes(BUILD_WITH_AI_LOCAL_ID);
 };

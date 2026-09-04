@@ -241,6 +241,40 @@
   gap: 0.45rem;
 }
 
+.pf-site-nav-whatsapp {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  border-radius: 0.8rem;
+  background: #25d366;
+  color: #ffffff;
+  text-decoration: none;
+  transition: background 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+}
+
+.pf-site-nav-whatsapp:hover {
+  background: #1ebe57;
+  border-color: rgba(37, 211, 102, 0.5);
+  transform: translateY(-1px);
+}
+
+.pf-site-nav-whatsapp .pf-whatsapp-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.pf-site-nav-whatsapp-mobile {
+  color: #128c7e !important;
+}
+
+.pf-site-nav-whatsapp-mobile .pf-whatsapp-icon {
+  color: #25d366;
+}
+
 .pf-site-nav-auth {
   display: flex;
   align-items: center;
