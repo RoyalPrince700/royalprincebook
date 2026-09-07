@@ -101,6 +101,16 @@ const EventPage = () => {
             <WhatsAppIcon />
             Join Workshop WhatsApp Group
           </a>
+          {event.recordingsUrl ? (
+            <a
+              href={event.recordingsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="pf-btn pf-btn-drive"
+            >
+              Watch Recorded Sessions
+            </a>
+          ) : null}
         </div>
         <div className="pf-stat-grid" style={{ marginTop: '2rem' }}>
           <div className="pf-stat-card">

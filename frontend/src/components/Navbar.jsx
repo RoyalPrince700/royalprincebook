@@ -6,7 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { getRedirectPath } from '../utils/authRedirect';
 import { buildLoginPath } from '../utils/requireAuth';
 import { isPremiumUser, userOwnsBuildWithAi } from '../utils/bookAccess';
-import { WORKSHOP_WHATSAPP_GROUP_URL } from '../utils/workshop';
+import { BUILD_WITH_AI_SUCCESS_PATH, WORKSHOP_WHATSAPP_GROUP_URL } from '../utils/workshop';
 import NavIcon from './NavIcon';
 import WhatsAppIcon from './WhatsAppIcon';
 import BrandMark from './BrandMark';
@@ -50,6 +50,10 @@ const Navbar = () => {
 
   if (isPremium) {
     navLinks.push({ to: '/event', label: 'Event', icon: 'event' });
+  }
+
+  if (ownsBuildWithAi) {
+    navLinks.push({ to: BUILD_WITH_AI_SUCCESS_PATH, label: 'Your kit', icon: 'spark' });
   }
 
   if (isAdmin) {

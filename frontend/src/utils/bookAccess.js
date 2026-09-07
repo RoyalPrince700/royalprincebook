@@ -1,5 +1,6 @@
 import { getLocalBookForApiBook, isLocalBookId } from './localBookService';
-import { BUILD_WITH_AI_LOCAL_ID } from './workshop';
+import { isBuildWithAi } from './bookUtils';
+import { BUILD_WITH_AI_LOCAL_ID, BUILD_WITH_AI_SUCCESS_PATH } from './workshop';
 import {
   getBookDetailsPath,
   getBookEditPath,
@@ -78,6 +79,39 @@ export const userOwnsBuildWithAi = (user) => {
 
   const accessIds = (user.purchasedBooks || []).map(normalizeBookId);
   return accessIds.includes(BUILD_WITH_AI_LOCAL_ID);
+};
+
+export const isBuildWithAiBook = (book) => {
+  if (!book) {
+    return false;
+  }
+
+  if (isBuildWithAi(book.title)) {
+    return true;
+  }
+
+  const bookId = normalizeBookId(book._id);
+  const apiBookId = normalizeBookId(book.apiBookId);
+
+  return bookId === BUILD_WITH_AI_LOCAL_ID || apiBookId === BUILD_WITH_AI_LOCAL_ID;
+};
+
+export const getPostPurchasePath = (book) => {
+  if (isBuildWithAiBook(book)) {
+    return BUILD_WITH_AI_SUCCESS_PATH;
+  }
+
+  return getBookReadPath(book);
+};
+
+export const getPostPurchaseLocation = (book) => {
+  const pathname = getPostPurchasePath(book);
+
+  if (isBuildWithAiBook(book)) {
+    return { pathname, state: { purchaseConfirmed: true } };
+  }
+
+  return pathname;
 };
 
 export {

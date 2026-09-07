@@ -17,6 +17,8 @@ import {
   getBookEditPath,
   getBookReadPath,
   getBookSlug,
+  getPostPurchaseLocation,
+  isBuildWithAiBook,
   userHasBookAccess
 } from '../utils/bookAccess';
 import { resolveBookFromKey } from '../utils/bookSlugs';
@@ -214,12 +216,25 @@ const ReadBook = () => {
                await refreshProfile();
              }
 
-             navigate(getBookReadPath(book), { replace: true });
-             notify({
-               title: 'Payment successful',
-               message: 'You can now read the book.',
-               variant: 'success'
-             });
+             const next = getPostPurchaseLocation(book);
+             if (typeof next === 'string') {
+               navigate(next, { replace: true });
+             } else {
+               navigate(next.pathname, { replace: true, state: next.state });
+             }
+             notify(
+               isBuildWithAiBook(book)
+                 ? {
+                     title: 'You are in',
+                     message: 'Your workshop kit is ready — WhatsApp, event, recordings, and the book.',
+                     variant: 'success'
+                   }
+                 : {
+                     title: 'Payment successful',
+                     message: 'You can now read the book.',
+                     variant: 'success'
+                   }
+             );
            } catch (err) {
              console.error("Verification failed", err);
              notify({

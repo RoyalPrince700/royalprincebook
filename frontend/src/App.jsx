@@ -15,6 +15,7 @@ import BookList from './components/Book/BookList';
 import BookInsightPage from './pages/BookInsightPage';
 import ReadBook from './pages/ReadBook';
 import EventPage from './pages/EventPage';
+import PurchaseSuccessPage from './pages/PurchaseSuccessPage';
 import PrivateRoute from './components/Auth/PrivateRoute';
 import PremiumRoute from './components/Auth/PremiumRoute';
 import AdminRoute from './components/Auth/AdminRoute';
@@ -69,6 +70,7 @@ const Layout = ({ children }) => {
     location.pathname.startsWith('/blog') ||
     location.pathname === '/all-books' ||
     location.pathname === '/event' ||
+    location.pathname === '/purchase-success' ||
     location.pathname === '/login' ||
     /^\/books\/[^/]+\/details$/.test(location.pathname);
   const isAdmin = location.pathname.startsWith('/admin');
@@ -204,6 +206,14 @@ function App() {
                     <PremiumRoute>
                       <EventPage />
                     </PremiumRoute>
+                  }
+                />
+                <Route
+                  path="/purchase-success"
+                  element={
+                    <PrivateRoute>
+                      <PurchaseSuccessPage />
+                    </PrivateRoute>
                   }
                 />
                 <Route

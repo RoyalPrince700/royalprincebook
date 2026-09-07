@@ -51,6 +51,11 @@ const workshopEventSchema = new mongoose.Schema(
       type: String,
       default: 'Africa/Lagos'
     },
+    recordingsUrl: {
+      type: String,
+      default: '',
+      trim: true
+    },
     sessions: {
       type: [sessionSchema],
       default: []

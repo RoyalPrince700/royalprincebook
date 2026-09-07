@@ -57,6 +57,7 @@ const AdminEvent = () => {
         title: event.title,
         description: event.description,
         timezone: event.timezone,
+        recordingsUrl: event.recordingsUrl,
         sessions: event.sessions
       });
 
@@ -140,6 +141,17 @@ const AdminEvent = () => {
             type="text"
             value={event?.timezone || 'Africa/Lagos'}
             onChange={(e) => setEvent((prev) => ({ ...prev, timezone: e.target.value }))}
+            className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+          />
+
+          <label className="mb-2 mt-5 block text-sm font-medium text-slate-700">
+            Recordings (Google Drive)
+          </label>
+          <input
+            type="url"
+            value={event?.recordingsUrl || ''}
+            onChange={(e) => setEvent((prev) => ({ ...prev, recordingsUrl: e.target.value }))}
+            placeholder="https://drive.google.com/drive/folders/..."
             className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
           />
         </div>

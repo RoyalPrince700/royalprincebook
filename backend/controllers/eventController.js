@@ -9,6 +9,7 @@ const defaultWorkshopEvent = () => ({
   description:
     'A live 2-day workshop for book buyers. We build together using the same MERN stack and Cursor workflow from the book.',
   timezone: 'Africa/Lagos',
+  recordingsUrl: '',
   sessions: [
     {
       sessionId: 'day-1',
@@ -34,6 +35,7 @@ const serializeWorkshopEvent = (event) => ({
   title: event.title,
   description: event.description,
   timezone: event.timezone,
+  recordingsUrl: event.recordingsUrl || '',
   sessions: (event.sessions || []).map((session) => ({
     sessionId: session.sessionId,
     title: session.title,
@@ -83,7 +85,7 @@ const getAdminWorkshopEvent = async (req, res) => {
 
 const updateAdminWorkshopEvent = async (req, res) => {
   try {
-    const { title, description, timezone, sessions } = req.body;
+    const { title, description, timezone, recordingsUrl, sessions } = req.body;
     const event = await getOrCreateWorkshopEvent();
 
     if (title != null) {
@@ -96,6 +98,10 @@ const updateAdminWorkshopEvent = async (req, res) => {
 
     if (timezone != null) {
       event.timezone = String(timezone).trim() || 'Africa/Lagos';
+    }
+
+    if (recordingsUrl != null) {
+      event.recordingsUrl = String(recordingsUrl).trim();
     }
 
     if (Array.isArray(sessions)) {

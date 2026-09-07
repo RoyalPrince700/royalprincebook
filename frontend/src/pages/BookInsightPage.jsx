@@ -8,6 +8,7 @@ import {
   getBookDetailsPath,
   getBookReadPath,
   getBookSlug,
+  getPostPurchaseLocation,
   userHasBookAccess
 } from '../utils/bookAccess';
 import { resolveBookFromKey } from '../utils/bookSlugs';
@@ -23,7 +24,7 @@ const BookInsightPage = () => {
 
   const { checkoutBook, buyingBookId } = useBookPurchase({
     onPurchaseSuccess: async (purchasedBook) => {
-      navigate(getBookReadPath(purchasedBook));
+      navigate(getPostPurchaseLocation(purchasedBook));
     }
   });
 

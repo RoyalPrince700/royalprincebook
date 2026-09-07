@@ -234,11 +234,13 @@ const getBookPurchaseEmailTemplate = ({
   currency,
   transactionId,
   libraryUrl,
+  libraryLabel = 'Open Library',
   eventUrl
 }) => {
   const safeUsername = escapeHtml(getEmailHandle(email));
   const safeBookTitle = escapeHtml(bookTitle || 'your book');
   const safeLibraryUrl = escapeHtml(libraryUrl);
+  const safeLibraryLabel = escapeHtml(libraryLabel);
   const safeEventUrl = escapeHtml(eventUrl);
   const paymentAmount = formatPrice(amount, currency) || 'Your payment was received successfully';
   const safeTransactionId = transactionId ? escapeHtml(transactionId) : null;
@@ -268,7 +270,7 @@ CEO, ${APP_NAME}`,
       subtitle: `Thank you for purchasing ${safeBookTitle}. Your library access is ready, and as a paid reader you can now attend the event.`,
       primaryAction: {
         href: safeLibraryUrl,
-        label: 'Open Library'
+        label: safeLibraryLabel
       },
       secondaryAction: {
         href: safeEventUrl,

@@ -71,13 +71,17 @@ const sendBookPurchaseEmail = async ({ user, book, paymentData }) => {
   }
 
   const frontendUrl = getFrontendUrl();
+  const isBuildWithAiPurchase = /build with ai/i.test(book.title || '');
   const template = getBookPurchaseEmailTemplate({
     email: user.email,
     bookTitle: book.title,
     amount: paymentData?.amount ?? book.price,
     currency: paymentData?.currency || 'NGN',
     transactionId: paymentData?.id || paymentData?.tx_ref,
-    libraryUrl: `${frontendUrl}/all-books`,
+    libraryUrl: isBuildWithAiPurchase
+      ? `${frontendUrl}/purchase-success`
+      : `${frontendUrl}/all-books`,
+    libraryLabel: isBuildWithAiPurchase ? 'Open your workshop kit' : 'Open Library',
     eventUrl: `${frontendUrl}/event`
   });
 

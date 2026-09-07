@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePlatformDialog } from '../contexts/PlatformDialogContext';
 import { getRedirectPath } from '../utils/authRedirect';
 import { buildLoginPath } from '../utils/requireAuth';
-import { getBookReadPath } from '../utils/bookAccess';
+import { getPostPurchaseLocation, isBuildWithAiBook } from '../utils/bookAccess';
 
 const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
   const navigate = useNavigate();
@@ -128,14 +128,22 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
           if (onPurchaseSuccessRef.current) {
             await onPurchaseSuccessRef.current(currentBook);
           } else {
-            navigate(getBookReadPath(currentBook));
+            navigate(getPostPurchaseLocation(currentBook));
           }
 
-          notifyRef.current({
-            title: 'Payment successful',
-            message: 'You can now read this book.',
-            variant: 'success'
-          });
+          notifyRef.current(
+            isBuildWithAiBook(currentBook)
+              ? {
+                  title: 'You are in',
+                  message: 'Your workshop kit is ready — WhatsApp, event, recordings, and the book.',
+                  variant: 'success'
+                }
+              : {
+                  title: 'Payment successful',
+                  message: 'You can now read this book.',
+                  variant: 'success'
+                }
+          );
         } catch (error) {
           console.error('Payment verification failed:', error);
           notifyRef.current({

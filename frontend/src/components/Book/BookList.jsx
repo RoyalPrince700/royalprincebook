@@ -10,6 +10,7 @@ import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
 import PageLoader from '../PageLoader';
 import { mergeBooksForCatalog } from '../../utils/localBookService';
 import { getBookReadPath, userHasBookAccess } from '../../utils/bookAccess';
+import BuildWithAiOfferCountdown from './BuildWithAiOfferCountdown';
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -108,6 +109,8 @@ const BookList = () => {
         description="Browse every title in a cleaner, more focused storefront designed to keep attention on the books."
         centered
       >
+        <BuildWithAiOfferCountdown />
+
         <div className="pf-stat-grid">
           <div className="pf-stat-card">
             <p className="pf-stat-label">Titles</p>
