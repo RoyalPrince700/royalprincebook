@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import ContentPageShell from '../../components/ContentPageShell';
-import { isBuildWithAi, isLeadershipFromWithin } from '../../utils/bookUtils';
+import { getBookDetailsPath } from '../../utils/bookAccess';
+import { CATALOG_BOOK_SLUGS } from '../../utils/bookSlugs';
 
 const BOOK_FOOTERS = {
   'build-with-ai': {
@@ -28,51 +28,34 @@ const BOOK_FOOTERS = {
   }
 };
 
-const BlogTemplate = ({ post }) => {
-  const [bookPaths, setBookPaths] = useState({
-    'leadership-from-within': '/all-books',
-    'build-with-ai': '/books/local-build-with-ai/details'
+const relatedBookToPath = (relatedKey) => {
+  if (!relatedKey) {
+    return '/all-books';
+  }
+
+  if (relatedKey.startsWith('/')) {
+    return relatedKey;
+  }
+
+  if (relatedKey === 'build-with-ai' || relatedKey === CATALOG_BOOK_SLUGS.BUILD_WITH_AI) {
+    return getBookDetailsPath({
+      _id: 'local-build-with-ai',
+      title: 'Build with AI'
+    });
+  }
+
+  return getBookDetailsPath({
+    _id: 'local-leading-from-within',
+    title: 'Leading from Within'
   });
+};
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadBookLinks = async () => {
-      try {
-        const response = await axios.get('/books');
-        const books = response.data.books || [];
-        const leadershipBook = books.find((book) => isLeadershipFromWithin(book.title));
-        const buildWithAiBook = books.find((book) => isBuildWithAi(book.title));
-
-        if (!isMounted) return;
-
-        setBookPaths((current) => ({
-          ...current,
-          ...(leadershipBook?._id
-            ? { 'leadership-from-within': `/books/${leadershipBook._id}/details` }
-            : {}),
-          ...(buildWithAiBook?._id
-            ? { 'build-with-ai': `/books/${buildWithAiBook._id}/details` }
-            : {})
-        }));
-      } catch (error) {
-        console.error('Failed to resolve book details links:', error);
-      }
-    };
-
-    loadBookLinks();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const resolveCtaTarget = (target) =>
-    bookPaths[target] || (target.startsWith('/') ? target : '/all-books');
+const BlogTemplate = ({ post }) => {
+  const resolveCtaTarget = (target) => relatedBookToPath(target);
 
   const relatedBook = post.relatedBook || 'leadership-from-within';
   const footer = BOOK_FOOTERS[relatedBook] || BOOK_FOOTERS['leadership-from-within'];
-  const footerBookPath = bookPaths[relatedBook] || '/all-books';
+  const footerBookPath = relatedBookToPath(relatedBook);
 
   return (
     <ContentPageShell>

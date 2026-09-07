@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { usePlatformDialog } from '../contexts/PlatformDialogContext';
 import { getRedirectPath } from '../utils/authRedirect';
 import { buildLoginPath } from '../utils/requireAuth';
-import { getReadBookId } from '../utils/bookAccess';
+import { getBookReadPath } from '../utils/bookAccess';
 
 const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
         name: user?.username || ''
       },
       meta: {
-        bookId: selectedBook?._id || '',
+        bookId: selectedBook?.apiBookId || selectedBook?._id || '',
         userId: user?.id || user?._id || ''
       },
       customizations: {
@@ -116,7 +116,7 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
         try {
           const verifyResponse = await axios.post('/payment/verify', {
             transaction_id: response.transaction_id || response.id,
-            bookId: currentBook._id
+            bookId: currentBook.apiBookId || currentBook._id
           });
 
           if (Array.isArray(verifyResponse.data?.purchasedBooks)) {
@@ -127,6 +127,8 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
 
           if (onPurchaseSuccessRef.current) {
             await onPurchaseSuccessRef.current(currentBook);
+          } else {
+            navigate(getBookReadPath(currentBook));
           }
 
           notifyRef.current({
@@ -182,7 +184,7 @@ const useBookPurchase = ({ onPurchaseSuccess } = {}) => {
     }
 
     setSelectedBook(book);
-    setBuyingBookId(book._id);
+    setBuyingBookId(book.apiBookId || book._id);
   };
 
   return {

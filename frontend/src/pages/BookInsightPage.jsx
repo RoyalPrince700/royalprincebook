@@ -4,8 +4,13 @@ import axios from 'axios';
 import BookInsightDetails from '../components/Book/BookInsightDetails';
 import { useAuth } from '../contexts/AuthContext';
 import useBookPurchase from '../hooks/useBookPurchase';
-import { getLocalBook, isLocalBookId } from '../utils/localBookService';
-import { getReadBookId, userHasBookAccess } from '../utils/bookAccess';
+import {
+  getBookDetailsPath,
+  getBookReadPath,
+  getBookSlug,
+  userHasBookAccess
+} from '../utils/bookAccess';
+import { resolveBookFromKey } from '../utils/bookSlugs';
 
 const BookInsightPage = () => {
   const { bookId } = useParams();
@@ -18,7 +23,7 @@ const BookInsightPage = () => {
 
   const { checkoutBook, buyingBookId } = useBookPurchase({
     onPurchaseSuccess: async (purchasedBook) => {
-      navigate(`/books/${getReadBookId(purchasedBook)}/read`);
+      navigate(getBookReadPath(purchasedBook));
     }
   });
 
@@ -28,13 +33,23 @@ const BookInsightPage = () => {
       setError('');
 
       try {
-        if (isLocalBookId(bookId)) {
-          setBook(getLocalBook(bookId));
+        const resolvedBook = await resolveBookFromKey(bookId, async (key) => {
+          const response = await axios.get(`/books/details/${key}`);
+          return response.data.book || null;
+        });
+
+        if (!resolvedBook) {
+          setBook(null);
+          setError('Failed to load book details');
           return;
         }
 
-        const response = await axios.get(`/books/details/${bookId}`);
-        setBook(response.data.book || null);
+        setBook(resolvedBook);
+
+        const canonicalSlug = getBookSlug(resolvedBook);
+        if (canonicalSlug && bookId !== canonicalSlug) {
+          navigate(getBookDetailsPath(resolvedBook), { replace: true });
+        }
       } catch (fetchError) {
         console.error('Failed to fetch book details:', fetchError);
         setError('Failed to load book details');
@@ -44,13 +59,13 @@ const BookInsightPage = () => {
     };
 
     fetchBook();
-  }, [bookId]);
+  }, [bookId, navigate]);
 
   const getIsOwned = (currentBook) => userHasBookAccess(user, currentBook);
 
   const handleRead = () => {
     if (!book) return;
-    navigate(`/books/${getReadBookId(book)}/read`);
+    navigate(getBookReadPath(book));
   };
 
   const handleBuy = () => {
@@ -58,13 +73,15 @@ const BookInsightPage = () => {
     checkoutBook(book);
   };
 
+  const purchaseBookId = book?.apiBookId || book?._id;
+
   return (
     <BookInsightDetails
       book={book}
       loading={loading}
       error={error}
       canRead={getIsOwned(book)}
-      buying={buyingBookId === book?._id}
+      buying={buyingBookId === purchaseBookId || buyingBookId === book?._id}
       onRead={handleRead}
       onBuy={handleBuy}
     />

@@ -1,5 +1,11 @@
 import { getLocalBookForApiBook, isLocalBookId } from './localBookService';
 import { BUILD_WITH_AI_LOCAL_ID } from './workshop';
+import {
+  getBookDetailsPath,
+  getBookEditPath,
+  getBookReadPath,
+  getBookSlug
+} from './bookSlugs';
 
 export const normalizeBookId = (id) => String(id ?? '');
 
@@ -21,9 +27,10 @@ export const userHasBookAccess = (user, book) => {
   }
 
   const bookId = normalizeBookId(book._id);
+  const apiBookId = normalizeBookId(book.apiBookId);
   const accessIds = (user.purchasedBooks || []).map(normalizeBookId);
 
-  if (accessIds.includes(bookId)) {
+  if (accessIds.includes(bookId) || (apiBookId && accessIds.includes(apiBookId))) {
     return true;
   }
 
@@ -71,4 +78,11 @@ export const userOwnsBuildWithAi = (user) => {
 
   const accessIds = (user.purchasedBooks || []).map(normalizeBookId);
   return accessIds.includes(BUILD_WITH_AI_LOCAL_ID);
+};
+
+export {
+  getBookDetailsPath,
+  getBookEditPath,
+  getBookReadPath,
+  getBookSlug
 };

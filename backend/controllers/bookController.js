@@ -1,6 +1,7 @@
 const Book = require('../models/Book');
 const User = require('../models/User');
 const { applyEffectivePrice } = require('../bookPricing');
+const { resolveBookByIdOrAlias } = require('../utils/bookAliases');
 
 // Get all books for the authenticated user
 const getBooks = async (req, res) => {
@@ -55,7 +56,12 @@ const getBook = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const book = await Book.findById(id)
+    const resolved = await resolveBookByIdOrAlias(id, Book);
+    if (!resolved) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+
+    const book = await Book.findById(resolved._id)
       .populate('author', 'username email')
       .populate('pages.lastEditedBy', 'username');
 

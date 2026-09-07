@@ -1,7 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getBookCover, getOriginalBookPrice, isBuildWithAi } from '../../utils/bookUtils';
-import { getReadBookId } from '../../utils/bookAccess';
+import {
+  getBookDetailsPath,
+  getBookEditPath,
+  getBookReadPath
+} from '../../utils/bookAccess';
 import { useAuth } from '../../contexts/AuthContext';
 
 const BookCard = ({
@@ -26,7 +30,7 @@ const BookCard = ({
 
   const handleViewDetails = (e) => {
     if (e) e.stopPropagation();
-    navigate(`/books/${book._id}/details`);
+    navigate(getBookDetailsPath(book));
   };
 
   const handleRead = (e) => {
@@ -35,7 +39,7 @@ const BookCard = ({
       onRead(book);
       return;
     }
-    navigate(`/books/${getReadBookId(book)}/read`);
+    navigate(getBookReadPath(book));
   };
 
   const handleBuy = (e) => {
@@ -44,7 +48,7 @@ const BookCard = ({
       onBuy(book);
       return;
     }
-    navigate(`/books/${book._id}/details`);
+    navigate(getBookDetailsPath(book));
   };
 
   const handleDelete = (e) => {
@@ -58,7 +62,7 @@ const BookCard = ({
       onEdit(book);
       return;
     }
-    navigate(`/books/${book._id}`);
+    navigate(getBookEditPath(book));
   };
 
   return (

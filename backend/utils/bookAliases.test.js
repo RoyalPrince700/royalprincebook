@@ -56,6 +56,29 @@ test('resolveBookByIdOrAlias resolves local ids through title match', async () =
   assert.strictEqual(resolvedFromMongo._id, mongoId);
 });
 
+test('resolveBookByIdOrAlias resolves catalog and title slugs', async () => {
+  const mongoId = '674abc123def456789012347';
+  const mockBook = {
+    _id: mongoId,
+    title: 'Build with AI: From Zero to Full-Stack Developer with Cursor',
+    price: 1000
+  };
+
+  const Book = {
+    find: async () => [mockBook],
+    findById: async (id) => (String(id) === mongoId ? mockBook : null)
+  };
+
+  const fromShortSlug = await resolveBookByIdOrAlias('build-with-ai', Book);
+  assert.strictEqual(fromShortSlug._id, mongoId);
+
+  const fromTitleSlug = await resolveBookByIdOrAlias(
+    'build-with-ai-from-zero-to-full-stack-developer-with-cursor',
+    Book
+  );
+  assert.strictEqual(fromTitleSlug._id, mongoId);
+});
+
 test('resolveBookByIdOrAlias returns null when no matching book exists', async () => {
   const Book = {
     find: async () => [],

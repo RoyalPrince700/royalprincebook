@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const Book = require('../models/Book');
-const { LOCAL_BOOK_ALIASES, resolveBookByIdOrAlias } = require('./bookAliases');
+const { LOCAL_BOOK_ALIASES, resolveBookByIdOrAlias, findAliasByKey } = require('./bookAliases');
 const { getEffectiveBookPrice } = require('../bookPricing');
 
 const CATALOG_BOOKS = [
@@ -23,8 +23,19 @@ const CATALOG_BOOKS = [
   }
 ];
 
-const findCatalogDefinition = (bookId) =>
-  CATALOG_BOOKS.find((entry) => entry.localId === bookId) || null;
+const findCatalogDefinition = (bookId) => {
+  const direct = CATALOG_BOOKS.find((entry) => entry.localId === bookId);
+  if (direct) {
+    return direct;
+  }
+
+  const alias = findAliasByKey(bookId);
+  if (!alias) {
+    return null;
+  }
+
+  return CATALOG_BOOKS.find((entry) => entry.localId === alias.localId) || null;
+};
 
 const findBookByCatalogTitle = async (title) => {
   const alias = LOCAL_BOOK_ALIASES.find((entry) => entry.matchTitle(title));

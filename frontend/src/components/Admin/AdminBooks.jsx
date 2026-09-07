@@ -4,6 +4,7 @@ import AdminLayout from './AdminLayout';
 import PageLoader from '../PageLoader';
 import { formatCurrency, formatDate } from './adminUtils';
 import { mergeBooksForCatalog } from '../../utils/localBookService';
+import { getBookDetailsPath, getBookReadPath } from '../../utils/bookAccess';
 import useAdminResource from '../../hooks/useAdminResource';
 
 const AdminBooks = () => {
@@ -131,13 +132,13 @@ const AdminBooks = () => {
                     <td className="rounded-r-3xl border border-l-0 border-slate-200 px-4 py-4">
                       <div className="flex flex-wrap gap-2">
                         <Link
-                          to={`/books/${book._id}/read`}
+                          to={getBookReadPath(book)}
                           className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
                         >
                           Read
                         </Link>
                         <Link
-                          to={`/books/${book._id}/details`}
+                          to={getBookDetailsPath(book)}
                           className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
                         >
                           Details

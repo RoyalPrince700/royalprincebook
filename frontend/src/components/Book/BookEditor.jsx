@@ -5,6 +5,7 @@ import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
 import { isLocalBookId } from '../../utils/localBookService';
+import { getBookReadPath } from '../../utils/bookAccess';
 import axios from 'axios';
 import PageLoader from '../PageLoader';
 
@@ -260,7 +261,7 @@ const BookEditor = () => {
           {success && <span style={{ color: 'var(--success)' }}>{success}</span>}
           {error && <span style={{ color: 'var(--danger)' }}>{error}</span>}
 
-          <Link to={`/books/${bookId}/read`} style={{ textDecoration: 'none' }}>
+          <Link to={getBookReadPath({ _id: bookId, title: book?.title })} style={{ textDecoration: 'none' }}>
             <button className="btn-success" style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem' }}>
               Read Mode
             </button>

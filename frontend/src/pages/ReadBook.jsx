@@ -12,8 +12,14 @@ import PageLoader from '../components/PageLoader';
 import { getRedirectPath } from '../utils/authRedirect';
 import { buildLoginPath } from '../utils/requireAuth';
 import './ReadBook.css';
-import { getLocalBook, getLocalBookForApiBook, isLocalBookId } from '../utils/localBookService';
-import { getReadBookId, userHasBookAccess } from '../utils/bookAccess';
+import {
+  getBookDetailsPath,
+  getBookEditPath,
+  getBookReadPath,
+  getBookSlug,
+  userHasBookAccess
+} from '../utils/bookAccess';
+import { resolveBookFromKey } from '../utils/bookSlugs';
 
 const ReadBook = () => {
   const { bookId } = useParams();
@@ -75,15 +81,26 @@ const ReadBook = () => {
 
   const fetchBook = async () => {
     try {
-      if (isLocalBookId(bookId)) {
-        setBook(getLocalBook(bookId));
+      setLoading(true);
+      setError('');
+
+      const resolvedBook = await resolveBookFromKey(bookId, async (key) => {
+        const response = await axios.get(`/books/details/${key}`);
+        return response.data.book || null;
+      });
+
+      if (!resolvedBook) {
+        setBook(null);
+        setError('Failed to load book');
         return;
       }
 
-      const response = await axios.get(`/books/details/${bookId}`);
-      const apiBook = response.data.book;
-      const localBook = getLocalBookForApiBook(apiBook);
-      setBook(localBook || apiBook);
+      setBook(resolvedBook);
+
+      const canonicalSlug = getBookSlug(resolvedBook);
+      if (canonicalSlug && bookId !== canonicalSlug) {
+        navigate(`/books/${canonicalSlug}/read`, { replace: true });
+      }
     } catch (error) {
       console.error('Failed to fetch book:', error);
       setError('Failed to load book');
@@ -114,7 +131,7 @@ const ReadBook = () => {
 
   const handleDownload = async (format) => {
     try {
-      const response = await axios.get(`/export/${format}/${bookId}`, {
+      const response = await axios.get(`/export/${format}/${book.apiBookId || book._id}`, {
         responseType: 'blob'
       });
       
@@ -147,7 +164,7 @@ const ReadBook = () => {
       name: user?.username,
     },
     meta: {
-      bookId: book?._id || '',
+      bookId: book?.apiBookId || book?._id || '',
       userId: user?.id || user?._id || ''
     },
     customizations: {
@@ -188,7 +205,7 @@ const ReadBook = () => {
            try {
              const verifyResponse = await axios.post('/payment/verify', {
                transaction_id: response.transaction_id || response.id,
-               bookId: book._id
+               bookId: book.apiBookId || book._id
              });
 
              if (Array.isArray(verifyResponse.data?.purchasedBooks)) {
@@ -197,7 +214,7 @@ const ReadBook = () => {
                await refreshProfile();
              }
 
-             navigate(`/books/${getReadBookId(book)}/read`, { replace: true });
+             navigate(getBookReadPath(book), { replace: true });
              notify({
                title: 'Payment successful',
                message: 'You can now read the book.',
@@ -288,7 +305,7 @@ const ReadBook = () => {
           >
             {user ? 'Buy Now' : 'Sign in to Buy'}
           </button>
-          <Link to={`/books/${bookId}/details`} className="reader-text-link">View Book Details</Link>
+          <Link to={book ? getBookDetailsPath(book) : '/all-books'} className="reader-text-link">View Book Details</Link>
         </div>
       </div>
     );
@@ -304,7 +321,7 @@ const ReadBook = () => {
       <header className="reader-header">
         <div className="header-left">
           <Link
-            to={`/books/${bookId}/details`}
+            to={getBookDetailsPath(book)}
             className="reader-back-button"
             aria-label="Back to book details"
           >
@@ -382,8 +399,8 @@ const ReadBook = () => {
            </div>
            */}
 
-           {user?.role === 'admin' && (
-             <Link to={`/books/${bookId}`} className="edit-button-link">
+           {user?.role === 'admin' && book.apiBookId && (
+             <Link to={getBookEditPath({ _id: book.apiBookId })} className="edit-button-link">
               <button 
                 className="reader-icon-button" 
                 title="Edit Mode"
