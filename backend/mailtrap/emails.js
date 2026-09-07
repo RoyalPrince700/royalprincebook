@@ -9,11 +9,13 @@ const {
   getWorkshopWhatsAppInviteEmailTemplate
 } = require('./emailtemplates');
 
+const PRODUCTION_FRONTEND_URL = 'https://www.royalprincehub.com';
+
 const normalizeUrl = (url) => {
   const trimmedUrl = String(url || '').trim();
 
   if (!trimmedUrl) {
-    return 'https://www.royalprincehub.com';
+    return PRODUCTION_FRONTEND_URL;
   }
 
   const urlWithProtocol = /^https?:\/\//i.test(trimmedUrl)
@@ -23,17 +25,21 @@ const normalizeUrl = (url) => {
   return urlWithProtocol.replace(/\/+$/, '');
 };
 
-const getFrontendUrl = () => {
-  const isProdLike =
-    process.env.NODE_ENV === 'production' ||
-    !!process.env.RENDER_EXTERNAL_URL ||
-    !!process.env.RENDER ||
-    !!process.env.VERCEL;
-
-  return normalizeUrl(
-    process.env.FRONTEND_URL ||
-      (isProdLike ? 'https://www.royalprincehub.com' : 'http://localhost:5173')
+const isLocalFrontendUrl = (url) =>
+  /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(
+    String(url || '').trim()
   );
+
+const getFrontendUrl = () => {
+  const configured = String(process.env.FRONTEND_URL || '').trim();
+
+  // Email recipients cannot open localhost. Ignore local FRONTEND_URL so every
+  // template (welcome, purchase, workshop, taskboard, etc.) uses production.
+  if (!configured || isLocalFrontendUrl(configured)) {
+    return normalizeUrl(PRODUCTION_FRONTEND_URL);
+  }
+
+  return normalizeUrl(configured);
 };
 
 const sendWelcomeEmail = async (user) => {
@@ -199,6 +205,7 @@ const sendWorkshopWhatsAppInviteEmail = async ({
 };
 
 module.exports = {
+  getFrontendUrl,
   sendWelcomeEmail,
   sendBookPurchaseEmail,
   sendAdminBookPurchaseNotification,

@@ -137,6 +137,14 @@
   background: white;
 }
 
+a.reader-secondary-button {
+  text-decoration: none;
+}
+
+.reader-home-button {
+  flex-shrink: 0;
+}
+
 .reader-link-button {
   display: inline-flex;
   align-items: center;

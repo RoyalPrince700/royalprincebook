@@ -6,9 +6,7 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 process.env.MAILTRAP_USE_PRODUCTION = 'true';
 
-if (!process.env.FRONTEND_URL) {
-  process.env.FRONTEND_URL = 'https://www.royalprincehub.com';
-}
+process.env.FRONTEND_URL = 'https://www.royalprincehub.com';
 
 const User = require('../models/User');
 const Book = require('../models/Book');

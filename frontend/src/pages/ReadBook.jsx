@@ -336,6 +336,19 @@ const ReadBook = () => {
              Chapter {currentPageNum} / {totalPages}
            </div>
 
+           <Link
+             to="/"
+             className="reader-secondary-button reader-home-button"
+             aria-label="Back to website home"
+           >
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+               <path d="M3 9.5 12 3l9 6.5" />
+               <path d="M5 10v10h14V10" />
+             </svg>
+             <span>Home</span>
+           </Link>
+
+           {/* Download temporarily disabled
            <div className="download-wrap">
              <button 
                className="reader-secondary-button" 
@@ -367,6 +380,7 @@ const ReadBook = () => {
                </div>
              )}
            </div>
+           */}
 
            {user?.role === 'admin' && (
              <Link to={`/books/${bookId}`} className="edit-button-link">
