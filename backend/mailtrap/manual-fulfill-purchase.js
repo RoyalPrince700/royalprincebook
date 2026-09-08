@@ -15,7 +15,7 @@ const { sendBookPurchaseEmail, sendAdminBookPurchaseNotification } = require('./
 const { getConfiguredMode } = require('./mailtrap.config');
 
 const EMAIL = (process.argv[2] || '').trim().toLowerCase();
-const AMOUNT = Number(process.argv[3] || 1000);
+const AMOUNT = Number(process.argv[3] || 5000);
 const BOOK_ALIAS = 'local-build-with-ai';
 
 const formatUsername = (value) => {

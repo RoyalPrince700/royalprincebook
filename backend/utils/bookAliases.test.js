@@ -41,7 +41,7 @@ test('resolveBookByIdOrAlias resolves local ids through title match', async () =
   const mockBook = {
     _id: mongoId,
     title: 'Build with AI: From Zero to Full-Stack Developer with Cursor',
-    price: 1000
+    price: 5000
   };
 
   const Book = {
@@ -61,7 +61,7 @@ test('resolveBookByIdOrAlias resolves catalog and title slugs', async () => {
   const mockBook = {
     _id: mongoId,
     title: 'Build with AI: From Zero to Full-Stack Developer with Cursor',
-    price: 1000
+    price: 5000
   };
 
   const Book = {

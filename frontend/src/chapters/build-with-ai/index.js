@@ -60,7 +60,7 @@ export const buildWithAiBookData = {
   description:
     'A practical training guide for beginners who want to learn web development using the MERN stack and Cursor AI — from landing pages to full e-commerce applications.',
   genre: 'Technology / Web Development',
-  price: 1000,
+  price: 5000,
   status: 'draft',
   coverImage: buildWithAiCover,
   isLocal: true,

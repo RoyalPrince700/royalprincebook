@@ -18,7 +18,7 @@ const CATALOG_BOOKS = [
     description:
       'A practical training guide for beginners who want to learn web development using the MERN stack and Cursor AI — from landing pages to full e-commerce applications.',
     genre: 'Technology / Web Development',
-    price: 1000,
+    price: 5000,
     status: 'published'
   }
 ];
@@ -47,6 +47,20 @@ const findBookByCatalogTitle = async (title) => {
   return Book.findOne({ title });
 };
 
+const syncCatalogBookPrice = async (book, definition) => {
+  if (!book || !definition || typeof definition.price !== 'number') {
+    return book;
+  }
+
+  if (Number(book.price) === Number(definition.price)) {
+    return book;
+  }
+
+  book.price = definition.price;
+  await Book.findByIdAndUpdate(book._id, { price: definition.price });
+  return book;
+};
+
 const getCatalogAuthorId = async () => {
   const admin = await User.findOne({ role: 'admin' }).select('_id');
   if (admin?._id) {
@@ -58,19 +72,26 @@ const getCatalogAuthorId = async () => {
 };
 
 const ensureCatalogBook = async (bookId) => {
+  const definition = findCatalogDefinition(bookId);
   const resolved = await resolveBookByIdOrAlias(bookId, Book);
   if (resolved) {
-    return resolved;
+    const matchedDefinition =
+      definition ||
+      CATALOG_BOOKS.find((entry) => {
+        const alias = LOCAL_BOOK_ALIASES.find((item) => item.localId === entry.localId);
+        return alias?.matchTitle(resolved.title) || entry.title === resolved.title;
+      });
+
+    return syncCatalogBookPrice(resolved, matchedDefinition);
   }
 
-  const definition = findCatalogDefinition(bookId);
   if (!definition) {
     return null;
   }
 
   const existing = await findBookByCatalogTitle(definition.title);
   if (existing) {
-    return existing;
+    return syncCatalogBookPrice(existing, definition);
   }
 
   const author = await getCatalogAuthorId();

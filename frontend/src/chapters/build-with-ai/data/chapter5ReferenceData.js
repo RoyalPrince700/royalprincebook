@@ -11,7 +11,7 @@ export const chapter5SampleBooks = [
     title: 'Build with AI',
     description: 'Learn MERN stack development with Cursor AI — from landing pages to full e-commerce applications.',
     genre: 'Technology',
-    price: 1000
+    price: 5000
   },
   {
     _id: 'c5-book-3',

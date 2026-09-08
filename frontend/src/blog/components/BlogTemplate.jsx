@@ -10,11 +10,10 @@ const BOOK_FOOTERS = {
       <>
         If this workshop speaks to you, <em>Build with AI</em> is a gentle next step. It guides you
         through the MERN stack and Cursor workflow, unlocks the live sessions on Saturday 5th and
-        Sunday 6th September by 8pm, and stays at ₦1,000 so more people can learn without being left
-        out.
+        Sunday 6th September by 8pm, and is available for ₦5,000.
       </>
     ),
-    label: 'Get Build with AI for ₦1,000'
+    label: 'Get Build with AI for ₦5,000'
   },
   'leadership-from-within': {
     text: (

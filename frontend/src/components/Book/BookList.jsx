@@ -10,7 +10,10 @@ import { usePlatformDialog } from '../../contexts/PlatformDialogContext';
 import PageLoader from '../PageLoader';
 import { mergeBooksForCatalog } from '../../utils/localBookService';
 import { getBookReadPath, userHasBookAccess } from '../../utils/bookAccess';
-import BuildWithAiOfferCountdown from './BuildWithAiOfferCountdown';
+import buildWithAiCover from '../../assets/buildwithai.png';
+
+const BUILD_WITH_AI_DETAILS_PATH = '/books/build-with-ai/details';
+const BUILD_WITH_AI_PRICE = 5000;
 
 const BookList = () => {
   const [books, setBooks] = useState([]);
@@ -103,49 +106,49 @@ const BookList = () => {
 
   return (
     <ContentPageShell>
-      <PageHero
-        eyebrow="Library"
-        title="Explore the full collection."
-        description="Browse every title in a cleaner, more focused storefront designed to keep attention on the books."
-        centered
-      >
-        <BuildWithAiOfferCountdown />
-
-        <div className="pf-stat-grid">
-          <div className="pf-stat-card">
-            <p className="pf-stat-label">Titles</p>
-            <p className="pf-stat-value">{books.length}</p>
-          </div>
-          <div className="pf-stat-card">
-            <p className="pf-stat-label">Checkout</p>
-            <p className="pf-stat-text">Buy any book instantly with secure payment.</p>
-          </div>
-          <div className="pf-stat-card">
-            <p className="pf-stat-label">Experience</p>
-            <p className="pf-stat-text">
-              Fast checkout, clean browsing, and a product-first layout.
+      <PageHero>
+        <div className="pf-books-hero">
+          <div className="pf-books-hero-copy">
+            <p className="pf-books-hero-brand">Royal Prince Hub</p>
+            <h1 className="pf-books-hero-title">Build with AI</h1>
+            <p className="pf-books-hero-text">
+              From zero to full-stack developer with Cursor.
+            </p>
+            <div className="pf-page-hero-actions">
+              <Link to={BUILD_WITH_AI_DETAILS_PATH} className="pf-btn pf-btn-primary">
+                Get the book
+              </Link>
+              {user?.role === 'admin' ? (
+                <>
+                  <Link to="/dashboard" className="pf-btn pf-btn-secondary">
+                    Dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateForm((prev) => !prev)}
+                    className="pf-btn pf-btn-secondary pf-btn-admin"
+                  >
+                    {showCreateForm ? 'Close Form' : 'Create New Book'}
+                  </button>
+                  <Link to="/admin" className="pf-btn pf-btn-secondary">
+                    Admin Overview
+                  </Link>
+                </>
+              ) : null}
+            </div>
+            <p className="pf-books-hero-price">
+              NGN {BUILD_WITH_AI_PRICE.toLocaleString()}
             </p>
           </div>
-        </div>
 
-        <div className="pf-page-hero-actions">
-          {user?.role === 'admin' ? (
-            <>
-              <Link to="/dashboard" className="pf-btn pf-btn-secondary">
-                Dashboard
-              </Link>
-              <button
-                type="button"
-                onClick={() => setShowCreateForm((prev) => !prev)}
-                className="pf-btn pf-btn-secondary pf-btn-admin"
-              >
-                {showCreateForm ? 'Close Form' : 'Create New Book'}
-              </button>
-              <Link to="/admin" className="pf-btn pf-btn-secondary">
-                Admin Overview
-              </Link>
-            </>
-          ) : null}
+          <div className="pf-books-hero-cover-wrap">
+            <div className="pf-books-hero-cover-glow" aria-hidden="true" />
+            <img
+              src={buildWithAiCover}
+              alt="Build with AI book cover"
+              className="pf-books-hero-cover"
+            />
+          </div>
         </div>
       </PageHero>
 

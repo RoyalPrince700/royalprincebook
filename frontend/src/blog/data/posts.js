@@ -39,18 +39,18 @@ export const blogPosts = [
         ]
       },
       {
-        heading: 'How to join, and why the book is ₦1,000',
+        heading: 'How to join, and why the book is ₦5,000',
         paragraphs: [
           'Workshop access comes with my book, Build with AI: From Zero to Full-Stack Developer with Cursor. Once you get the book, you will also receive the link for the live sessions on Saturday, 5th September by 8pm, and Sunday, 6th September by 8pm. Think of the book as your map and the workshop as the guided walk. You get fourteen practical chapters on the MERN stack and Cursor, plus two evenings of live building with me.',
           'I want to be honest about the price. Part of me wanted to set it higher, not because I am chasing money, but because people often treat what costs more with greater care. My real goal has always been impact. I want as many willing learners as possible to walk away able to build.',
-          'I also understand real life. Data costs money. Some people will spend on fuel. Many of us are stretching what we already have. I do not want anyone who is ready to grow to feel left out or burdened by the door fee. That is why Build with AI is just ₦1,000. It is affordable on purpose, while still inviting you to take the commitment seriously.',
+          'I also understand real life. Data costs money. Some people will spend on fuel. Many of us are stretching what we already have. Build with AI is now ₦5,000 — a fair price for the book, workshop access, and the commitment it asks of you.',
           'There is no separate workshop ticket on top. If you already have the book, you are welcome. Watch out for the access details. If you do not have it yet, this is a gentle place to begin.'
         ],
         cta: {
           eyebrow: 'Join the weekend',
           text:
-            'Get Build with AI for ₦1,000 and unlock your invitation for Saturday 5th September by 8pm and Sunday 6th September by 8pm. Priced for access and impact, so more people can learn without being left behind.',
-          label: 'Get Build with AI for ₦1,000',
+            'Get Build with AI for ₦5,000 and unlock your invitation for Saturday 5th September by 8pm and Sunday 6th September by 8pm.',
+          label: 'Get Build with AI for ₦5,000',
           target: 'build-with-ai'
         }
       },
