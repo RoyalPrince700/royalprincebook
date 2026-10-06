@@ -4,9 +4,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   clearAuthRedirect,
   DEFAULT_AUTH_REDIRECT,
-  getStoredAuthRedirect,
   resolveAuthRedirect
 } from '../../utils/authRedirect';
+import { takeDesktopPort } from '../../utils/desktopCapture';
 
 const AuthCallback = () => {
   const { completeGoogleAuth } = useAuth();
@@ -16,6 +16,14 @@ const AuthCallback = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const token = params.get('token');
+    const desktopPort = takeDesktopPort();
+
+    if (desktopPort && token) {
+      window.location.replace(
+        `http://127.0.0.1:${desktopPort}/callback?token=${encodeURIComponent(token)}`
+      );
+      return;
+    }
 
     const finishGoogleAuth = async () => {
       const redirectPath = resolveAuthRedirect(DEFAULT_AUTH_REDIRECT);

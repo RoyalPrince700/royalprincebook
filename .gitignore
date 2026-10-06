@@ -148,6 +148,7 @@ logs
 # Build outputs
 build/
 dist/
+desktop/release/
 
 # OS generated files
 .DS_Store

@@ -4,6 +4,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import ContentPageShell from '../ContentPageShell';
 import BrandMark from '../BrandMark';
 import { getRedirectPath, normalizeRedirectPath, saveAuthRedirect } from '../../utils/authRedirect';
+import {
+  desktopSignInStarted,
+  markDesktopSignInStarted,
+  parseDesktopPort,
+  rememberDesktopPort
+} from '../../utils/desktopCapture';
 
 const authErrors = {
   auth_failed: 'Google sign-in failed. Please try again.',
@@ -23,11 +29,30 @@ const Login = () => {
     ? `/register?redirect=${encodeURIComponent(redirectPath)}`
     : '/register';
 
+  const desktopPort = parseDesktopPort(searchParams.get('desktop_port'));
+
   useEffect(() => {
     if (redirectPath) {
       saveAuthRedirect(redirectPath);
     }
   }, [redirectPath]);
+
+  useEffect(() => {
+    if (!desktopPort) return undefined;
+
+    rememberDesktopPort(desktopPort);
+    if (errorCode) {
+      window.location.replace(
+        `http://127.0.0.1:${desktopPort}/callback?error=${encodeURIComponent(errorCode)}`
+      );
+      return undefined;
+    }
+
+    if (desktopSignInStarted(desktopPort)) return undefined;
+    markDesktopSignInStarted(desktopPort);
+    loginWithGoogle(redirectPath);
+    return undefined;
+  }, [desktopPort, errorCode, loginWithGoogle, redirectPath]);
 
   return (
     <ContentPageShell>
@@ -99,7 +124,7 @@ const Login = () => {
                 <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
                   <path fill="#EA4335" d="M12 10.2v3.9h5.4c-.2 1.3-1.5 3.9-5.4 3.9-3.2 0-5.9-2.7-5.9-6s2.7-6 5.9-6c1.8 0 3 .8 3.7 1.4l2.5-2.4C16.6 3.5 14.5 2.5 12 2.5 6.8 2.5 2.6 6.7 2.6 12S6.8 21.5 12 21.5c6.9 0 9.1-4.8 9.1-7.3 0-.5-.1-.9-.1-1.3H12Z" />
                 </svg>
-                Continue with Google
+                {desktopPort ? 'Opening Google…' : 'Continue with Google'}
               </button>
               <p className="pf-login-note mt-4 text-center text-sm">
                 We currently support Google authentication only.

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getStoredAuthRedirect, normalizeRedirectPath, saveAuthRedirect } from '../utils/authRedirect';
+import { clearDesktopPort, parseDesktopPort, peekDesktopPort } from '../utils/desktopCapture';
 
 const AuthContext = createContext();
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -26,6 +27,15 @@ export const AuthProvider = ({ children }) => {
   if (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const onDesktopCallback = window.location.pathname === '/auth/callback';
+    const startingDesktop = Boolean(parseDesktopPort(params.get('desktop_port')));
+    if (!onDesktopCallback && !startingDesktop) {
+      clearDesktopPort();
+    }
+  }, []);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -87,7 +97,9 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = useCallback((redirectPath = '') => {
     const path = normalizeRedirectPath(redirectPath) || getStoredAuthRedirect();
     saveAuthRedirect(path);
-    window.location.href = `${apiBaseUrl}/auth/google`;
+    const desktopPort = peekDesktopPort();
+    const desktopQuery = desktopPort ? `?desktop_port=${desktopPort}` : '';
+    window.location.href = `${apiBaseUrl}/auth/google${desktopQuery}`;
   }, []);
 
   const logout = useCallback(() => {

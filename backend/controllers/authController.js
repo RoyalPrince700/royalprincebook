@@ -1,7 +1,11 @@
 const passport = require('passport');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { getAvatarEmoji, isValidAvatarId } = require('../utils/workboardAvatars');
 const { expandBookAccessIds } = require('../utils/bookAliases');
+const { isValidDesktopPort, signDesktopState, readDesktopPort } = require('../utils/desktopAuthState');
+
+const DESKTOP_TOKEN_EXPIRES_IN = '30d';
 
 const getFrontendUrl = () => {
   const isProdLike =
@@ -16,23 +20,75 @@ const getFrontendUrl = () => {
   );
 };
 
-const googleAuth = passport.authenticate('google', {
-  scope: ['profile', 'email'],
-  session: false
-});
+const desktopCallbackUrl = (port, params) => {
+  const query = new URLSearchParams(params).toString();
+  return `http://127.0.0.1:${port}/callback?${query}`;
+};
+
+const issueDesktopToken = (token) => {
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  if (!decoded?.userId) {
+    throw new Error('Desktop token is missing a user id');
+  }
+
+  return jwt.sign({ userId: decoded.userId }, process.env.JWT_SECRET, {
+    expiresIn: DESKTOP_TOKEN_EXPIRES_IN
+  });
+};
+
+const googleAuth = (req, res, next) => {
+  const options = {
+    scope: ['profile', 'email'],
+    session: false
+  };
+
+  if (req.query.desktop_port !== undefined) {
+    const desktopPort = Number(req.query.desktop_port);
+    if (!isValidDesktopPort(desktopPort)) {
+      return res.status(400).json({ message: 'Invalid desktop port' });
+    }
+
+    try {
+      options.state = signDesktopState(desktopPort);
+    } catch (error) {
+      console.error('[Auth] Desktop sign-in could not start:', error.message);
+      return res.status(500).json({ message: 'Desktop sign-in is not available' });
+    }
+  }
+
+  return passport.authenticate('google', options)(req, res, next);
+};
 
 const googleAuthCallback = (req, res, next) => {
   const frontendUrl = getFrontendUrl();
+  const desktopPort = readDesktopPort(req.query.state);
+
+  const redirectToLogin = (errorCode) => {
+    if (desktopPort) {
+      return res.redirect(desktopCallbackUrl(desktopPort, { error: errorCode }));
+    }
+    return res.redirect(`${frontendUrl}/login?error=${errorCode}`);
+  };
 
   passport.authenticate('google', { session: false }, (err, data) => {
     if (err) {
       console.error('[Auth] Google Auth Error:', err);
-      return res.redirect(`${frontendUrl}/login?error=auth_failed`);
+      return redirectToLogin('auth_failed');
     }
 
     if (!data || !data.token) {
       console.error('[Auth] No token returned from Google auth flow.');
-      return res.redirect(`${frontendUrl}/login?error=no_token`);
+      return redirectToLogin('no_token');
+    }
+
+    if (desktopPort) {
+      try {
+        const desktopToken = issueDesktopToken(data.token);
+        return res.redirect(desktopCallbackUrl(desktopPort, { token: desktopToken }));
+      } catch (error) {
+        console.error('[Auth] Desktop token error:', error.message);
+        return redirectToLogin('auth_failed');
+      }
     }
 
     return res.redirect(

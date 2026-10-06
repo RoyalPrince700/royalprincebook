@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self'; script-src 'self'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Capture</title>
+    <link rel="stylesheet" href="capture.css" />
+  </head>
+  <body>
+    <main class="panel">
+      <header class="drag">
+        <p class="eyebrow">Task Capture</p>
+        <button type="button" class="close" id="close" aria-label="Close">×</button>
+      </header>
+
+      <section id="signed-out" class="view" hidden>
+        <h1>Log a task from any app</h1>
+        <p class="lede">
+          Sign in once with the Google account you use on Royal Prince Hub. After that,
+          <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Space</kbd> opens this window wherever you are working.
+        </p>
+        <button type="button" class="primary" id="sign-in">Sign in with Google</button>
+        <p class="status" id="sign-in-status" role="status"></p>
+      </section>
+
+      <section id="signed-in" class="view" hidden>
+        <h1>What are you working on?</h1>
+        <p class="context" id="context">Saved to your taskboard for today.</p>
+        <form id="task-form">
+          <label class="sr-only" for="title">Task</label>
+          <input id="title" name="title" type="text" maxlength="200" placeholder="Write the task" autocomplete="off" />
+          <button type="submit" class="primary" id="save">Save</button>
+        </form>
+        <p class="status" id="save-status" role="status"></p>
+        <footer>
+          <button type="button" class="link" id="open-noteboard">Noteboard</button>
+          <button type="button" class="link" id="open-taskboard">Taskboard</button>
+          <button type="button" class="link" id="sign-out">Sign out</button>
+        </footer>
+      </section>
+    </main>
+    <script src="capture.js"></script>
+  </body>
+</html>

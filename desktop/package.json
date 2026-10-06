@@ -1,0 +1,39 @@
+{
+  "name": "task-capture",
+  "productName": "Task Capture",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Log a taskboard task from any Windows app.",
+  "main": "main.js",
+  "scripts": {
+    "make-icon": "node scripts/make-icon.js",
+    "start": "electron .",
+    "dist": "electron-builder --win zip"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.royalprincehub.taskcapture",
+    "productName": "Task Capture",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "capture.html",
+      "capture.css",
+      "capture.js",
+      "icon.png",
+      "tray.png"
+    ],
+    "win": {
+      "target": "zip",
+      "icon": "icon.png",
+      "artifactName": "TaskCapture.${ext}",
+      "signAndEditExecutable": false
+    }
+  }
+}
