@@ -1,7 +1,5 @@
-const axios = require('axios');
+const { generateGeminiText, parseModelJson } = require('./gemini');
 
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
-const DEFAULT_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash'];
 const MONTHS = [
   'January',
   'February',
@@ -41,14 +39,6 @@ Rules:
 - Ignore notes that have no meeting content.
 
 Return JSON with keys headline, summary, highlights, and actionItems. Each action item has task, owner, and due.`;
-};
-
-const parseModelJson = (raw) => {
-  const text = String(raw || '').trim();
-  if (!text) throw new Error('Empty model response');
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  const candidate = fenced ? fenced[1].trim() : text;
-  return JSON.parse(candidate);
 };
 
 const normalizeReport = (parsed, { boardTitle, generatedAt }) => {
@@ -114,46 +104,6 @@ const formatReportText = (report) => {
   return lines.join('\n');
 };
 
-const modelCandidates = () => {
-  const preferred = String(process.env.GEMINI_MODEL || '').trim();
-  return [...new Set([preferred, ...DEFAULT_MODELS].filter(Boolean))];
-};
-
-const callGemini = async (apiKey, model, prompt) => {
-  const response = await axios.post(
-    `${GEMINI_URL}/${model}:generateContent`,
-    {
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.3,
-        responseMimeType: 'application/json'
-      }
-    },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey
-      },
-      timeout: 30000,
-      validateStatus: () => true
-    }
-  );
-
-  return response;
-};
-
-const geminiErrorMessage = (status, data) => {
-  const apiMessage = data?.error?.message || data?.error?.status || '';
-  if (status === 429) return 'The AI service is busy. Try again in a moment.';
-  if (status === 401 || status === 403) {
-    return 'Gemini rejected the API key. Check GEMINI_API_KEY in the backend environment.';
-  }
-  if (/safety|blocked/i.test(apiMessage)) {
-    return 'These notes could not be summarized. Try removing sensitive content and generate the report again.';
-  }
-  return 'Could not write the meeting report. Try again in a moment.';
-};
-
 const summarizeMeetingNotes = async ({ title, notes }) => {
   const cleaned = (notes || []).map((text) => clip(text, 500)).filter(Boolean).slice(0, 80);
   if (!cleaned.length) {
@@ -162,69 +112,24 @@ const summarizeMeetingNotes = async ({ title, notes }) => {
     throw error;
   }
 
-  const apiKey = String(process.env.GEMINI_API_KEY || '').trim();
-  if (!apiKey) {
-    const error = new Error('Gemini is not configured. Add GEMINI_API_KEY to the backend environment.');
-    error.status = 503;
+  const raw = await generateGeminiText(buildPrompt(title, cleaned), {
+    temperature: 0.3,
+    blockedMessage:
+      'These notes could not be summarized. Try removing sensitive content and generate the report again.',
+    emptyMessage: 'The AI returned an empty report. Try again.'
+  });
+
+  try {
+    return normalizeReport(parseModelJson(raw), {
+      boardTitle: clip(title, 120) || 'Untitled',
+      generatedAt: formatReportDate()
+    });
+  } catch (parseError) {
+    console.error('Meeting report parse error:', parseError.message);
+    const error = new Error('The AI report could not be read. Try again.');
+    error.status = 502;
     throw error;
   }
-
-  const prompt = buildPrompt(title, cleaned);
-  let lastStatus = 502;
-  let lastData = null;
-
-  for (const model of modelCandidates()) {
-    const response = await callGemini(apiKey, model, prompt);
-    if (response.status === 404 || response.status === 429 || response.status === 503) {
-      lastStatus = response.status;
-      lastData = response.data;
-      continue;
-    }
-    if (response.status < 200 || response.status >= 300) {
-      const error = new Error(geminiErrorMessage(response.status, response.data));
-      error.status = response.status >= 500 ? 502 : response.status;
-      throw error;
-    }
-
-    const parts = response.data?.candidates?.[0]?.content?.parts || [];
-    const raw = parts
-      .filter((part) => part?.text && !part.thought)
-      .map((part) => part.text)
-      .pop()
-      ?.trim();
-
-    if (!raw) {
-      const blockReason = response.data?.promptFeedback?.blockReason;
-      const error = new Error(
-        blockReason
-          ? 'These notes could not be summarized. Try removing sensitive content and generate the report again.'
-          : 'The AI returned an empty report. Try again.'
-      );
-      error.status = 502;
-      throw error;
-    }
-
-    try {
-      return normalizeReport(parseModelJson(raw), {
-        boardTitle: clip(title, 120) || 'Untitled',
-        generatedAt: formatReportDate()
-      });
-    } catch (parseError) {
-      console.error('Meeting report parse error:', parseError.message);
-      const error = new Error('The AI report could not be read. Try again.');
-      error.status = 502;
-      throw error;
-    }
-  }
-
-  console.error('Gemini request failed:', lastStatus, lastData?.error?.message || '');
-  const error = new Error(
-    lastStatus === 429 || lastStatus === 503
-      ? 'The AI service is busy. Try again in a moment.'
-      : 'The configured Gemini model is unavailable.'
-  );
-  error.status = 502;
-  throw error;
 };
 
 module.exports = {

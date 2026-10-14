@@ -3,6 +3,8 @@ const signedIn = document.getElementById('signed-in');
 const signInButton = document.getElementById('sign-in');
 const signInStatus = document.getElementById('sign-in-status');
 const titleInput = document.getElementById('title');
+const noteInput = document.getElementById('note');
+const personalInput = document.getElementById('personal');
 const saveButton = document.getElementById('save');
 const saveStatus = document.getElementById('save-status');
 const contextLine = document.getElementById('context');
@@ -40,9 +42,15 @@ const render = (state) => {
 
 const showError = (error) => error?.message || 'Something went wrong. Try again.';
 
+const clearForm = () => {
+  titleInput.value = '';
+  noteInput.value = '';
+  personalInput.checked = false;
+};
+
 window.capture.onSession((state) => {
   setStatus(saveStatus, '');
-  if (state?.reset) titleInput.value = '';
+  if (state?.reset) clearForm();
   render(state);
 });
 
@@ -56,7 +64,7 @@ signInButton.addEventListener('click', async () => {
   try {
     const state = await window.capture.signIn();
     setStatus(signInStatus, '');
-    titleInput.value = '';
+    clearForm();
     render(state);
   } catch (error) {
     setStatus(signInStatus, showError(error), true);
@@ -65,11 +73,18 @@ signInButton.addEventListener('click', async () => {
   }
 });
 
+form.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    form.requestSubmit();
+  }
+});
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   const title = titleInput.value.trim();
   if (!title) {
-    setStatus(saveStatus, 'Write the task first.', true);
+    setStatus(saveStatus, 'Write the title first.', true);
     titleInput.focus();
     return;
   }
@@ -77,14 +92,18 @@ form.addEventListener('submit', async (event) => {
   saveButton.disabled = true;
   setStatus(saveStatus, 'Saving…');
   try {
-    const result = await window.capture.saveTask(title);
+    const result = await window.capture.saveTask({
+      title,
+      note: noteInput.value.trim(),
+      personal: personalInput.checked
+    });
     if (!result?.ok) {
       setStatus(saveStatus, result?.message || 'Could not save the task.', true);
       if (result?.signedOut) render({ signedIn: false });
       return;
     }
     setStatus(saveStatus, result.message || 'Saved.');
-    titleInput.value = '';
+    clearForm();
     window.setTimeout(() => window.capture.hide(), result.queued ? 1800 : 500);
   } catch (error) {
     setStatus(saveStatus, showError(error), true);
@@ -103,7 +122,7 @@ document.getElementById('open-taskboard').addEventListener('click', () => {
 
 document.getElementById('sign-out').addEventListener('click', async () => {
   const state = await window.capture.signOut();
-  titleInput.value = '';
+  clearForm();
   setStatus(saveStatus, '');
   render(state);
 });

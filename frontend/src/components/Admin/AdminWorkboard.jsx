@@ -30,7 +30,12 @@ import {
   buildTaskHistoryTimeline,
   searchWorkboardItems
 } from '../../utils/workboardGamification';
-import { isRetryableStatus, mergePendingIntoBoard, taskOutbox } from '../../utils/taskboardOutbox';
+import {
+  isRetryableStatus,
+  mergePendingIntoBoard,
+  omitPersonalTasks,
+  taskOutbox
+} from '../../utils/taskboardOutbox';
 import './AdminWorkboard.css';
 
 const STATUS_OPTIONS = [
@@ -109,7 +114,8 @@ const emptyForm = {
   assignedBy: '',
   tag: '',
   priority: DEFAULT_PRIORITY,
-  project: ''
+  project: '',
+  isPersonal: false
 };
 
 const toDateKey = (date = new Date()) => {
@@ -338,8 +344,43 @@ const formFromTask = (task) => ({
   assignedBy: task.assignedBy || '',
   tag: task.tag || '',
   priority: task.priority || DEFAULT_PRIORITY,
-  project: task.project ? String(task.project._id || task.project) : ''
+  project: task.project ? String(task.project._id || task.project) : '',
+  isPersonal: Boolean(task.isPersonal)
 });
+
+const PersonalTaskCheckbox = ({ id, checked, onChange, disabled = false }) => (
+  <label className="wb-personal-check" htmlFor={id} onClick={(event) => event.stopPropagation()}>
+    <input
+      id={id}
+      type="checkbox"
+      checked={Boolean(checked)}
+      disabled={disabled}
+      onChange={(event) => onChange(event.target.checked)}
+    />
+    <span>
+      <span className="wb-personal-check-title">Personal</span>
+      <span className="wb-personal-check-hint">
+        Stays on your board only. Left out of reports and hidden from anyone you share with.
+      </span>
+    </span>
+  </label>
+);
+
+const SOCIAL_PLATFORMS = [
+  { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'twitter', label: 'Twitter' },
+  { id: 'instagram', label: 'Instagram' }
+];
+
+const copyTextToClipboard = async (text) => {
+  if (!text) return false;
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 const weekIndexForDate = (monthWeeks, dateKey) => {
   const match = monthWeeks.findIndex((week) => dateKey >= week.start && dateKey <= week.end);
@@ -415,6 +456,13 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [socialTask, setSocialTask] = useState(null);
+  const [socialLoading, setSocialLoading] = useState(false);
+  const [socialError, setSocialError] = useState('');
+  const [socialDraft, setSocialDraft] = useState(null);
+  const [socialPlatform, setSocialPlatform] = useState('linkedin');
+  const [socialCopied, setSocialCopied] = useState(false);
+  const socialCopyTimerRef = useRef(null);
   const [reportPeriod, setReportPeriod] = useState('week'); // 'day' | 'week' | 'month'
   const [reportDownloading, setReportDownloading] = useState(false);
   const [reportError, setReportError] = useState('');
@@ -646,12 +694,11 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
           params: { startDate, endDate, ownerId }
         });
 
-        setTasksByDate(
-          mergePendingIntoBoard(
-            response.data.tasksByDate || {},
-            myId ? taskOutbox.listForBoard(myId, ownerId) : []
-          )
+        const merged = mergePendingIntoBoard(
+          response.data.tasksByDate || {},
+          myId ? taskOutbox.listForBoard(myId, ownerId) : []
         );
+        setTasksByDate(ownerId === myId ? merged : omitPersonalTasks(merged));
         setTaskTags(response.data.tags || []);
         setCanEdit(Boolean(response.data.canEdit));
         if (response.data.myPermissions) {
@@ -680,7 +727,11 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
       const response = await axios.get('/taskboard/gamification', {
         params: { ownerId }
       });
-      setHistoryTasks(response.data.tasks || []);
+      setHistoryTasks(
+        ownerId === myId
+          ? response.data.tasks || []
+          : (response.data.tasks || []).filter((task) => !task.isPersonal)
+      );
       if (typeof response.data.totalXp === 'number') {
         setTotalXp(response.data.totalXp);
       }
@@ -690,7 +741,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
     } catch (statsError) {
       console.error('Failed to load taskboard gamification:', statsError);
     }
-  }, [ownerId]);
+  }, [ownerId, myId]);
 
   const loadMission = useCallback(async () => {
     if (!ownerId) return;
@@ -989,9 +1040,11 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
       const sharedOwnerId = data.owner?.id ? String(data.owner.id) : '';
       setShareMeta(data);
       setTasksByDate(
-        mergePendingIntoBoard(
-          data.tasksByDate || {},
-          myId ? taskOutbox.listForBoard(myId, sharedOwnerId) : []
+        omitPersonalTasks(
+          mergePendingIntoBoard(
+            data.tasksByDate || {},
+            myId ? taskOutbox.listForBoard(myId, sharedOwnerId) : []
+          )
         )
       );
       setMyPermissions(data.myPermissions || []);
@@ -1302,6 +1355,26 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
     };
   }, [user?.role]);
 
+  useEffect(() => {
+    if (!socialTask) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setSocialTask(null);
+        setSocialError('');
+        setSocialCopied(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [socialTask]);
+
+  useEffect(
+    () => () => {
+      if (socialCopyTimerRef.current) clearTimeout(socialCopyTimerRef.current);
+    },
+    []
+  );
+
   const closeModal = () => {
     setModalMode(null);
     setViewTask(null);
@@ -1327,6 +1400,42 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
       date: dateKey
     });
     setModalMode('create');
+  };
+
+  const closeSocial = () => {
+    setSocialTask(null);
+    setSocialError('');
+    setSocialCopied(false);
+  };
+
+  const loadSocialPost = async (task) => {
+    if (!isBoardOwner || !task?._id || task.pendingSync || socialLoading) return;
+    setSocialTask(task);
+    setSocialPlatform('linkedin');
+    setSocialCopied(false);
+    setSocialError('');
+    setSocialDraft(null);
+    setSocialLoading(true);
+    try {
+      const response = await axios.post(`/taskboard/tasks/${task._id}/social-post`);
+      setSocialDraft(response.data);
+    } catch (err) {
+      setSocialError(err.response?.data?.message || 'Could not write the social post.');
+    } finally {
+      setSocialLoading(false);
+    }
+  };
+
+  const copySocialPost = async () => {
+    const text = socialDraft?.posts?.[socialPlatform]?.text || '';
+    const ok = await copyTextToClipboard(text);
+    if (!ok) {
+      setSocialError('Could not copy the post. Select the text and copy it manually.');
+      return;
+    }
+    setSocialCopied(true);
+    if (socialCopyTimerRef.current) clearTimeout(socialCopyTimerRef.current);
+    socialCopyTimerRef.current = setTimeout(() => setSocialCopied(false), 1800);
   };
 
   const openView = (task, color) => {
@@ -1372,6 +1481,9 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
         priority: form.priority || DEFAULT_PRIORITY,
         project: form.project || null
       };
+      if (isBoardOwner) {
+        payload.isPersonal = Boolean(form.isPersonal);
+      }
       if (isSharedView && ownerId) {
         payload.ownerId = ownerId;
       }
@@ -1395,6 +1507,28 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
     } catch (saveError) {
       console.error('Failed to save task:', saveError);
       setError(saveError.response?.data?.message || saveError.message || 'Failed to save task.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const togglePersonal = async (checked) => {
+    if (!isBoardOwner || !viewTask || viewTask.pendingSync || saving) return;
+    const nextValue = Boolean(checked);
+    setViewTask((prev) => (prev ? { ...prev, isPersonal: nextValue } : prev));
+    setSaving(true);
+    try {
+      const response = await axios.put(`/taskboard/tasks/${viewTask._id}`, {
+        isPersonal: nextValue
+      });
+      const updated = response.data.task;
+      setViewTask(updated);
+      setError('');
+      await reloadBoardRef.current();
+    } catch (personalError) {
+      console.error('Failed to update personal flag:', personalError);
+      setViewTask((prev) => (prev ? { ...prev, isPersonal: !nextValue } : prev));
+      setError(personalError.response?.data?.message || 'Failed to update personal flag.');
     } finally {
       setSaving(false);
     }
@@ -2671,6 +2805,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                           </span>
                           <p className="wb-note-meta">{timeLabel || 'All day'}</p>
                           <p className="wb-note-title">{task.title}</p>
+                          {task.isPersonal ? <p className="wb-note-personal">Personal</p> : null}
                           {task.tag ? <p className="wb-note-tag">{task.tag}</p> : null}
                           {task.priority && task.priority !== 'NORMAL' ? (
                             <p className={`wb-note-priority wb-note-priority--${String(task.priority).toLowerCase()}`}>
@@ -2809,9 +2944,17 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                               <button
                                 key={task._id}
                                 type="button"
-                                className={`wb-month-chip wb-note--${paper} wb-note-status--${task.status || 'started'}`}
+                                className={`wb-month-chip wb-note--${paper} wb-note-status--${task.status || 'started'}${
+                                  task.isPersonal ? ' is-personal' : ''
+                                }`}
                                 onClick={() => openView(task, paper)}
-                                title={task.pendingSync ? `Waiting to sync. ${task.title}` : task.title}
+                                title={
+                                  task.pendingSync
+                                    ? `Waiting to sync. ${task.title}`
+                                    : task.isPersonal
+                                      ? `Personal · ${task.title}`
+                                      : task.title
+                                }
                               >
                                 <span
                                   className={`wb-status-dot wb-status-dot--${task.status || 'started'}`}
@@ -3229,6 +3372,87 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
           </div>
         ) : null}
 
+        {socialTask ? (
+          <div className="wb-confirm-backdrop" onClick={closeSocial}>
+            <div
+              className="wb-modal wb-social"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="taskboard-social-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <p className="wb-note-meta">Social post</p>
+              <h2 id="taskboard-social-title">{socialTask.title || 'Untitled task'}</h2>
+              <p className="wb-social-note">
+                Review before you post. Internal details stay out of the draft.
+              </p>
+              {socialDraft?.contextLabel ? (
+                <p className="wb-social-context">{socialDraft.contextLabel}</p>
+              ) : null}
+
+              <div className="wb-social-tabs" role="tablist" aria-label="Social platforms">
+                {SOCIAL_PLATFORMS.map((platform) => (
+                  <button
+                    key={platform.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={socialPlatform === platform.id}
+                    className={`wb-social-tab${socialPlatform === platform.id ? ' is-active' : ''}`}
+                    onClick={() => {
+                      setSocialPlatform(platform.id);
+                      setSocialCopied(false);
+                    }}
+                  >
+                    {platform.label}
+                  </button>
+                ))}
+              </div>
+
+              {socialLoading ? <p className="wb-social-status">Writing LinkedIn, Twitter, and Instagram…</p> : null}
+              {socialError ? <p className="wb-social-error">{socialError}</p> : null}
+
+              {socialDraft?.posts ? (
+                <>
+                  {socialDraft.posts.sensitivity === 'kept-high-level' ? (
+                    <p className="wb-social-context">Kept high-level so private details stay private.</p>
+                  ) : null}
+                  {socialDraft.posts.angle ? (
+                    <p className="wb-social-angle">{socialDraft.posts.angle}</p>
+                  ) : null}
+                  <textarea
+                    className="wb-social-copy"
+                    readOnly
+                    value={socialDraft.posts[socialPlatform]?.text || ''}
+                    aria-label={`${socialPlatform} post`}
+                    onFocus={(event) => event.target.select()}
+                  />
+                </>
+              ) : null}
+
+              <div className="wb-modal-actions">
+                <button type="button" onClick={closeSocial}>
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => loadSocialPost(socialTask)}
+                  disabled={socialLoading}
+                >
+                  {socialLoading ? 'Writing…' : 'Regenerate'}
+                </button>
+                <button
+                  type="button"
+                  className="wb-modal-primary"
+                  onClick={copySocialPost}
+                  disabled={socialLoading || !socialDraft?.posts?.[socialPlatform]?.text}
+                >
+                  {socialCopied ? 'Copied' : 'Copy post'}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {showModal ? (
           <div className="wb-modal-backdrop" onClick={closeModal}>
             {modalMode === 'view' && viewTask ? (
@@ -3291,6 +3515,19 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                       </span>
                     </div>
                   ) : null}
+                  {isBoardOwner ? (
+                    <PersonalTaskCheckbox
+                      id="wb-view-personal"
+                      checked={Boolean(viewTask.isPersonal)}
+                      disabled={Boolean(viewTask.pendingSync) || saving}
+                      onChange={togglePersonal}
+                    />
+                  ) : viewTask.isPersonal ? (
+                    <div className="wb-sticky-field">
+                      <span className="wb-sticky-field-label">Visibility</span>
+                      <span className="wb-note-personal">Personal</span>
+                    </div>
+                  ) : null}
                 </div>
 
                 {viewTaskHistory.length > 0 ? (
@@ -3330,8 +3567,19 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                       Delete
                     </button>
                   ) : null}
-                  {!viewTask.pendingSync && (canEditTasks || canDeleteTasks || (!isSharedView && canEdit)) ? (
+                  {!viewTask.pendingSync && (canEditTasks || canDeleteTasks || (!isSharedView && canEdit) || isBoardOwner) ? (
                     <>
+                      {isBoardOwner ? (
+                        <button
+                          type="button"
+                          onClick={() => loadSocialPost(viewTask)}
+                          disabled={socialLoading}
+                        >
+                          {socialLoading && socialTask && String(socialTask._id) === String(viewTask._id)
+                            ? 'Writing…'
+                            : 'Create social post'}
+                        </button>
+                      ) : null}
                       {!isSharedView && canEdit ? (
                       <button type="button" className="wb-focus-chip" onClick={() => openFocusMode(viewTask)} title="Focus mode (F)">
                         Focus
@@ -3582,6 +3830,17 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                     }
                     placeholder="Who assigned this?"
                   />
+
+                  {isBoardOwner ? (
+                    <PersonalTaskCheckbox
+                      id="wb-personal"
+                      checked={Boolean(form.isPersonal)}
+                      disabled={saving}
+                      onChange={(checked) =>
+                        setForm((prev) => ({ ...prev, isPersonal: checked }))
+                      }
+                    />
+                  ) : null}
 
                   <div className="wb-modal-actions">
                     <button

@@ -5,6 +5,7 @@ const WorkboardMission = require('../models/WorkboardMission');
 const WorkboardVictory = require('../models/WorkboardVictory');
 const User = require('../models/User');
 const { canEditWorkboard } = require('../middleware/auth');
+const { visibleTasksQuery } = require('../utils/workboardPersonal');
 const {
   syncUserAchievements,
   listAchievementsForUser,
@@ -109,7 +110,8 @@ const listProjects = async (req, res) => {
     const projectIds = projects.map((project) => project._id);
     const tasks = await WorkboardTask.find({
       owner: ownerId,
-      project: { $in: projectIds }
+      project: { $in: projectIds },
+      ...visibleTasksQuery(req.user, ownerId)
     })
       .select('title status priority date project focusTime')
       .lean();

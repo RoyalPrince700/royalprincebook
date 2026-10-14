@@ -4,6 +4,7 @@ const {
   getWorkers,
   getTasks,
   createTask,
+  createTaskSocialPost,
   updateTask,
   updateTaskStatus,
   deleteTask,
@@ -107,6 +108,7 @@ router.post('/objectives', createObjective);
 router.put('/objectives/:id', updateObjective);
 router.delete('/objectives/:id', deleteObjective);
 router.post('/tasks', createTask);
+router.post('/tasks/:id/social-post', createTaskSocialPost);
 router.put('/tasks/:id', updateTask);
 router.patch('/tasks/:id/status', updateTaskStatus);
 router.patch('/tasks/:id/focus', addFocusTime);

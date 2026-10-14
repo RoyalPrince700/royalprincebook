@@ -4,7 +4,7 @@ contextBridge.exposeInMainWorld('capture', {
   getState: () => ipcRenderer.invoke('get-state'),
   signIn: () => ipcRenderer.invoke('sign-in'),
   signOut: () => ipcRenderer.invoke('sign-out'),
-  saveTask: (title) => ipcRenderer.invoke('save-task', title),
+  saveTask: (task) => ipcRenderer.invoke('save-task', task),
   openBoard: (board) => ipcRenderer.invoke('open-board', board),
   hide: () => ipcRenderer.invoke('hide'),
   onSession: (callback) => {

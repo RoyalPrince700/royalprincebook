@@ -52,7 +52,9 @@ body {
 .close,
 .primary,
 .link,
-input {
+label,
+input,
+textarea {
   -webkit-app-region: no-drag;
   font: inherit;
 }
@@ -117,7 +119,13 @@ form {
   margin-top: 14px;
 }
 
-input {
+label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+input,
+textarea {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -128,8 +136,49 @@ input {
   user-select: text;
 }
 
-input:focus {
+textarea {
+  resize: none;
+  line-height: 1.4;
+  min-height: 72px;
+}
+
+input:focus,
+textarea:focus {
   border-color: rgba(228, 177, 90, 0.8);
+}
+
+.personal {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+.personal input {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  flex-shrink: 0;
+  accent-color: var(--gold);
+}
+
+.personal-title {
+  display: block;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.personal-hint {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .primary {

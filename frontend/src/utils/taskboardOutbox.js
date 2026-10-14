@@ -30,6 +30,7 @@ const cleanPayload = (payload, id) => {
     tag: String(payload.tag || '').trim().slice(0, 40),
     priority: payload.priority || 'NORMAL',
     project: payload.project || null,
+    isPersonal: Boolean(payload.isPersonal),
     ...(payload.ownerId ? { ownerId: String(payload.ownerId) } : {})
   };
 };
@@ -47,8 +48,17 @@ export const toPendingTask = (item) => ({
   assignedBy: item.payload.assignedBy || '',
   tag: item.payload.tag || '',
   priority: item.payload.priority || 'NORMAL',
-  project: item.payload.project || null
+  project: item.payload.project || null,
+  isPersonal: Boolean(item.payload.isPersonal)
 });
+
+export const omitPersonalTasks = (tasksByDate) => {
+  const next = {};
+  Object.entries(tasksByDate || {}).forEach(([date, tasks]) => {
+    next[date] = (tasks || []).filter((task) => !task?.isPersonal);
+  });
+  return next;
+};
 
 export const mergePendingIntoBoard = (tasksByDate, pendingItems) => {
   const next = {};

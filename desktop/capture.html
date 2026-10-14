@@ -28,8 +28,17 @@
         <h1>What are you working on?</h1>
         <p class="context" id="context">Saved to your taskboard for today.</p>
         <form id="task-form">
-          <label class="sr-only" for="title">Task</label>
-          <input id="title" name="title" type="text" maxlength="160" placeholder="Write the task" autocomplete="off" />
+          <label for="title">Title</label>
+          <input id="title" name="title" type="text" maxlength="160" placeholder="What are you working on?" autocomplete="off" />
+          <label for="note">Notes</label>
+          <textarea id="note" name="note" rows="3" maxlength="4000" placeholder="Optional"></textarea>
+          <label class="personal" for="personal">
+            <input id="personal" name="personal" type="checkbox" />
+            <span>
+              <span class="personal-title">Personal</span>
+              <span class="personal-hint">Stays on your board only. Left out of reports and hidden from anyone you share with.</span>
+            </span>
+          </label>
           <button type="submit" class="primary" id="save">Save</button>
         </form>
         <p class="status" id="save-status" role="status"></p>

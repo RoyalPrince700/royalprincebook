@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import {
   createTaskOutbox,
   isRetryableStatus,
-  mergePendingIntoBoard
+  mergePendingIntoBoard,
+  omitPersonalTasks
 } from './taskboardOutbox.js';
 
 let passed = 0;
@@ -58,6 +59,29 @@ test('shows queued tasks on the board without dropping server tasks', () => {
     ['Already saved', 'Queued']
   );
   assert.equal(merged['2026-10-14'][1].pendingSync, true);
+});
+
+test('keeps the personal flag on queued tasks', () => {
+  const outbox = createTaskOutbox(memoryStorage());
+  const item = outbox.enqueue('user-1', {
+    title: 'Call mum',
+    date: '2026-10-14',
+    isPersonal: true
+  });
+  assert.equal(item.payload.isPersonal, true);
+});
+
+test('drops personal tasks from a shared board payload', () => {
+  const stripped = omitPersonalTasks({
+    '2026-10-14': [
+      { _id: 'work', title: 'Standup', isPersonal: false },
+      { _id: 'home', title: 'Doctor', isPersonal: true }
+    ]
+  });
+  assert.deepEqual(
+    stripped['2026-10-14'].map((task) => task._id),
+    ['work']
+  );
 });
 
 test('retries when the server is asleep and stops on a rejected task', () => {

@@ -28,7 +28,8 @@ const normalizeItem = (item) => {
       title,
       description: String(payload.description || '').trim().slice(0, 4000),
       date,
-      status: 'started'
+      status: 'started',
+      isPersonal: payload.isPersonal === true
     }
   };
 };

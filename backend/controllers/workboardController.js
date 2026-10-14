@@ -28,6 +28,13 @@ const {
 } = require('../utils/workboardAccess');
 const mongoose = require('mongoose');
 const { normalizeClientRequestId } = require('../utils/clientRequestId');
+const {
+  parsePersonalFlag,
+  visibleTasksQuery,
+  publicTasksQuery,
+  isHiddenPersonalTask
+} = require('../utils/workboardPersonal');
+const { createSocialPosts } = require('../utils/socialPost');
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -433,7 +440,8 @@ const getTasks = async (req, res) => {
     if (hasRange) {
       const tasks = await WorkboardTask.find({
         owner: ownerId,
-        date: { $gte: startDate, $lte: endDate }
+        date: { $gte: startDate, $lte: endDate },
+        ...visibleTasksQuery(req.user, ownerId)
       }).lean();
 
       const normalized = tasks.map((task) => ({
@@ -466,7 +474,11 @@ const getTasks = async (req, res) => {
       });
     }
 
-    const tasks = await WorkboardTask.find({ owner: ownerId, date }).lean();
+    const tasks = await WorkboardTask.find({
+      owner: ownerId,
+      date,
+      ...visibleTasksQuery(req.user, ownerId)
+    }).lean();
     const tagNames = await listTagNames(ownerId);
 
     res.json({
@@ -511,6 +523,7 @@ const createTask = async (req, res) => {
       tag = '',
       priority = DEFAULT_PRIORITY,
       project = null,
+      isPersonal = false,
       ownerId: requestedOwnerId
     } = req.body;
 
@@ -570,6 +583,7 @@ const createTask = async (req, res) => {
     );
 
     const savedTag = await upsertTag(boardOwnerId, tag);
+    const personal = boardOwnerId === userId ? parsePersonalFlag(isPersonal) : false;
 
     const task = new WorkboardTask({
       owner: boardOwnerId,
@@ -585,6 +599,7 @@ const createTask = async (req, res) => {
       tag: savedTag,
       priority: normalizedPriority,
       project: projectId,
+      isPersonal: personal,
       xpAwarded: 0,
       completedAt: null,
       cancelledAt: status === 'cancelled' ? new Date() : null,
@@ -645,6 +660,9 @@ const updateTask = async (req, res) => {
     }
     const ownerId = task.owner.toString();
     const userId = req.user._id.toString();
+    if (isHiddenPersonalTask(task, req.user)) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
     const canEditTask =
       ownerId === userId ||
       (await hasWorkboardPermission(ownerId, userId, 'edit_task'));
@@ -659,7 +677,7 @@ const updateTask = async (req, res) => {
     if (!task.originalDate) {
       task.originalDate = task.date;
     }
-    const { title, description, date, startTime, endTime, status, assignedBy, tag, priority, project } =
+    const { title, description, date, startTime, endTime, status, assignedBy, tag, priority, project, isPersonal } =
       req.body;
 
     if (title !== undefined) {
@@ -730,6 +748,9 @@ const updateTask = async (req, res) => {
     if (tag !== undefined) {
       task.tag = await upsertTag(ownerId, tag);
     }
+    if (isPersonal !== undefined && ownerId === userId) {
+      task.isPersonal = parsePersonalFlag(isPersonal);
+    }
 
     const nextStatus = normalizeTaskStatus(task.status);
     const xpResult = applyCompletionXp(task, previousStatus, nextStatus);
@@ -771,6 +792,9 @@ const updateTaskStatus = async (req, res) => {
     }
     const ownerId = task.owner.toString();
     const userId = req.user._id.toString();
+    if (isHiddenPersonalTask(task, req.user)) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
     const canUpdateStatus =
       ownerId === userId ||
       (await hasWorkboardPermission(ownerId, userId, 'update_status')) ||
@@ -825,6 +849,9 @@ const deleteTask = async (req, res) => {
     }
     const ownerId = task.owner.toString();
     const userId = req.user._id.toString();
+    if (isHiddenPersonalTask(task, req.user)) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
     const canDelete =
       ownerId === userId ||
       (await hasWorkboardPermission(ownerId, userId, 'delete_task'));
@@ -857,6 +884,10 @@ const addComment = async (req, res) => {
       return res.status(404).json({ message: 'Task not found' });
     }
 
+    if (isHiddenPersonalTask(task, req.user)) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
     const isOwner = task.owner.toString() === req.user._id.toString();
     const isSuperior = req.user.role === 'superior';
     const canComment =
@@ -886,7 +917,8 @@ const loadReportPayload = async ({ period, date, ownerId }) => {
   const { startDate, endDate } = getRangeForPeriod(period, date);
   const tasks = await WorkboardTask.find({
     owner: ownerId,
-    date: { $gte: startDate, $lte: endDate }
+    date: { $gte: startDate, $lte: endDate },
+    ...publicTasksQuery()
   })
     .sort({ date: 1, startTime: 1, createdAt: 1 })
     .lean();
@@ -1209,7 +1241,8 @@ const getSharedReport = async (req, res) => {
 
     const tasks = await WorkboardTask.find({
       owner: share.owner,
-      date: { $gte: share.startDate, $lte: share.endDate }
+      date: { $gte: share.startDate, $lte: share.endDate },
+      ...publicTasksQuery()
     })
       .sort({ date: 1, startTime: 1, createdAt: 1 })
       .lean();
@@ -1401,13 +1434,14 @@ const getGamificationStats = async (req, res) => {
       User.findById(ownerId).select(streakFields),
       WorkboardTask.find({
         owner: ownerId,
+        ...visibleTasksQuery(req.user, ownerId),
         $or: [
           { date: { $gte: startDate, $lte: endDate } },
           { originalDate: { $gte: startDate, $lte: endDate } }
         ]
       })
         .select(
-          'date originalDate rolledFromDate status priority xpAwarded completedAt cancelledAt title focusTime project tag startTime endTime createdAt updatedAt'
+          'date originalDate rolledFromDate status priority xpAwarded completedAt cancelledAt title focusTime project tag startTime endTime createdAt updatedAt isPersonal'
         )
         .lean()
     ]);
@@ -1486,10 +1520,78 @@ const restoreVisitStreak = async (req, res) => {
   }
 };
 
+const createTaskSocialPost = async (req, res) => {
+  try {
+    if (!canEditWorkboard(req.user)) {
+      return res.status(403).json({ message: 'Only admins can create a social post from a task' });
+    }
+
+    const task = await WorkboardTask.findById(req.params.id);
+    if (!task || isHiddenPersonalTask(task, req.user)) {
+      return res.status(404).json({ message: 'Task not found' });
+    }
+
+    const ownerId = task.owner.toString();
+    if (ownerId !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Only the board owner can create a social post from this task' });
+    }
+
+    const tag = String(task.tag || '').trim();
+    const related = tag
+      ? await WorkboardTask.find({
+          owner: task.owner,
+          tag,
+          _id: { $ne: task._id },
+          isPersonal: { $ne: true }
+        })
+          .sort({ updatedAt: -1 })
+          .limit(6)
+          .select('title description')
+      : [];
+
+    const posts = await createSocialPosts({
+      task: {
+        title: task.title,
+        tag,
+        status: task.status,
+        description: task.description,
+        sensitive: Boolean(task.isPersonal)
+      },
+      related
+    });
+
+    let contextLabel = 'Based on this task.';
+    if (tag && related.length === 1) {
+      contextLabel = `Also read 1 other task tagged ${tag}.`;
+    } else if (tag && related.length > 1) {
+      contextLabel = `Also read ${related.length} other tasks tagged ${tag}.`;
+    } else if (tag) {
+      contextLabel = `Based on this task. No other tasks use the ${tag} tag yet.`;
+    }
+
+    res.json({
+      taskId: task._id,
+      title: task.title,
+      tag,
+      contextLabel,
+      posts
+    });
+  } catch (error) {
+    const status = error.status || 500;
+    if (status >= 500) {
+      console.error('Task social post error:', error.message);
+    }
+    res.status(status).json({
+      message: error.message || 'Failed to create social post'
+    });
+  }
+};
+
 module.exports = {
   getWorkers,
   getTasks,
   createTask,
+  createTaskSocialPost,
   updateTask,
   updateTaskStatus,
   deleteTask,

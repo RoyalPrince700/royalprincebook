@@ -41,6 +41,17 @@ test('round-trips a saved queue and drops corrupt rows', () => {
   assert.deepStrictEqual(loadOutboxItems(JSON.stringify([{ id: 'nope' }])), []);
 });
 
+test('keeps the personal flag on a queued task', () => {
+  const id = '123e4567-e89b-42d3-a456-426614174000';
+  const outbox = createOutbox();
+  const item = sample(id, 'ada@example.com');
+  item.payload.isPersonal = true;
+  outbox.enqueue(item);
+  const restored = createOutbox(loadOutboxItems(JSON.stringify(outbox.all())));
+  assert.strictEqual(restored.get(id).payload.isPersonal, true);
+  assert.strictEqual(outbox.enqueue(sample('123e4567-e89b-42d3-b456-426614174111', 'ada@example.com')).payload.isPersonal, false);
+});
+
 test('classifies cold-start failures as retryable and bad tasks as permanent', () => {
   assert.strictEqual(classifyHttpStatus(undefined), 'retry');
   assert.strictEqual(classifyHttpStatus(500), 'retry');

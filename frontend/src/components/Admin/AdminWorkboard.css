@@ -1223,7 +1223,7 @@
   color: var(--wb-ink-soft);
 }
 
-.wb-modal input,
+.wb-modal input:not([type='checkbox']),
 .wb-modal textarea,
 .wb-modal select {
   margin-top: 0.35rem;
@@ -1234,6 +1234,61 @@
   color: var(--wb-ink);
   padding: 0.7rem 0.85rem;
   font-size: 0.875rem;
+}
+
+.wb-personal-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  cursor: pointer;
+  color: var(--wb-ink);
+}
+
+.wb-personal-check input {
+  appearance: auto;
+  flex-shrink: 0;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  border-radius: 0.25rem;
+  accent-color: var(--wb-add);
+  cursor: pointer;
+}
+
+.wb-personal-check input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.wb-personal-check-title {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.wb-personal-check-hint {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--wb-ink-soft);
+}
+
+.wb-note-personal {
+  display: inline-flex;
+  align-self: flex-start;
+  border-radius: 999px;
+  background: rgba(61, 52, 44, 0.12);
+  color: var(--wb-ink);
+  padding: 0.18rem 0.55rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .wb-tag-row {
@@ -1318,7 +1373,8 @@
   text-overflow: ellipsis;
 }
 
-.wb-note-tag {
+.wb-note-tag,
+.wb-note .wb-note-personal {
   margin: 0.2rem 0 0;
   font-size: 0.62rem;
 }
@@ -1427,6 +1483,56 @@
   margin: 0.15rem 0 0;
   font-size: 1.15rem;
   font-weight: 700;
+}
+
+.wb-social {
+  max-width: 40rem;
+}
+
+.wb-social-note,
+.wb-social-context,
+.wb-social-angle,
+.wb-social-status,
+.wb-social-error {
+  margin: 0.55rem 0 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--wb-ink-soft);
+}
+
+.wb-social-error {
+  color: #8a3a28;
+}
+
+.wb-social-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.9rem;
+}
+
+.wb-social-tab {
+  appearance: none;
+  border: 1px solid rgba(120, 90, 60, 0.18);
+  background: transparent;
+  color: var(--wb-ink);
+  border-radius: 999px;
+  padding: 0.32rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.wb-social-tab.is-active {
+  background: var(--wb-tab-active);
+  color: var(--wb-tab-active-text);
+  border-color: var(--wb-tab-active);
+}
+
+.wb-social-copy {
+  min-height: 16rem;
+  resize: vertical;
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 
 .wb-confirm-copy {

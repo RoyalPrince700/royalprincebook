@@ -197,6 +197,7 @@ body:has([data-board-theme='dark'].admin-workspace-shell--immersive) {
   .wb-note-meta,
   .wb-note-title,
   .wb-note-tag,
+  .wb-note-personal,
   .wb-note-priority,
   .wb-note-actions button
 ) {
@@ -204,7 +205,8 @@ body:has([data-board-theme='dark'].admin-workspace-shell--immersive) {
 }
 
 [data-board-theme='dark'] .wb-board .wb-note .wb-note-title,
-[data-board-theme='dark'] .wb-board .wb-note .wb-note-tag {
+[data-board-theme='dark'] .wb-board .wb-note .wb-note-tag,
+[data-board-theme='dark'] .wb-board .wb-note .wb-note-personal {
   color: var(--wb-note-ink) !important;
 }
 
@@ -262,8 +264,19 @@ body:has([data-board-theme='dark'].admin-workspace-shell--immersive) {
   color: var(--wb-ink) !important;
 }
 
+[data-board-theme='dark'] .wb-board .wb-personal-check input {
+  accent-color: var(--wb-add);
+  background: transparent !important;
+  border: none !important;
+}
+
+[data-board-theme='dark'] .wb-board .wb-note-personal {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: var(--wb-note-ink) !important;
+}
+
 [data-board-theme='dark'] .wb-board :is(
-  .wb-modal input,
+  .wb-modal input:not([type='checkbox']),
   .wb-modal textarea,
   .wb-modal select,
   .wb-quick-capture input,
@@ -293,6 +306,10 @@ body:has([data-board-theme='dark'].admin-workspace-shell--immersive) {
   border-color: var(--wb-board-line) !important;
   background: rgba(255, 255, 255, 0.04) !important;
   color: var(--wb-ink-soft) !important;
+}
+
+[data-board-theme='dark'] .wb-board .wb-social-error {
+  color: #f0a8a0 !important;
 }
 
 [data-board-theme='dark'] .wb-board .wb-error,

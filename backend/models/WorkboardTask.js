@@ -100,6 +100,14 @@ const workboardTaskSchema = new mongoose.Schema({
     maxlength: 40,
     default: ''
   },
+  /**
+   * Owner-only. Hidden from reports and from anyone the board is shared with.
+   */
+  isPersonal: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
   /** Priority drives XP on completion. Defaults keep legacy tasks compatible. */
   priority: {
     type: String,

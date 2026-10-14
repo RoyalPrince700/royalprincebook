@@ -54,7 +54,7 @@ const recentFailures = new Map();
 const SYNC_TIMEOUT_MS = 90000;
 const QUICK_SAVE_MS = 4000;
 const RETRY_MS = 30000;
-const CAPTURE_HEIGHT = 400;
+const CAPTURE_HEIGHT = 640;
 
 const trimSlash = (value) => String(value || '').replace(/\/+$/, '');
 
@@ -550,10 +550,10 @@ const kickFlush = () => {
   return flushPromise;
 };
 
-const saveTask = async (title) => {
+const saveTask = async (title, note = '', personal = false) => {
   const cleaned = String(title || '').trim().slice(0, 160);
   if (!cleaned) {
-    throw new Error('Write the task first.');
+    throw new Error('Write the title first.');
   }
   if (!settings.token) {
     const error = new Error('Sign in before saving a task.');
@@ -564,17 +564,22 @@ const saveTask = async (title) => {
     throw new Error('Sign in before saving a task.');
   }
 
-  const description = currentContext.appName || currentContext.windowTitle
+  const context = currentContext.appName || currentContext.windowTitle
     ? currentContext.label
     : '';
+  const written = String(note || '').trim();
+  const description = written && context
+    ? `${written}\n\n${context}`
+    : written || context;
   const item = taskOutbox.enqueue({
     id: crypto.randomUUID(),
     accountKey: accountKey(),
     payload: {
       title: cleaned,
-      description: description.slice(0, 500),
+      description: description.slice(0, 4000),
       date: today(),
-      status: 'started'
+      status: 'started',
+      isPersonal: Boolean(personal)
     }
   });
   persistOutbox();
@@ -658,9 +663,12 @@ const registerIpc = () => {
     clearSession();
     return publicState({ reset: true });
   });
-  ipcMain.handle('save-task', async (_event, title) => {
+  ipcMain.handle('save-task', async (_event, task) => {
     try {
-      return { ok: true, ...(await saveTask(title)) };
+      const title = typeof task === 'string' ? task : task?.title;
+      const note = typeof task === 'string' ? '' : task?.note;
+      const personal = typeof task === 'string' ? false : Boolean(task?.personal);
+      return { ok: true, ...(await saveTask(title, note, personal)) };
     } catch (error) {
       return {
         ok: false,

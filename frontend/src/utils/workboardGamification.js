@@ -1232,7 +1232,13 @@ export const searchWorkboardItems = ({
   const taskHits = (tasks || [])
     .filter((task) => match(task.title, task.description, task.tag, task.assignedBy))
     .slice(0, 12)
-    .map((task) => ({ type: 'task', id: task._id || task.id, title: task.title, meta: task.date, raw: task }));
+    .map((task) => ({
+      type: 'task',
+      id: task._id || task.id,
+      title: task.title,
+      meta: task.isPersonal ? `${task.date} · Personal` : task.date,
+      raw: task
+    }));
 
   const projectHits = (projects || [])
     .filter((project) => match(project.title, project.description))
