@@ -21,6 +21,17 @@ const render = (state) => {
   signedIn.hidden = !signedInNow;
   contextLine.textContent = state?.context?.label || 'Saved to your taskboard for today.';
 
+  if (state?.syncError) {
+    setStatus(saveStatus, state.syncError, true);
+  } else if (state?.pending) {
+    setStatus(
+      saveStatus,
+      state.pending === 1
+        ? '1 task is waiting to sync.'
+        : `${state.pending} tasks are waiting to sync.`
+    );
+  }
+
   if (signedInNow) {
     titleInput.focus();
     titleInput.select();
@@ -74,7 +85,7 @@ form.addEventListener('submit', async (event) => {
     }
     setStatus(saveStatus, result.message || 'Saved.');
     titleInput.value = '';
-    window.setTimeout(() => window.capture.hide(), 500);
+    window.setTimeout(() => window.capture.hide(), result.queued ? 1800 : 500);
   } catch (error) {
     setStatus(saveStatus, showError(error), true);
   } finally {

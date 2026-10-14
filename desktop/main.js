@@ -9,10 +9,12 @@ const {
   screen,
   shell
 } = require('electron');
+const crypto = require('crypto');
 const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const { spawn } = require('child_process');
+const { classifyHttpStatus, createOutbox, loadOutboxItems } = require('./outbox');
 
 const SHORTCUT = 'CommandOrControl+Shift+Space';
 const SHORTCUT_LABEL = 'Ctrl+Shift+Space';
@@ -44,6 +46,15 @@ let currentContext = { appName: '', windowTitle: '', label: '' };
 let lastExternalContext = { appName: '', windowTitle: '', label: '' };
 let foregroundWatcher = null;
 let signInPromise = null;
+let taskOutbox = createOutbox();
+let outboxPath = '';
+let flushPromise = null;
+let flushTimer = null;
+const recentFailures = new Map();
+const SYNC_TIMEOUT_MS = 90000;
+const QUICK_SAVE_MS = 4000;
+const RETRY_MS = 30000;
+const CAPTURE_HEIGHT = 400;
 
 const trimSlash = (value) => String(value || '').replace(/\/+$/, '');
 
@@ -207,6 +218,11 @@ while ($true) {
   };
 };
 
+const accountKey = () =>
+  String(settings.user?.email || settings.user?.username || '').trim().toLowerCase();
+
+const pendingCount = () => taskOutbox.pendingFor(accountKey()).length;
+
 const publicState = (extra = {}) => ({
   signedIn: Boolean(settings.token),
   user: settings.user
@@ -214,6 +230,7 @@ const publicState = (extra = {}) => ({
     : null,
   context: currentContext,
   shortcut: SHORTCUT_LABEL,
+  pending: pendingCount(),
   ...extra
 });
 
@@ -229,9 +246,9 @@ const today = () => {
   return `${date.getFullYear()}-${month}-${day}`;
 };
 
-const api = async (pathname, { method = 'GET', body, token = settings.token } = {}) => {
+const api = async (pathname, { method = 'GET', body, token = settings.token, timeout = 25000 } = {}) => {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 25000);
+  const timer = setTimeout(() => controller.abort(), timeout);
   try {
     const response = await fetch(`${settings.apiBaseUrl}${pathname}`, {
       method,
@@ -294,7 +311,7 @@ const positionWindow = () => {
   const cursor = screen.getCursorScreenPoint();
   const display = screen.getDisplayNearestPoint(cursor);
   const width = 420;
-  const height = 340;
+  const height = CAPTURE_HEIGHT;
   captureWindow.setBounds({
     x: Math.round(display.workArea.x + (display.workArea.width - width) / 2),
     y: Math.round(display.workArea.y + (display.workArea.height - height) / 2),
@@ -325,7 +342,7 @@ const showCapture = async () => {
 const createCaptureWindow = () => {
   captureWindow = new BrowserWindow({
     width: 420,
-    height: 340,
+    height: CAPTURE_HEIGHT,
     show: false,
     frame: false,
     resizable: false,
@@ -440,11 +457,101 @@ const signIn = async () => {
     clearSession();
     throw error;
   }
+  kickFlush();
   return publicState();
 };
 
+const persistOutbox = () => {
+  fs.mkdirSync(path.dirname(outboxPath), { recursive: true });
+  fs.writeFileSync(outboxPath, JSON.stringify(taskOutbox.all(), null, 2));
+};
+
+const readOutboxFile = () => {
+  try {
+    taskOutbox = createOutbox(loadOutboxItems(fs.readFileSync(outboxPath, 'utf8')));
+  } catch (error) {
+    if (error.code !== 'ENOENT') console.error('Could not read the task outbox', error);
+    taskOutbox = createOutbox();
+  }
+};
+
+const queuedMessage = (count) =>
+  count === 1
+    ? 'Saved on this computer. It will show on your taskboard once the server wakes up.'
+    : `Saved on this computer. ${count} tasks will show on your taskboard once the server wakes up.`;
+
+const scheduleFlush = () => {
+  if (flushTimer || flushPromise || !settings.token || !accountKey()) return;
+  if (!pendingCount()) return;
+  flushTimer = setTimeout(() => {
+    flushTimer = null;
+    kickFlush();
+  }, RETRY_MS);
+};
+
+const runFlush = async () => {
+  let retryLater = false;
+  while (settings.token && accountKey()) {
+    const item = taskOutbox.pendingFor(accountKey())[0];
+    if (!item) break;
+    try {
+      await api('/taskboard/tasks', {
+        method: 'POST',
+        body: item.payload,
+        timeout: SYNC_TIMEOUT_MS
+      });
+      taskOutbox.remove(item.id);
+      persistOutbox();
+    } catch (error) {
+      const kind = error.status === 401 ? 'auth' : classifyHttpStatus(error.status);
+      if (kind === 'auth') {
+        clearSession();
+        sendSession({ reset: true });
+        break;
+      }
+      if (kind === 'permanent') {
+        taskOutbox.remove(item.id);
+        persistOutbox();
+        recentFailures.set(item.id, error.message || 'Could not save the task.');
+        sendSession({ syncError: recentFailures.get(item.id) });
+        continue;
+      }
+      retryLater = true;
+      break;
+    }
+  }
+  return { retryLater };
+};
+
+const kickFlush = () => {
+  if (flushTimer) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
+  if (flushPromise) return flushPromise;
+  if (!settings.token || !accountKey() || !pendingCount()) return Promise.resolve();
+
+  let outcome = { retryLater: false };
+  flushPromise = runFlush()
+    .then((result) => {
+      outcome = result || outcome;
+    })
+    .catch((error) => {
+      console.error('Task sync failed', error);
+      outcome = { retryLater: true };
+    })
+    .finally(() => {
+      flushPromise = null;
+      if (tray) rebuildTray();
+      if (!settings.token || !accountKey()) return;
+      if (outcome.retryLater) scheduleFlush();
+      else if (pendingCount()) kickFlush();
+    });
+  return flushPromise;
+};
+
 const saveTask = async (title) => {
-  const cleaned = String(title || '').trim();
+  const cleaned = String(title || '').trim().slice(0, 160);
   if (!cleaned) {
     throw new Error('Write the task first.');
   }
@@ -453,33 +560,49 @@ const saveTask = async (title) => {
     error.signedOut = true;
     throw error;
   }
+  if (!accountKey()) {
+    throw new Error('Sign in before saving a task.');
+  }
 
   const description = currentContext.appName || currentContext.windowTitle
     ? currentContext.label
     : '';
-
-  try {
-    await api('/taskboard/tasks', {
-      method: 'POST',
-      body: {
-        title: cleaned.slice(0, 200),
-        description: description.slice(0, 500),
-        date: today(),
-        status: 'started'
-      }
-    });
-  } catch (error) {
-    if (error.status === 401) {
-      clearSession();
-      sendSession({ reset: true });
-      const expired = new Error('Your sign-in expired. Sign in again.');
-      expired.signedOut = true;
-      throw expired;
+  const item = taskOutbox.enqueue({
+    id: crypto.randomUUID(),
+    accountKey: accountKey(),
+    payload: {
+      title: cleaned,
+      description: description.slice(0, 500),
+      date: today(),
+      status: 'started'
     }
-    throw error;
+  });
+  persistOutbox();
+  if (tray) rebuildTray();
+
+  await Promise.race([
+    kickFlush(),
+    new Promise((resolve) => setTimeout(resolve, QUICK_SAVE_MS))
+  ]);
+
+  const failure = recentFailures.get(item.id);
+  if (failure) {
+    recentFailures.delete(item.id);
+    throw new Error(failure);
   }
 
-  return { message: 'Saved to today’s taskboard.' };
+  if (!settings.token && taskOutbox.get(item.id)) {
+    const expired = new Error('Saved on this computer. Sign in again and it will sync.');
+    expired.signedOut = true;
+    throw expired;
+  }
+
+  if (!taskOutbox.get(item.id)) {
+    return { message: 'Saved to today’s taskboard.', pending: pendingCount() };
+  }
+
+  const pending = pendingCount();
+  return { message: queuedMessage(pending), queued: true, pending };
 };
 
 const rebuildTray = () => {
@@ -517,7 +640,8 @@ const rebuildTray = () => {
     }
   ]);
   tray.setContextMenu(menu);
-  tray.setToolTip(`Task Capture — ${SHORTCUT_LABEL}`);
+  const waiting = pendingCount() ? ` — ${pendingCount()} waiting to sync` : '';
+  tray.setToolTip(`Task Capture — ${SHORTCUT_LABEL}${waiting}`);
 };
 
 const createTray = () => {
@@ -565,7 +689,9 @@ if (!gotLock) {
 
   app.whenReady().then(async () => {
     settingsPath = path.join(app.getPath('userData'), 'settings.json');
+    outboxPath = path.join(app.getPath('userData'), 'outbox.json');
     loadSettings();
+    readOutboxFile();
     applyLoginItem();
     foregroundWatcher = createForegroundWatcher();
     registerIpc();
@@ -579,11 +705,13 @@ if (!gotLock) {
     }
 
     if (settings.token) {
+      kickFlush();
       try {
         await refreshProfile();
       } catch (error) {
         if (error.status === 401) clearSession();
       }
+      kickFlush();
     }
 
     if (!settings.token) {

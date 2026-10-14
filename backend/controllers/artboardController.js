@@ -4,6 +4,7 @@ const ArtboardNote = require('../models/ArtboardNote');
 const ArtboardShare = require('../models/ArtboardShare');
 const { NOTE_COLORS } = require('../models/ArtboardNote');
 const { emitArtboardEvent } = require('../realtime/artboardSocket');
+const { summarizeMeetingNotes } = require('../utils/meetingReport');
 
 const DEFAULT_NOTE_SIZE = { width: 176, height: 140 };
 const STARTER_NOTE = { x: 280, y: 180, color: 'yellow', text: '', zIndex: 1 };
@@ -558,12 +559,42 @@ const deleteSharedNote = async (req, res) => {
   }
 };
 
+const summarizeArtboard = async (req, res) => {
+  try {
+    if (!canUseArtboard(req.user)) {
+      return res.status(403).json({ message: 'Noteboard access required' });
+    }
+
+    const board = await findOwnedArtboard(req.params.id, req.user._id);
+    if (!board) {
+      return res.status(404).json({ message: 'Artboard not found' });
+    }
+
+    const notes = await loadBoardNotes(board);
+    const report = await summarizeMeetingNotes({
+      title: board.title,
+      notes: notes.map((note) => note.text)
+    });
+
+    res.json({ report });
+  } catch (error) {
+    const status = error.status || 500;
+    if (status >= 500) {
+      console.error('Summarize artboard error:', error.message);
+    }
+    res.status(status).json({
+      message: error.message || 'Failed to summarize noteboard'
+    });
+  }
+};
+
 module.exports = {
   listArtboards,
   createArtboard,
   getArtboard,
   updateArtboard,
   deleteArtboard,
+  summarizeArtboard,
   createNote,
   updateNote,
   deleteNote,

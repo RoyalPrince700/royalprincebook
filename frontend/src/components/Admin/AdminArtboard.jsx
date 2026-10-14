@@ -210,6 +210,15 @@ const SideIcon = ({ name }) => {
           <path d="M5 15V5a2 2 0 0 1 2-2h10" />
         </svg>
       );
+    case 'report':
+      return (
+        <svg {...props}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <path d="M14 2v6h6" />
+          <path d="M8 13h8" />
+          <path d="M8 17h5" />
+        </svg>
+      );
     default:
       return null;
   }
@@ -279,10 +288,19 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   const [shareError, setShareError] = useState('');
   const [shareAnchor, setShareAnchor] = useState(null);
   const [peerCount, setPeerCount] = useState(0);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [summarizing, setSummarizing] = useState(false);
+  const [report, setReport] = useState(null);
+  const [reportError, setReportError] = useState('');
+  const [reportCopied, setReportCopied] = useState(false);
 
   const dragRef = useRef(null);
   const notesRef = useRef(notes);
   const saveTimers = useRef({});
+  const pendingPatches = useRef({});
+  const noteSaveInflight = useRef({});
+  const reportCopyTimer = useRef(null);
+  const reportOpenRef = useRef(false);
   const titleInputRef = useRef(null);
   const noteEls = useRef({});
   const activeIdRef = useRef(activeId);
@@ -350,6 +368,17 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
   useEffect(() => {
     notesRef.current = notes;
   }, [notes]);
+
+  useEffect(() => {
+    reportOpenRef.current = reportOpen;
+  }, [reportOpen]);
+
+  useEffect(
+    () => () => {
+      if (reportCopyTimer.current) clearTimeout(reportCopyTimer.current);
+    },
+    []
+  );
 
   useEffect(() => {
     activeIdRef.current = activeId;
@@ -428,6 +457,7 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
 
     const onKeyDown = (event) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (reportOpenRef.current) return;
       if (isTypingTarget(event.target)) return;
 
       const key = event.key.toLowerCase();
@@ -923,18 +953,55 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     if (!boardId) return;
     const key = String(id);
     markLocalNoteWrite(key);
+    pendingPatches.current[key] = {
+      ...(pendingPatches.current[key] || {}),
+      ...patch
+    };
     if (saveTimers.current[key]) clearTimeout(saveTimers.current[key]);
-    saveTimers.current[key] = setTimeout(async () => {
-      try {
-        markLocalNoteWrite(key);
+    saveTimers.current[key] = setTimeout(() => {
+      const nextPatch = pendingPatches.current[key];
+      delete pendingPatches.current[key];
+      delete saveTimers.current[key];
+      if (!nextPatch) return;
+      const request = axios
+        .patch(`${noteApiBase(boardId)}/notes/${id}`, nextPatch, {
+          headers: socketHeaders()
+        })
+        .catch((err) => {
+          console.error(err);
+          setError(err.response?.data?.message || 'Failed to save note');
+        })
+        .finally(() => {
+          if (noteSaveInflight.current[key] === request) {
+            delete noteSaveInflight.current[key];
+          }
+        });
+      markLocalNoteWrite(key);
+      noteSaveInflight.current[key] = request;
+    }, 280);
+  }, [isGuest, markLocalNoteWrite, noteApiBase]);
+
+  const flushPendingNotes = useCallback(async () => {
+    const boardId = activeIdRef.current;
+    if (!boardId || isGuest) return;
+    const entries = Object.entries(pendingPatches.current);
+    entries.forEach(([key]) => {
+      if (saveTimers.current[key]) {
+        clearTimeout(saveTimers.current[key]);
+        delete saveTimers.current[key];
+      }
+    });
+    pendingPatches.current = {};
+    const inflight = Object.values(noteSaveInflight.current);
+    await Promise.all([
+      ...inflight,
+      ...entries.map(async ([id, patch]) => {
+        markLocalNoteWrite(id);
         await axios.patch(`${noteApiBase(boardId)}/notes/${id}`, patch, {
           headers: socketHeaders()
         });
-      } catch (err) {
-        console.error(err);
-        setError(err.response?.data?.message || 'Failed to save note');
-      }
-    }, 280);
+      })
+    ]);
   }, [isGuest, markLocalNoteWrite, noteApiBase]);
 
   const updateNoteLocal = useCallback((id, patch) => {
@@ -968,6 +1035,63 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add note');
     }
+  };
+
+  const closeReport = useCallback(() => {
+    setReportOpen(false);
+    setReportCopied(false);
+  }, []);
+
+  useEffect(() => {
+    if (!reportOpen) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') closeReport();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [reportOpen, closeReport]);
+
+  const handleSummarize = async () => {
+    if (isGuest) {
+      requireSignIn();
+      return;
+    }
+    if (!activeId || summarizing || isSharedMode) return;
+
+    const filled = notesRef.current.some((note) => String(note.text || '').trim());
+    setReportOpen(true);
+    setReport(null);
+    setReportCopied(false);
+    reportOpenRef.current = true;
+
+    if (!filled) {
+      setReportError('Add some meeting notes on this board first.');
+      return;
+    }
+
+    setReportError('');
+    setSummarizing(true);
+    try {
+      await flushPendingNotes();
+      const response = await axios.post(`/taskboard/artboards/${activeId}/summarize`);
+      setReport(response.data.report);
+    } catch (err) {
+      setReportError(err.response?.data?.message || 'Could not write the meeting report.');
+    } finally {
+      setSummarizing(false);
+    }
+  };
+
+  const handleCopyReport = async () => {
+    if (!report?.text) return;
+    const ok = await copyTextToClipboard(report.text);
+    if (!ok) {
+      setReportError('Could not copy the report. Select the text and copy it manually.');
+      return;
+    }
+    setReportCopied(true);
+    if (reportCopyTimer.current) clearTimeout(reportCopyTimer.current);
+    reportCopyTimer.current = setTimeout(() => setReportCopied(false), 1800);
   };
 
   const handleTextChange = (id, text) => {
@@ -1336,6 +1460,22 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
               <span className="ab-side-btn-label">Add note</span>
             </button>
 
+            {!isSharedMode ? (
+              <button
+                type="button"
+                className="ab-side-btn ab-side-btn--report ab-side-btn--row"
+                onClick={handleSummarize}
+                disabled={summarizing}
+                aria-label="Summarize meeting notes"
+                title="Turn these notes into a summary and action points"
+              >
+                <SideIcon name="report" />
+                <span className="ab-side-btn-label">
+                  {summarizing ? 'Writing…' : 'Meeting report'}
+                </span>
+              </button>
+            ) : null}
+
             {editingTitle && !isSharedMode ? (
               <div className="ab-side-panel">
                 <p className="ab-side-panel-label">Board title</p>
@@ -1385,6 +1525,18 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
             >
               <SideIcon name="note" />
             </button>
+            {!isSharedMode ? (
+              <button
+                type="button"
+                className="ab-side-btn ab-side-btn--report"
+                onClick={handleSummarize}
+                disabled={summarizing}
+                aria-label="Summarize meeting notes"
+                title="Meeting report"
+              >
+                <SideIcon name="report" />
+              </button>
+            ) : null}
           </div>
         )}
       </aside>
@@ -1444,6 +1596,97 @@ const AdminArtboard = ({ onExit, shareToken = '' }) => {
               </p>
             </>
           )}
+        </div>
+      ) : null}
+
+      {reportOpen ? (
+        <div className="ab-report-backdrop" onClick={closeReport}>
+          <div
+            className="ab-report"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ab-report-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="ab-report-head">
+              <p className="ab-report-kicker">Meeting report</p>
+              <button
+                type="button"
+                className="ab-report-close"
+                onClick={closeReport}
+                aria-label="Close report"
+              >
+                ×
+              </button>
+            </div>
+
+            {summarizing ? (
+              <p className="ab-report-status">Writing a summary and action points…</p>
+            ) : null}
+
+            {reportError ? <p className="ab-report-error">{reportError}</p> : null}
+
+            {report ? (
+              <div className="ab-report-body">
+                <h2 id="ab-report-title" className="ab-report-title">
+                  {report.headline}
+                </h2>
+                <p className="ab-report-meta">
+                  {report.boardTitle}
+                  {report.generatedAt ? ` · ${report.generatedAt}` : ''}
+                </p>
+
+                <section className="ab-report-section">
+                  <h3>Summary</h3>
+                  <p>{report.summary}</p>
+                </section>
+
+                {report.highlights?.length ? (
+                  <section className="ab-report-section">
+                    <h3>Key points</h3>
+                    <ul>
+                      {report.highlights.map((point, index) => (
+                        <li key={`${index}-${point}`}>{point}</li>
+                      ))}
+                    </ul>
+                  </section>
+                ) : null}
+
+                <section className="ab-report-section">
+                  <h3>Action points</h3>
+                  {report.actionItems?.length ? (
+                    <ol className="ab-report-actions">
+                      {report.actionItems.map((item, index) => (
+                        <li key={`${index}-${item.task}`}>
+                          <p>{item.task}</p>
+                          <span>
+                            {item.owner}
+                            {item.due ? ` · ${item.due}` : ''}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : (
+                    <p>No action points were captured in these notes.</p>
+                  )}
+                </section>
+              </div>
+            ) : null}
+
+            <div className="ab-report-footer">
+              <button
+                type="button"
+                className="ab-btn ab-btn-primary"
+                onClick={handleCopyReport}
+                disabled={!report?.text || summarizing}
+              >
+                {reportCopied ? 'Copied' : 'Copy report'}
+              </button>
+              <button type="button" className="ab-btn ab-btn-ghost" onClick={closeReport}>
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
 

@@ -30,6 +30,7 @@ import {
   buildTaskHistoryTimeline,
   searchWorkboardItems
 } from '../../utils/workboardGamification';
+import { isRetryableStatus, mergePendingIntoBoard, taskOutbox } from '../../utils/taskboardOutbox';
 import './AdminWorkboard.css';
 
 const STATUS_OPTIONS = [
@@ -405,6 +406,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
   const { requireSignIn, signInPrompt } = useSignInPrompt(isSharedView ? 'share_edit' : 'task');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [syncNote, setSyncNote] = useState('');
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [modalMode, setModalMode] = useState(null); // 'view' | 'create' | 'edit'
@@ -644,7 +646,12 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
           params: { startDate, endDate, ownerId }
         });
 
-        setTasksByDate(response.data.tasksByDate || {});
+        setTasksByDate(
+          mergePendingIntoBoard(
+            response.data.tasksByDate || {},
+            myId ? taskOutbox.listForBoard(myId, ownerId) : []
+          )
+        );
         setTaskTags(response.data.tags || []);
         setCanEdit(Boolean(response.data.canEdit));
         if (response.data.myPermissions) {
@@ -653,12 +660,18 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
         setError('');
       } catch (fetchError) {
         console.error('Failed to load taskboard tasks:', fetchError);
-        if (!quiet) {
+        setTasksByDate((current) =>
+          mergePendingIntoBoard(
+            current,
+            myId ? taskOutbox.listForBoard(myId, ownerId) : []
+          )
+        );
+        if (!quiet && fetchError.response) {
           setError(fetchError.response?.data?.message || 'Failed to load taskboard.');
         }
       }
     },
-    [ownerId, viewMode, calendarRange.start, calendarRange.end, weekStart]
+    [ownerId, myId, viewMode, calendarRange.start, calendarRange.end, weekStart]
   );
 
   const loadGamification = useCallback(async () => {
@@ -835,6 +848,121 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
     ]
   );
 
+  const cancelledSyncIds = useRef(new Set());
+  const flushLock = useRef(false);
+  const reloadBoardRef = useRef(async () => {});
+
+  const refreshSyncNote = useCallback(() => {
+    if (!myId || !ownerId) {
+      setSyncNote('');
+      return;
+    }
+    const count = taskOutbox.listForBoard(myId, ownerId).length;
+    if (count === 0) {
+      setSyncNote('');
+      return;
+    }
+    setSyncNote(
+      count === 1
+        ? '1 task is saved on this device. It will show on your taskboard once the server wakes up.'
+        : `${count} tasks are saved on this device. They will show on your taskboard once the server wakes up.`
+    );
+  }, [myId, ownerId]);
+
+  const showQueuedTasks = useCallback(() => {
+    setTasksByDate((current) =>
+      mergePendingIntoBoard(
+        current,
+        myId && ownerId ? taskOutbox.listForBoard(myId, ownerId) : []
+      )
+    );
+    refreshSyncNote();
+  }, [myId, ownerId, refreshSyncNote]);
+
+  const flushTaskOutbox = useCallback(async () => {
+    if (!myId || flushLock.current) return;
+    flushLock.current = true;
+    let synced = false;
+    let stoppedForRetry = false;
+    let permanentError = '';
+    try {
+      while (true) {
+        const next = taskOutbox.list(myId)[0];
+        if (!next) break;
+        if (cancelledSyncIds.current.has(next.id)) {
+          taskOutbox.remove(myId, next.id);
+          continue;
+        }
+        try {
+          const response = await axios.post('/taskboard/tasks', next.payload, { timeout: 90000 });
+          if (cancelledSyncIds.current.has(next.id)) {
+            taskOutbox.remove(myId, next.id);
+            const createdId = response.data?.task?._id;
+            if (createdId) {
+              axios.delete(`/taskboard/tasks/${createdId}`).catch(() => {});
+            }
+            continue;
+          }
+          taskOutbox.remove(myId, next.id);
+          synced = true;
+          if (!response.data?.alreadySaved) {
+            await applyXpResponse(response.data);
+          }
+        } catch (syncError) {
+          const status = syncError.response?.status;
+          if (!isRetryableStatus(status)) {
+            taskOutbox.remove(myId, next.id);
+            permanentError =
+              syncError.response?.data?.message || `Could not save "${next.payload.title}".`;
+            continue;
+          }
+          stoppedForRetry = true;
+          break;
+        }
+      }
+    } catch (loopError) {
+      console.error('Task sync stopped', loopError);
+      stoppedForRetry = true;
+    } finally {
+      flushLock.current = false;
+      if (synced) {
+        await reloadBoardRef.current();
+      } else {
+        showQueuedTasks();
+      }
+      refreshSyncNote();
+      if (permanentError) setError(permanentError);
+      if (!stoppedForRetry && myId && taskOutbox.list(myId).length) {
+        void flushTaskOutbox();
+      }
+    }
+  }, [myId, applyXpResponse, refreshSyncNote, showQueuedTasks]);
+
+  const rememberTask = useCallback(
+    (payload) => {
+      const item = taskOutbox.enqueue(myId, payload);
+      showQueuedTasks();
+      return item;
+    },
+    [myId, showQueuedTasks]
+  );
+
+  useEffect(() => {
+    if (!myId) return undefined;
+    void flushTaskOutbox();
+    const timer = window.setInterval(() => {
+      void flushTaskOutbox();
+    }, 30000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void flushTaskOutbox();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [myId, flushTaskOutbox]);
+
   const goToToday = useCallback(() => {
     const today = toDateKey();
     const monthKey = monthKeyFromDate(parseDateKey(today));
@@ -849,19 +977,27 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
     });
   }, []);
 
-  const loadSharedView = useCallback(async () => {
+  const loadSharedView = useCallback(async ({ quiet = false } = {}) => {
     if (!shareToken) return;
-    setLoading(true);
-    setError('');
+    if (!quiet) {
+      setLoading(true);
+      setError('');
+    }
     try {
       const response = await axios.get(`/taskboard/share/${shareToken}`);
       const data = response.data;
+      const sharedOwnerId = data.owner?.id ? String(data.owner.id) : '';
       setShareMeta(data);
-      setTasksByDate(data.tasksByDate || {});
+      setTasksByDate(
+        mergePendingIntoBoard(
+          data.tasksByDate || {},
+          myId ? taskOutbox.listForBoard(myId, sharedOwnerId) : []
+        )
+      );
       setMyPermissions(data.myPermissions || []);
       setAccessRequest(data.accessRequest || null);
       setCanEdit(Boolean(data.myPermissions?.length));
-      setOwnerId(data.owner?.id ? String(data.owner.id) : '');
+      setOwnerId(sharedOwnerId);
 
       const anchor = data.anchorDate || data.startDate;
       const monthKey = monthKeyFromDate(parseDateKey(anchor));
@@ -884,11 +1020,16 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
       }
     } catch (fetchError) {
       console.error('Failed to load shared taskboard:', fetchError);
-      setError(fetchError.response?.data?.message || 'Share link is unavailable.');
+      if (!quiet || fetchError.response) {
+        setError(fetchError.response?.data?.message || 'Share link is unavailable.');
+      }
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
-  }, [shareToken]);
+  }, [shareToken, myId]);
+
+  reloadBoardRef.current = () =>
+    isSharedView ? loadSharedView({ quiet: true }) : loadTasks({ quiet: true });
 
   const loadAccessRequests = useCallback(async () => {
     if (!isBoardOwner) return;
@@ -1051,7 +1192,13 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
     let cancelled = false;
 
     const run = async () => {
-      setLoading(true);
+      const queued = myId ? taskOutbox.listForBoard(myId, ownerId) : [];
+      if (queued.length) {
+        setTasksByDate((current) => mergePendingIntoBoard(current, queued));
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
       await Promise.all([
         loadTasks(),
         loadGamification(),
@@ -1071,6 +1218,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
   }, [
     isSharedView,
     ownerId,
+    myId,
     loadTasks,
     loadGamification,
     loadMission,
@@ -1190,7 +1338,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
   };
 
   const switchToEdit = () => {
-    if (!canEdit || !viewTask) return;
+    if (!canEdit || !viewTask || viewTask.pendingSync) return;
     setEditingId(viewTask._id);
     setForm(formFromTask(viewTask));
     setAddingTag(false);
@@ -1237,20 +1385,16 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
         setModalMode('view');
         setEditingId(null);
         await applyXpResponse(response.data);
+        await reloadBoardRef.current();
       } else {
-        const response = await axios.post('/taskboard/tasks', payload);
-        if (response.data.tags) setTaskTags(response.data.tags);
+        rememberTask(payload);
         closeModal();
-        await applyXpResponse(response.data);
-      }
-
-      await loadTasks({ quiet: true });
-      if (isSharedView) {
-        await loadSharedView();
+        setError('');
+        void flushTaskOutbox();
       }
     } catch (saveError) {
       console.error('Failed to save task:', saveError);
-      setError(saveError.response?.data?.message || 'Failed to save task.');
+      setError(saveError.response?.data?.message || saveError.message || 'Failed to save task.');
     } finally {
       setSaving(false);
     }
@@ -1288,6 +1432,8 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
 
   const changeStatus = async (taskId, status) => {
     if (!canChangeStatus) return;
+    const existing = flattenTasksByDate(tasksByDate).find((task) => String(task._id) === String(taskId));
+    if (existing?.pendingSync) return;
     try {
       const response = await axios.patch(`/taskboard/tasks/${taskId}/status`, { status });
       await loadTasks({ quiet: true });
@@ -1325,7 +1471,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
 
     setQuickSaving(true);
     try {
-      const response = await axios.post('/taskboard/tasks', {
+      rememberTask({
         title: title.slice(0, 160),
         date: toDateKey(),
         status: 'started',
@@ -1336,11 +1482,11 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
       });
       setQuickCapture('');
       setQuickCaptureOpen(false);
-      await loadTasks({ quiet: true });
-      await applyXpResponse(response.data);
+      setError('');
+      void flushTaskOutbox();
     } catch (captureError) {
       console.error('Quick capture failed:', captureError);
-      setError(captureError.response?.data?.message || 'Failed to capture task.');
+      setError(captureError.response?.data?.message || captureError.message || 'Failed to capture task.');
     } finally {
       setQuickSaving(false);
     }
@@ -1410,7 +1556,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
   };
 
   const openFocusMode = (task) => {
-    if (!task) return;
+    if (!task || task.pendingSync) return;
     setFocusTask(task);
     setModalMode(null);
   };
@@ -1512,7 +1658,8 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
       }
       if (key === 'f' && canEdit) {
         const todayTasks = (tasksByDate[todayKey] || []).filter(
-          (task) => task.status !== 'completed' && task.status !== 'cancelled'
+          (task) =>
+            !task.pendingSync && task.status !== 'completed' && task.status !== 'cancelled'
         );
         if (todayTasks[0]) {
           event.preventDefault();
@@ -1571,7 +1718,13 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
   };
 
   const requestDelete = (task) => {
-    if (!canEdit || !task) return;
+    if (!task) return;
+    if (task.pendingSync) {
+      if (!canDeleteTasks && !canShowAddUi) return;
+      setDeleteTarget(task);
+      return;
+    }
+    if (!canEdit) return;
     setDeleteTarget(task);
   };
 
@@ -1581,7 +1734,25 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
   };
 
   const confirmDelete = async () => {
-    if (!canDeleteTasks || !deleteTarget || deleting) return;
+    if (!deleteTarget || deleting) return;
+    if (deleteTarget.pendingSync) {
+      if (!canDeleteTasks && !canShowAddUi) return;
+      const id = deleteTarget.clientRequestId || deleteTarget._id;
+      cancelledSyncIds.current.add(String(id));
+      try {
+        taskOutbox.remove(myId, id);
+      } catch (removeError) {
+        setError(removeError.message || 'Could not remove the saved task.');
+        return;
+      }
+      showQueuedTasks();
+      if (viewTask && String(viewTask._id) === String(deleteTarget._id)) {
+        closeModal();
+      }
+      setDeleteTarget(null);
+      return;
+    }
+    if (!canDeleteTasks) return;
     setDeleting(true);
     try {
       const response = await axios.delete(`/taskboard/tasks/${deleteTarget._id}`);
@@ -1941,6 +2112,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
     <AdminLayout chrome="minimal" standalone={layoutStandalone}>
       <BoardShell className={mobileLayoutMode === 'overview' ? 'wb-board--overview' : ''}>
         {error ? <div className="wb-error">{error}</div> : null}
+        {syncNote ? <div className="wb-sync-note">{syncNote}</div> : null}
 
         <div className="wb-mobile-layout-bar">
           <div className="wb-mobile-layout-toggle" role="group" aria-label="Board layout">
@@ -2495,7 +2667,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                           <span
                             className={`wb-status-badge wb-status-badge--${task.status || 'started'}`}
                           >
-                            {statusLabel(task.status)}
+                            {task.pendingSync ? 'Waiting to sync' : statusLabel(task.status)}
                           </span>
                           <p className="wb-note-meta">{timeLabel || 'All day'}</p>
                           <p className="wb-note-title">{task.title}</p>
@@ -2506,7 +2678,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                             </p>
                           ) : null}
 
-                          {canChangeStatus || canDeleteTasks ? (
+                          {!task.pendingSync && (canChangeStatus || canDeleteTasks) ? (
                             <div
                               className="wb-note-actions"
                               onClick={(event) => event.stopPropagation()}
@@ -2639,7 +2811,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                                 type="button"
                                 className={`wb-month-chip wb-note--${paper} wb-note-status--${task.status || 'started'}`}
                                 onClick={() => openView(task, paper)}
-                                title={task.title}
+                                title={task.pendingSync ? `Waiting to sync. ${task.title}` : task.title}
                               >
                                 <span
                                   className={`wb-status-dot wb-status-dot--${task.status || 'started'}`}
@@ -3087,7 +3259,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                     <span
                       className={`wb-status-badge wb-status-badge--${viewTask.status || 'started'}`}
                     >
-                      {statusLabel(viewTask.status)}
+                      {viewTask.pendingSync ? 'Waiting to sync' : statusLabel(viewTask.status)}
                     </span>
                   </div>
                   {viewTask.assignedBy ? (
@@ -3149,7 +3321,16 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                   <button type="button" onClick={closeModal}>
                     Close
                   </button>
-                  {canEditTasks || canDeleteTasks || (!isSharedView && canEdit) ? (
+                  {viewTask.pendingSync && (canDeleteTasks || canShowAddUi) ? (
+                    <button
+                      type="button"
+                      className="wb-modal-danger"
+                      onClick={() => requestDelete(viewTask)}
+                    >
+                      Delete
+                    </button>
+                  ) : null}
+                  {!viewTask.pendingSync && (canEditTasks || canDeleteTasks || (!isSharedView && canEdit)) ? (
                     <>
                       {!isSharedView && canEdit ? (
                       <button type="button" className="wb-focus-chip" onClick={() => openFocusMode(viewTask)} title="Focus mode (F)">
@@ -3197,6 +3378,7 @@ const AdminWorkboard = ({ standalone = false, shareToken = null }) => {
                     id="wb-title"
                     required
                     value={form.title}
+                    maxLength={160}
                     onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
                     placeholder="What are you working on?"
                   />

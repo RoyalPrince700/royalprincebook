@@ -27,6 +27,7 @@ const {
   canCollaborateOnBoard
 } = require('../utils/workboardAccess');
 const mongoose = require('mongoose');
+const { normalizeClientRequestId } = require('../utils/clientRequestId');
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -487,7 +488,13 @@ const getTasks = async (req, res) => {
   }
 };
 
+const sendExistingTask = (res, task) => {
+  res.status(200).json({ task, alreadySaved: true });
+};
+
 const createTask = async (req, res) => {
+  let clientRequestId = null;
+  let boardOwnerId = null;
   try {
     if (!canEditWorkboard(req.user)) {
       return res.status(403).json({ message: 'Only admins can create workboard tasks' });
@@ -537,13 +544,25 @@ const createTask = async (req, res) => {
     }
 
     const userId = req.user._id.toString();
-    let boardOwnerId = userId;
+    boardOwnerId = userId;
     if (requestedOwnerId && requestedOwnerId !== userId) {
       const canAdd = await hasWorkboardPermission(requestedOwnerId, userId, 'add_task');
       if (!canAdd) {
         return res.status(403).json({ message: 'You do not have permission to add tasks here' });
       }
       boardOwnerId = requestedOwnerId;
+    }
+
+    const clientRequest = normalizeClientRequestId(req.body.clientRequestId);
+    if (clientRequest?.error) {
+      return res.status(400).json({ message: clientRequest.error });
+    }
+    clientRequestId = clientRequest?.id || null;
+    if (clientRequestId) {
+      const existing = await WorkboardTask.findOne({ owner: boardOwnerId, clientRequestId });
+      if (existing) {
+        return sendExistingTask(res, existing);
+      }
     }
 
     const previousLevel = calculateLevel(
@@ -569,11 +588,22 @@ const createTask = async (req, res) => {
       xpAwarded: 0,
       completedAt: null,
       cancelledAt: status === 'cancelled' ? new Date() : null,
-      focusTime: 0
+      focusTime: 0,
+      ...(clientRequestId ? { clientRequestId } : {})
     });
 
     const xpResult = applyCompletionXp(task, 'started', status);
-    await task.save();
+    try {
+      await task.save();
+    } catch (saveError) {
+      if (saveError?.code === 11000 && clientRequestId) {
+        const existing = await WorkboardTask.findOne({ owner: boardOwnerId, clientRequestId });
+        if (existing) {
+          return sendExistingTask(res, existing);
+        }
+      }
+      throw saveError;
+    }
     const totalXp = await adjustUserWorkboardXp(boardOwnerId, xpResult.xpDelta);
     const nextLevel = calculateLevel(totalXp);
     const achievementSync = await runAchievementSync(boardOwnerId);
@@ -589,6 +619,15 @@ const createTask = async (req, res) => {
       newlyUnlocked: achievementSync.newlyUnlocked
     });
   } catch (error) {
+    if (error?.code === 11000 && clientRequestId) {
+      const existing = await WorkboardTask.findOne({ owner: boardOwnerId, clientRequestId });
+      if (existing) {
+        return sendExistingTask(res, existing);
+      }
+    }
+    if (error?.name === 'ValidationError') {
+      return res.status(400).json({ message: 'Invalid task' });
+    }
     console.error('Workboard create task error:', error);
     res.status(500).json({ message: 'Failed to create task' });
   }

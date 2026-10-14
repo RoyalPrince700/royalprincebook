@@ -133,11 +133,27 @@ const workboardTaskSchema = new mongoose.Schema({
   comments: {
     type: [commentSchema],
     default: []
+  },
+  /**
+   * Set by the desktop app and the website when a create may be retried
+   * after the server wakes. A second post with the same id is the same task.
+   */
+  clientRequestId: {
+    type: String,
+    trim: true,
+    maxlength: 36
   }
 }, {
   timestamps: true
 });
 
 workboardTaskSchema.index({ owner: 1, date: 1 });
+workboardTaskSchema.index(
+  { owner: 1, clientRequestId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { clientRequestId: { $type: 'string' } }
+  }
+);
 
 module.exports = mongoose.model('WorkboardTask', workboardTaskSchema);

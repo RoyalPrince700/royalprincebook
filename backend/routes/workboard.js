@@ -43,6 +43,7 @@ const {
   getArtboard,
   updateArtboard,
   deleteArtboard,
+  summarizeArtboard,
   createNote,
   updateNote,
   deleteNote,
@@ -131,6 +132,7 @@ router.post('/leaderboards/:id/invite', inviteToLeaderboard);
 router.get('/artboards', listArtboards);
 router.post('/artboards', createArtboard);
 router.post('/artboards/:id/share', createArtboardShare);
+router.post('/artboards/:id/summarize', summarizeArtboard);
 router.get('/artboards/:id', getArtboard);
 router.patch('/artboards/:id', updateArtboard);
 router.delete('/artboards/:id', deleteArtboard);
